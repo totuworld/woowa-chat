@@ -12,12 +12,8 @@ const JSCPostInstantEventMessageReq: JSONSchema6 = {
         message: {
           type: 'string',
         },
-        uid: {
-          description: 'auth를 통해서 발급된 고유 id',
-          type: 'string',
-        },
       },
-      required: ['uid', 'instantEventId', 'message'],
+      required: ['instantEventId', 'message'],
       type: 'object',
     },
   },

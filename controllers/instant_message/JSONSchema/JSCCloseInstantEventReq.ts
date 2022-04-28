@@ -9,12 +9,8 @@ const JSCCloseInstantEventReq: JSONSchema6 = {
         instantEventId: {
           type: 'string',
         },
-        uid: {
-          description: 'auth를 통해서 발급된 고유 id',
-          type: 'string',
-        },
       },
-      required: ['uid', 'instantEventId'],
+      required: ['instantEventId'],
       type: 'object',
     },
   },

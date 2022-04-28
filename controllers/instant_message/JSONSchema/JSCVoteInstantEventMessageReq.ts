@@ -9,10 +9,6 @@ const JSCVoteInstantEventMessageReq: JSONSchema6 = {
         instantEventId: {
           type: 'string',
         },
-        uid: {
-          description: 'auth를 통해서 발급된 고유 id',
-          type: 'string',
-        },
         messageId: {
           type: 'string',
         },
@@ -20,7 +16,7 @@ const JSCVoteInstantEventMessageReq: JSONSchema6 = {
           type: 'boolean',
         },
       },
-      required: ['uid', 'instantEventId', 'messageId', 'isUpvote'],
+      required: ['instantEventId', 'messageId', 'isUpvote'],
       type: 'object',
     },
   },

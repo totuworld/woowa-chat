@@ -6,11 +6,16 @@ const JSCFindAllInstantEventReq: JSONSchema6 = {
     query: {
       additionalProperties: false,
       properties: {
-        uid: {
-          type: 'string',
+        page: {
+          type: 'number',
+          minimum: 1,
+        },
+        size: {
+          type: 'number',
+          minimum: 10,
         },
       },
-      required: ['uid'],
+      required: [],
       type: 'object',
     },
   },

@@ -1,22 +1,22 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import validateParamWithData from '../req_validator';
-import BadReqError from '../custom_error/bad_req_error';
-import { CreateInstantEventReq } from './interface/CreateInstantEventReq';
-import JSCCreateInstantEventReq from './JSONSchema/JSCCreateInstantEventReq';
-import InstantMessageModel from '@/models/instant_message/instant_msg.model';
-import JSCGetInstantEventReq from './JSONSchema/JSCGetInstantEventReq';
-import { GetInstantEventReq } from './interface/GetInstantEventReq';
-import { PostInstantEventMessageReq } from './interface/PostInstantEventMessageReq';
-import JSCPostInstantEventMessageReq from './JSONSchema/JSCPostInstantEventMessageReq';
-import JSCInstantEventMessageListReq from './JSONSchema/JSCInstantEventMessageListReq';
-import JSCInstantEventMessageInfoReq from './JSONSchema/JSCInstantEventMessageInfoReq';
-import JSCPostInstantEventMessageReplyReq from './JSONSchema/JSCPostInstantEventMessageReplyReq';
-import JSCFindAllInstantEventReq from './JSONSchema/JSCFindAllInstantEventReq';
-import checkEmptyToken from '../check_empty_token';
-import verifyFirebaseIdToken from '../verify_firebase_id_token';
-import JSCVoteInstantEventMessageReq from './JSONSchema/JSCVoteInstantEventMessageReq';
-import JSCDenyInstantEventMessageReq from './JSONSchema/JSCDenyInstantEventMessageReq';
-import JSCCloseInstantEventReq from './JSONSchema/JSCCloseInstantEventReq';
+import { CreateInstantEventReq } from '@/controllers/instant_message/interface/CreateInstantEventReq';
+import validateParamWithData from '@/controllers/req_validator';
+import JSCCreateInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCCreateInstantEventReq';
+import BadReqError from '@/controllers/custom_error/bad_req_error';
+import ChatModel from './chat.model';
+import JSCFindAllInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCFindAllInstantEventReq';
+import { GetInstantEventReq } from '@/controllers/instant_message/interface/GetInstantEventReq';
+import JSCGetInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCGetInstantEventReq';
+import JSCCloseInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCCloseInstantEventReq';
+import { PostInstantEventMessageReq } from '@/controllers/instant_message/interface/PostInstantEventMessageReq';
+import JSCPostInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCPostInstantEventMessageReq';
+import verifyFirebaseIdToken from '@/controllers/verify_firebase_id_token';
+import JSCInstantEventMessageListReq from '@/controllers/instant_message/JSONSchema/JSCInstantEventMessageListReq';
+import JSCInstantEventMessageInfoReq from '@/controllers/instant_message/JSONSchema/JSCInstantEventMessageInfoReq';
+import checkEmptyToken from '@/controllers/check_empty_token';
+import JSCDenyInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCDenyInstantEventMessageReq';
+import JSCVoteInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCVoteInstantEventMessageReq';
+import JSCPostInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCPostInstantEventMessageReplyReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -29,13 +29,16 @@ async function create(req: NextApiRequest, res: NextApiResponse) {
     throw new BadReqError(validateResp.errorMessage);
   }
 
-  const { uid, title, desc, startDate, endDate } = validateResp.data.body;
-  const id = await InstantMessageModel.create({ uid, title, desc, startDate, endDate });
-  return res.status(201).json({ instantEventId: id });
+  // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
+  // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
+
+  const { title, desc, startDate, endDate } = validateResp.data.body;
+  await ChatModel.create({ title, desc, startDate, endDate });
+  return res.status(201).end();
 }
 
 async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
-  const validateResp = validateParamWithData<{ query: { uid: string } }>(
+  const validateResp = validateParamWithData<{ query: { page: number; size: number } }>(
     {
       query: req.query,
     },
@@ -44,8 +47,8 @@ async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const { uid } = validateResp.data.query;
-  const instantEventInfo = await InstantMessageModel.findAllEvent({ uid });
+  // TODO: page와 size를 넘겨서 paging 해야한다.
+  const instantEventInfo = await ChatModel.findAllEvent();
   return res.status(200).json(instantEventInfo);
 }
 
@@ -59,13 +62,13 @@ async function get(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const { uid, instantEventId } = validateResp.data.query;
-  const instantEventInfo = await InstantMessageModel.get({ uid, instantEventId });
+  const { instantEventId } = validateResp.data.query;
+  const instantEventInfo = await ChatModel.get({ instantEventId });
   return res.status(200).json(instantEventInfo);
 }
 
 async function lock(req: NextApiRequest, res: NextApiResponse) {
-  const validateResp = validateParamWithData<{ body: { uid: string; instantEventId: string } }>(
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
       body: req.body,
     },
@@ -74,13 +77,13 @@ async function lock(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const { uid, instantEventId } = validateResp.data.body;
-  await InstantMessageModel.lock({ uid, instantEventId });
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.lock({ instantEventId });
   return res.status(200).end();
 }
 
 async function close(req: NextApiRequest, res: NextApiResponse) {
-  const validateResp = validateParamWithData<{ body: { uid: string; instantEventId: string } }>(
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
       body: req.body,
     },
@@ -89,13 +92,13 @@ async function close(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const { uid, instantEventId } = validateResp.data.body;
-  await InstantMessageModel.close({ uid, instantEventId });
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.close({ instantEventId });
   return res.status(200).end();
 }
 
 async function closeSendMessage(req: NextApiRequest, res: NextApiResponse) {
-  const validateResp = validateParamWithData<{ body: { uid: string; instantEventId: string } }>(
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
       body: req.body,
     },
@@ -104,8 +107,8 @@ async function closeSendMessage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const { uid, instantEventId } = validateResp.data.body;
-  await InstantMessageModel.closeSendMessage({ uid, instantEventId });
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.closeSendMessage({ instantEventId });
   return res.status(200).end();
 }
 
@@ -119,7 +122,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await InstantMessageModel.post({ ...validateResp.data.body });
+  await ChatModel.post({ ...validateResp.data.body });
   return res.status(201).end();
 }
 
@@ -131,7 +134,6 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   }
   const validateResp = validateParamWithData<{
     query: {
-      uid: string;
       instantEventId: string;
     };
   }>(
@@ -143,7 +145,7 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const result = await InstantMessageModel.messageList({ ...validateResp.data.query, currentUserUid: senderUid });
+  const result = await ChatModel.messageList({ ...validateResp.data.query, currentUserUid: senderUid });
   return res.status(200).json(result);
 }
 
@@ -155,7 +157,6 @@ async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   }
   const validateResp = validateParamWithData<{
     query: {
-      uid: string;
       instantEventId: string;
       messageId: string;
     };
@@ -168,7 +169,7 @@ async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const result = await InstantMessageModel.messageInfo({ ...validateResp.data.query, currentUserUid: senderUid });
+  const result = await ChatModel.messageInfo({ ...validateResp.data.query, currentUserUid: senderUid });
   return res.status(200).json(result);
 }
 
@@ -177,7 +178,6 @@ async function denyMessage(req: NextApiRequest, res: NextApiResponse) {
   const uid = await verifyFirebaseIdToken(token);
   const validateResp = validateParamWithData<{
     body: {
-      uid: string;
       instantEventId: string;
       messageId: string;
     };
@@ -190,11 +190,9 @@ async function denyMessage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  // 즉석 이벤트를 만든 사람이 아니면 deny 못하게 한다.
-  if (uid !== validateResp.data.body.uid) {
-    throw new BadReqError('deny할 권한이 없습니다.');
-  }
-  const result = await InstantMessageModel.denyMessage({ ...validateResp.data.body });
+  //TODO: 관리자가 아니면 deny 못하게 한다.
+  console.info(uid);
+  const result = await ChatModel.denyMessage({ ...validateResp.data.body });
   return res.status(200).json(result);
 }
 
@@ -203,7 +201,6 @@ async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   const senderUid = await verifyFirebaseIdToken(token);
   const validateResp = validateParamWithData<{
     body: {
-      uid: string;
       instantEventId: string;
       messageId: string;
       isUpvote: boolean;
@@ -217,14 +214,13 @@ async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await InstantMessageModel.voteMessage({ ...validateResp.data.body, voter: senderUid });
+  await ChatModel.voteMessage({ ...validateResp.data.body, voter: senderUid });
   return res.status(200).end();
 }
 
 async function postReply(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{
     query: {
-      uid: string;
       instantEventId: string;
       messageId: string;
     };
@@ -245,11 +241,11 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await InstantMessageModel.postReply({ ...validateResp.data.query, ...validateResp.data.body });
+  await ChatModel.postReply({ ...validateResp.data.query, ...validateResp.data.body });
   return res.status(200).end();
 }
 
-const InstantMessageCtrl = {
+const ChatCtrl = {
   findAllEvent,
   create,
   get,
@@ -264,4 +260,4 @@ const InstantMessageCtrl = {
   postReply,
 };
 
-export default InstantMessageCtrl;
+export default ChatCtrl;

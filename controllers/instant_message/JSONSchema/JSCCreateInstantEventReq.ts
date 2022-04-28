@@ -22,12 +22,8 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
           type: 'string',
           format: 'date-time',
         },
-        uid: {
-          description: 'auth를 통해서 발급된 고유 id',
-          type: 'string',
-        },
       },
-      required: ['uid', 'title', 'startDate', 'endDate'],
+      required: ['title', 'startDate', 'endDate'],
       type: 'object',
     },
   },

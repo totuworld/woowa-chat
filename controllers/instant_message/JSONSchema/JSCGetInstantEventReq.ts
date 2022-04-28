@@ -6,14 +6,11 @@ const JSCGetInstantEventReq: JSONSchema6 = {
     query: {
       additionalProperties: false,
       properties: {
-        uid: {
-          type: 'string',
-        },
         instantEventId: {
           type: 'string',
         },
       },
-      required: ['uid', 'instantEventId'],
+      required: ['instantEventId'],
       type: 'object',
     },
   },
