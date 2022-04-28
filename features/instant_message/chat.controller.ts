@@ -17,6 +17,7 @@ import checkEmptyToken from '@/controllers/check_empty_token';
 import JSCDenyInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCDenyInstantEventMessageReq';
 import JSCVoteInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCVoteInstantEventMessageReq';
 import JSCPostInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCPostInstantEventMessageReplyReq';
+import JSCDenyInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCDenyInstantEventMessageReplyReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -196,6 +197,30 @@ async function denyMessage(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(result);
 }
 
+async function denyReply(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const uid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+      replyIdx: number;
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCDenyInstantEventMessageReplyReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  //TODO: 관리자가 아니면 deny 못하게 한다.
+  console.info(uid);
+  const result = await ChatModel.denyReply({ ...validateResp.data.body });
+  return res.status(200).json(result);
+}
+
 async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
   const senderUid = await verifyFirebaseIdToken(token);
@@ -256,6 +281,7 @@ const ChatCtrl = {
   messageList,
   getMessageInfo,
   denyMessage,
+  denyReply,
   voteMessage,
   postReply,
 };

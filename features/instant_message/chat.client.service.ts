@@ -241,6 +241,36 @@ async function denyMessage({
   }
 }
 
+async function denyReply({
+  instantEventId,
+  messageId,
+  replyIdx,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyIdx: number;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.deny_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyIdx },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function voteMessageInfo({
   instantEventId,
   messageId,
@@ -276,6 +306,7 @@ const ChatClientService = {
   get,
   immediateClosSendMessagePeriod,
   denyMessage,
+  denyReply,
   lock,
   voteMessageInfo,
   close,

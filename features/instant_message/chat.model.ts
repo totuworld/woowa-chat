@@ -191,6 +191,15 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         voter: [],
         voted,
         message: docData.deny !== undefined && docData.deny === true ? '비공개 처리된 메시지입니다.' : docData.message,
+        reply:
+          docData.reply !== undefined
+            ? docData.reply.map((replyMv) => {
+                if (replyMv.deny !== undefined && replyMv.deny) {
+                  return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
+                }
+                return { ...replyMv };
+              })
+            : [],
         createAt: docData.createAt.toDate().toISOString(),
         updateAt: docData.updateAt ? docData.updateAt.toDate().toISOString() : undefined,
       } as InInstantEventMessage;
@@ -236,6 +245,15 @@ async function messageInfo({
     ...resp,
     voted,
     message: resp.deny !== undefined && resp.deny === true ? '비공개 처리된 메시지입니다.' : resp.message,
+    reply:
+      resp.reply !== undefined
+        ? resp.reply.map((mv) => {
+            if (mv.deny !== undefined && mv.deny) {
+              return { ...mv, reply: '비공개 처리된 메시지입니다.' };
+            }
+            return { ...mv };
+          })
+        : [],
     id: messageId,
     voter: [],
     createAt: resp.createAt.toDate().toISOString(),
@@ -263,6 +281,37 @@ async function denyMessage({
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
     }
     await transaction.update(messageRef, { deny: true });
+  });
+}
+
+/** 특정 메시지의 특정 댓글을 deny 한다. */
+async function denyReply({
+  instantEventId,
+  messageId,
+  replyIdx,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyIdx: number;
+}): Promise<void> {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    const info = messageDoc.data() as InInstantEventMessageServer;
+    const prevReplyList = info.reply === undefined ? [] : [...info.reply];
+    if (prevReplyList.length < replyIdx) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
+    }
+    prevReplyList[replyIdx].deny = true;
+    await transaction.update(messageRef, { reply: prevReplyList });
   });
 }
 
@@ -382,6 +431,7 @@ const ChatModel = {
   denyMessage,
   voteMessage,
   postReply,
+  denyReply,
 };
 
 export default ChatModel;

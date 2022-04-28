@@ -23,6 +23,7 @@ export interface InInstantEventMessageServer extends InInstantEventMessageBase {
 export interface InInstantEventMessageReply {
   reply: string;
   createAt: string;
+  deny?: boolean;
   author?: {
     displayName: string;
     photoURL?: string;
