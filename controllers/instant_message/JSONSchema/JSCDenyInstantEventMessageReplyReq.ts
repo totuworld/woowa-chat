@@ -12,12 +12,11 @@ const JSCDenyInstantEventMessageReplyReq: JSONSchema6 = {
         messageId: {
           type: 'string',
         },
-        replyIdx: {
-          type: 'number',
-          minimum: 0,
+        replyId: {
+          type: 'string',
         },
       },
-      required: ['instantEventId', 'messageId', 'replyIdx'],
+      required: ['instantEventId', 'messageId', 'replyId'],
       type: 'object',
     },
   },

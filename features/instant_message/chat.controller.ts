@@ -204,7 +204,7 @@ async function denyReply(req: NextApiRequest, res: NextApiResponse) {
     body: {
       instantEventId: string;
       messageId: string;
-      replyIdx: number;
+      replyId: string;
     };
   }>(
     {

@@ -20,20 +20,12 @@ import ChatClientService from '../chat.client.service';
 interface Props {
   instantEventId: string;
   messageId: string;
-  idx: number;
   isOwner: boolean;
   replyItem: InInstantEventMessageReply;
   onSendComplete: () => void;
 }
 
-const InstantEventMessageReply = function ({
-  replyItem,
-  isOwner,
-  instantEventId,
-  messageId,
-  idx,
-  onSendComplete,
-}: Props) {
+const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId, messageId, onSendComplete }: Props) {
   const { authUser } = useAuth();
   const toast = useToast();
   function denyReply() {
@@ -47,7 +39,7 @@ const InstantEventMessageReply = function ({
     ChatClientService.denyReply({
       instantEventId,
       messageId,
-      replyIdx: idx,
+      replyId: replyItem.id,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({

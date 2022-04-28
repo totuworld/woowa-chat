@@ -21,6 +21,8 @@ export interface InInstantEventMessageServer extends InInstantEventMessageBase {
 }
 
 export interface InInstantEventMessageReply {
+  /** reply 고유 id */
+  id: string;
   reply: string;
   createAt: string;
   deny?: boolean;

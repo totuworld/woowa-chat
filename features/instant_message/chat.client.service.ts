@@ -244,11 +244,11 @@ async function denyMessage({
 async function denyReply({
   instantEventId,
   messageId,
-  replyIdx,
+  replyId,
 }: {
   instantEventId: string;
   messageId: string;
-  replyIdx: number;
+  replyId: string;
 }): Promise<Resp<void>> {
   const url = '/api/instant-event.messages.deny_reply';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -260,7 +260,7 @@ async function denyReply({
         headers: {
           authorization: token ?? '',
         },
-        data: { instantEventId, messageId, replyIdx },
+        data: { instantEventId, messageId, replyId },
       },
     });
     return { status: 200 };

@@ -1,5 +1,6 @@
 import { firestore } from 'firebase-admin';
 import moment from 'moment';
+import { nanoid } from 'nanoid';
 import CustomServerError from '@/controllers/custom_error/custom_server_error';
 import FirebaseAdmin from '../../models/firebase_admin';
 import { InInstantEvent } from '../../models/instant_message/interface/in_instant_event';
@@ -288,11 +289,11 @@ async function denyMessage({
 async function denyReply({
   instantEventId,
   messageId,
-  replyIdx,
+  replyId,
 }: {
   instantEventId: string;
   messageId: string;
-  replyIdx: number;
+  replyId: string;
 }): Promise<void> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -307,7 +308,11 @@ async function denyReply({
     }
     const info = messageDoc.data() as InInstantEventMessageServer;
     const prevReplyList = info.reply === undefined ? [] : [...info.reply];
-    if (prevReplyList.length < replyIdx) {
+    if (prevReplyList.length < 0) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
+    }
+    const replyIdx = prevReplyList.findIndex((fv) => fv.id === replyId);
+    if (replyIdx < 0) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
     }
     prevReplyList[replyIdx].deny = true;
@@ -400,14 +405,16 @@ async function postReply({
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지를 조회 중' });
     }
     const info = messageDoc.data() as InInstantEventMessageServer;
+    const newId = nanoid(4);
     const addReply: {
+      id: string;
       reply: string;
       createAt: string;
       author?: {
         displayName: string;
         photoURL?: string;
       };
-    } = { reply, createAt: moment().toISOString() };
+    } = { reply, createAt: moment().toISOString(), id: newId };
     if (author !== undefined) {
       addReply.author = author;
     }
