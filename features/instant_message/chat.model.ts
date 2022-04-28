@@ -298,13 +298,19 @@ async function voteMessage({
       throw new CustomServerError({ statusCode: 400, message: '잠긴 이벤트' });
     }
     const messageData = messageDoc.data() as InInstantEventMessageServer;
-    // 이미 투표 했는지 확인
-    if (messageData.voter !== undefined && messageData.voter.findIndex((fv: string) => fv === voter) >= 0) {
-      throw new CustomServerError({ statusCode: 400, message: '이미 투표했습니다.' });
-    }
+    const voterList = (() => {
+      if (messageData.voter === undefined) {
+        return [voter];
+      }
+      const findVoterIndex = messageData.voter.findIndex((fv) => fv === voter);
+      if (findVoterIndex > -1) {
+        return [...messageData.voter].filter((fv) => fv !== voter);
+      }
+      return [...messageData.voter, voter];
+    })();
     await transaction.update(messageRef, {
       vote: FieldValue.increment(isUpvote ? 1 : -1),
-      voter: messageData.voter !== undefined ? [...messageData.voter, voter] : [voter],
+      voter: voterList,
     });
   });
 }

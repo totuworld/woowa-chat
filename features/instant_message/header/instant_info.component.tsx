@@ -1,15 +1,13 @@
-import { Avatar, Box, Center, Flex, Image, Text } from '@chakra-ui/react';
+import { Box, Center, Image, Text } from '@chakra-ui/react';
 import moment from 'moment';
-import { InMemberInfo } from '@/models/member/in_member_info';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 
 interface Props {
-  userInfo: InMemberInfo;
   instantEventInfo: InInstantEvent;
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
 }
 
-const InstantInfo = function ({ userInfo, instantEventInfo, eventState }: Props) {
+const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   return (
     <>
@@ -19,15 +17,6 @@ const InstantInfo = function ({ userInfo, instantEventInfo, eventState }: Props)
         src="https://images.unsplash.com/photo-1590372648787-fa5a935c2c40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80"
         objectFit="cover"
       />
-      <Flex justify="center" mt={-8}>
-        <Avatar
-          size="lg"
-          src={userInfo.photoURL?.replace('_normal', '')}
-          css={{
-            border: '2px solid white',
-          }}
-        />
-      </Flex>
       <Box px="2" pb="2">
         <Text fontSize="md">{instantEventInfo?.title}</Text>
         <Text fontSize="xs">{instantEventInfo?.desc}</Text>

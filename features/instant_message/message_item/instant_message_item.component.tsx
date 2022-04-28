@@ -15,38 +15,32 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { ArrowUpIcon, ArrowDownIcon } from '@chakra-ui/icons';
+import { useState } from 'react';
 import convertDateToString from '@/utils/convert_date_to_string';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
-import InstantMessageClientService from '@/controllers/instant_message/instant_msg.client.service';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import HeartIcon from '@/components/heart_icon';
 import InstantMessageItemReplyInput from './reply_input.component';
 import InstantEventMessageReply from './reply.component';
+import ChatClientService from '../chat.client.service';
+import HeartEmptyIcon from '@/components/heart_empty_icon';
+import ReplyIcon from '@/components/reply_icon';
 
 interface Props {
-  uid: string;
   instantEventId: string;
   locked: boolean;
   item: InInstantEventMessage;
   onSendComplete: () => void;
 }
 
-const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete, locked }: Props) {
+const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
   const { authUser } = useAuth();
   const toast = useToast();
-  const isOwner = authUser !== null && authUser.uid === uid;
+  const [toggleReplyInput, setToggleReplyInput] = useState(false);
+  const isOwner = authUser !== null; // FIXME: 관리자 id와 비교해서 처리하도록 수정필요
 
-  function sendVote(isUpvote: boolean, voted: boolean) {
-    if (voted === true) {
-      toast({
-        title: '이 의견은 이미 투표했습니다.',
-        status: 'warning',
-        position: 'top-right',
-      });
-      return;
-    }
+  function sendVote(isUpvote: boolean) {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
@@ -54,8 +48,7 @@ const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete
       });
       return;
     }
-    InstantMessageClientService.voteMessageInfo({
-      uid,
+    ChatClientService.voteMessageInfo({
       instantEventId,
       messageId: item.id,
       isUpvote,
@@ -80,8 +73,7 @@ const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete
       });
       return;
     }
-    InstantMessageClientService.denyMessage({
-      uid,
+    ChatClientService.denyMessage({
       instantEventId,
       messageId: item.id,
     }).then((resp) => {
@@ -140,12 +132,13 @@ const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete
         </Flex>
       </Box>
       <Box p="2">
-        <Box borderRadius="md" borderWidth="1px" p="2">
+        <Box p="2">
           <Text whiteSpace="pre-line" fontSize="sm">
             {item.message}
           </Text>
         </Box>
-        {locked === false && item.deny === undefined && (
+        <Divider />
+        {item.deny === undefined && (
           <Grid
             templateColumns="repeat(2, 1fr)"
             gap={2}
@@ -158,58 +151,55 @@ const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete
           >
             <GridItem w="100%">
               <Button
+                disabled={locked === true}
                 fontSize="xs"
-                leftIcon={<ArrowUpIcon />}
+                leftIcon={item.voted ? <HeartIcon /> : <HeartEmptyIcon />}
                 width="full"
                 variant="ghost"
                 height="4"
-                color={item.voted ? 'gray.300' : 'black'}
+                color="black"
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  sendVote(true, item.voted);
+                  sendVote(!item.voted);
                 }}
               >
-                추천해요
+                {locked === true ? `${item.vote}` : '추천해요'}
               </Button>
             </GridItem>
             <GridItem w="100%">
               <Button
+                disabled={locked === true}
                 fontSize="xs"
-                leftIcon={<ArrowDownIcon />}
+                leftIcon={<ReplyIcon />}
                 width="full"
                 variant="ghost"
                 height="4"
-                color={item.voted ? 'gray.300' : 'black'}
+                color="black"
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  sendVote(false, item.voted);
+                  setToggleReplyInput((prev) => !prev);
                 }}
               >
-                다음에요
+                댓글달기
               </Button>
             </GridItem>
           </Grid>
         )}
-        {locked === true && (
-          <Box display="flex" alignItems="center" fontSize="xs" color="#F91880">
-            <HeartIcon />
-            {item.vote}
+        {locked === false && toggleReplyInput && (
+          <Box pt="2">
+            <Divider />
+            {item.deny === undefined && (
+              <InstantMessageItemReplyInput
+                instantEventId={instantEventId}
+                messageId={item.id}
+                locked={locked}
+                onSendComplete={onSendComplete}
+              />
+            )}
           </Box>
         )}
-        <Box pt="2">
-          <Divider />
-          {item.deny === undefined && (
-            <InstantMessageItemReplyInput
-              uid={uid}
-              instantEventId={instantEventId}
-              messageId={item.id}
-              locked={locked}
-              onSendComplete={onSendComplete}
-            />
-          )}
-        </Box>
         <Box>
           {item.reply &&
             item.reply.length > 0 &&
@@ -218,7 +208,7 @@ const InstantMessageItem = function ({ uid, instantEventId, item, onSendComplete
                 {idx === 0 && <Divider />}
                 <InstantEventMessageReply
                   // eslint-disable-next-line react/no-array-index-key
-                  key={`instant-event-msg-reply-${uid}-${instantEventId}-${item.id}-${idx}`}
+                  key={`instant-event-msg-reply-${instantEventId}-${item.id}-${idx}`}
                   replyItem={replyItem}
                 />
               </Box>

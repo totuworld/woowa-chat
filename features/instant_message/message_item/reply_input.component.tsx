@@ -2,17 +2,16 @@ import { Avatar, Box, Button, FormControl, FormLabel, Switch, Textarea, useToast
 import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { useAuth } from '@/contexts/auth_user.context';
-import InstantMessageClientService from '@/controllers/instant_message/instant_msg.client.service';
+import ChatClientService from '../chat.client.service';
 
 interface Props {
-  uid: string;
   instantEventId: string;
   messageId: string;
   locked: boolean;
   onSendComplete: () => void;
 }
 
-const InstantMessageItemReplyInput = function ({ locked, uid, instantEventId, messageId, onSendComplete }: Props) {
+const InstantMessageItemReplyInput = function ({ locked, instantEventId, messageId, onSendComplete }: Props) {
   const { authUser } = useAuth();
   const [message, updateMessage] = useState('');
   const [isAnonymous, setAnonymous] = useState(true);
@@ -53,8 +52,7 @@ const InstantMessageItemReplyInput = function ({ locked, uid, instantEventId, me
           size="sm"
           // borderRadius="full"
           onClick={() => {
-            InstantMessageClientService.postReply({
-              uid,
+            ChatClientService.postReply({
               instantEventId,
               messageId,
               reply: message,

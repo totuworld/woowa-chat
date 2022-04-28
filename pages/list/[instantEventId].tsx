@@ -7,27 +7,24 @@ import { useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import moment from 'moment';
-import { InMemberInfo } from '@/models/member/in_member_info';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
-import InstantMessageClientService from '@/controllers/instant_message/instant_msg.client.service';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
 import getStringValueFromQuery from '@/utils/get_value_from_query';
-import { memberFindByScreenNameForClient } from '@/models/member/member.client.service';
 import InstantInfo from '@/features/instant_message/header/instant_info.component';
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { useAuth } from '@/contexts/auth_user.context';
 import InstantMessageItem from '@/features/instant_message/message_item/instant_message_item.component';
 import InstantEventHeaderSideMenu from '@/features/instant_message/header/side_menu.component';
+import ChatClientService from '@/features/instant_message/chat.client.service';
 
 interface Props {
   host: string;
-  userInfo: InMemberInfo | null;
   instantEventInfo: InInstantEvent | null;
 }
 
-async function postMessage({ message, uid, instantEventId }: { message: string; uid: string; instantEventId: string }) {
+async function postMessage({ message, instantEventId }: { message: string; instantEventId: string }) {
   if (message.length <= 0) {
     return {
       result: false,
@@ -35,8 +32,7 @@ async function postMessage({ message, uid, instantEventId }: { message: string; 
     };
   }
   try {
-    await InstantMessageClientService.post({
-      uid,
+    await ChatClientService.post({
       instantEventId,
       message,
     });
@@ -52,12 +48,15 @@ async function postMessage({ message, uid, instantEventId }: { message: string; 
   }
 }
 
-const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEventInfo: propsEventInfo }) {
+const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
   const { authUser } = useAuth();
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
+  const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
+
+  const isOwner = authUser !== null; // FIXME: 관리자 목록과 비교해서 찾도록 변경 필요.
 
   const eventState = (() => {
     if (instantEventInfo === null) {
@@ -89,13 +88,13 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
     return 'pre';
   })();
 
-  const messageListQueryKey = ['instantMessageList', userInfo?.uid, instantEventInfo?.instantEventId, authUser];
+  const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
   useQuery(
     messageListQueryKey,
     async () => {
       const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
       const resp = await axios.get<InInstantEventMessage[]>(
-        `/api/instant-event.messages.list/${userInfo?.uid}/${instantEventInfo?.instantEventId}`,
+        `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}`,
         {
           headers: token
             ? {
@@ -107,7 +106,7 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
       return resp;
     },
     {
-      enabled: eventState === 'reply' || eventState === 'locked',
+      enabled: eventState === 'reply' || eventState === 'locked' || isOwner,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -118,19 +117,17 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
     },
   );
 
-  if (userInfo === null || instantEventInfo === null) {
-    return <p>사용자를 찾을 수 없습니다.</p>;
+  if (instantEventInfo === null) {
+    return <p>정보를 찾을 수 없습니다.</p>;
   }
-
-  const isOwner = authUser !== null && authUser.uid === userInfo.uid;
 
   return (
     <ServiceLayout height="100vh" backgroundColor="gray.200">
       <Box maxW="md" mx="auto" pt="6">
-        <Link href={`/${userInfo.screenName}`}>
+        <Link href="/list">
           <a>
             <Button fontSize="sm" mb="2" leftIcon={<ChevronLeftIcon />}>
-              {userInfo.screenName} 홈으로
+              리스트로 이동
             </Button>
           </a>
         </Link>
@@ -140,12 +137,10 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
               <Flex pr="2" pt="2">
                 <Spacer />
                 <InstantEventHeaderSideMenu
-                  userInfo={userInfo}
                   instantEventInfo={instantEventInfo}
                   eventState={eventState}
                   onCompleteLockOrClose={() => {
-                    InstantMessageClientService.get({
-                      uid: userInfo.uid,
+                    ChatClientService.get({
                       instantEventId: instantEventInfo.instantEventId,
                     }).then((resp) => {
                       if (resp.status === 200 && resp.payload) {
@@ -157,7 +152,7 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
               </Flex>
             </Box>
           )}
-          <InstantInfo userInfo={userInfo} instantEventInfo={instantEventInfo} eventState={eventState} />
+          <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} />
         </Box>
         {eventState === 'question' && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
@@ -205,7 +200,6 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
                 onClick={async () => {
                   const resp = await postMessage({
                     message,
-                    uid: userInfo.uid,
                     instantEventId: instantEventInfo.instantEventId,
                   });
                   if (resp.result === false) {
@@ -213,6 +207,15 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
                       title: '메시지 등록 실패',
                       position: 'top-right',
                     });
+                  }
+                  if (resp.result === true) {
+                    toast({
+                      title: '질문 등록이 완료 되었습니다',
+                      position: 'top-right',
+                    });
+                  }
+                  if (isOwner) {
+                    setListLoadTrigger((prev) => !prev);
                   }
                   updateMessage('');
                 }}
@@ -222,19 +225,17 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
             </Flex>
           </Box>
         )}
-        {(eventState === 'reply' || eventState === 'locked') && (
+        {(eventState === 'reply' || eventState === 'locked' || isOwner) && (
           <VStack spacing="12px" mt="6">
             {messageList.map((item) => (
               <InstantMessageItem
-                key={`instant-message-${userInfo.uid}-${instantEventInfo.instantEventId}-${item.id}`}
-                uid={userInfo.uid}
+                key={`instant-message-${instantEventInfo.instantEventId}-${item.id}`}
                 instantEventId={instantEventInfo.instantEventId}
                 item={item}
                 locked={eventState === 'locked'}
                 onSendComplete={() => {
                   console.info('send complete');
-                  InstantMessageClientService.getMessageInfo({
-                    uid: userInfo.uid,
+                  ChatClientService.getMessageInfo({
                     instantEventId: instantEventInfo.instantEventId,
                     messageId: item.id,
                   }).then((info) => {
@@ -263,37 +264,23 @@ const InstantEventHomePage: NextPage<Props> = function ({ userInfo, instantEvent
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) => {
   const host = getBaseUrl(true);
-  const screenName = getStringValueFromQuery({ query, field: 'screenName' });
   const instantEventId = getStringValueFromQuery({ query, field: 'instantEventId' });
-  if (screenName === undefined || instantEventId === undefined) {
+  if (instantEventId === undefined) {
     return {
       props: {
         host,
-        userInfo: null,
         instantEventInfo: null,
       },
     };
   }
   try {
-    const userInfo = await memberFindByScreenNameForClient({ isServer: true, screenName });
-    if (userInfo.payload?.uid === undefined) {
-      return {
-        props: {
-          host,
-          userInfo: userInfo.payload ?? null,
-          instantEventInfo: null,
-        },
-      };
-    }
-    const instantInfo = await InstantMessageClientService.get({
-      uid: userInfo.payload?.uid,
+    const instantInfo = await ChatClientService.get({
       instantEventId,
       isServer: true,
     });
     return {
       props: {
         host,
-        userInfo: userInfo.payload ?? null,
         instantEventInfo: instantInfo.payload ?? null,
       },
     };
@@ -302,11 +289,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
     return {
       props: {
         host,
-        userInfo: null,
         instantEventInfo: null,
       },
     };
   }
 };
 
-export default InstantEventHomePage;
+export default EventHomePage;

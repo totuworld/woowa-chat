@@ -1,20 +1,17 @@
 import { Menu, MenuButton, MenuList, IconButton, MenuItem } from '@chakra-ui/react';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
-import { InMemberInfo } from '@/models/member/in_member_info';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
-import InstantMessageClientService from '@/controllers/instant_message/instant_msg.client.service';
+import ChatClientService from '../chat.client.service';
 
 interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
-  userInfo: InMemberInfo;
   instantEventInfo: InInstantEvent;
   onCompleteLockOrClose: () => void;
 }
 
-async function immediateCloseSendMessagePeriod({ uid, instantEventId }: { uid: string; instantEventId: string }) {
+async function immediateCloseSendMessagePeriod({ instantEventId }: { instantEventId: string }) {
   try {
-    await InstantMessageClientService.immediateClosSendMessagePeriod({
-      uid,
+    await ChatClientService.immediateClosSendMessagePeriod({
       instantEventId,
     });
     return {
@@ -24,15 +21,14 @@ async function immediateCloseSendMessagePeriod({ uid, instantEventId }: { uid: s
     console.error(err);
     return {
       result: false,
-      message: '즉시 질문기간 종료 실패',
+      message: '질문기간 종료 실패',
     };
   }
 }
 
-async function lockEvent({ uid, instantEventId }: { uid: string; instantEventId: string }) {
+async function lockEvent({ instantEventId }: { instantEventId: string }) {
   try {
-    await InstantMessageClientService.lock({
-      uid,
+    await ChatClientService.lock({
       instantEventId,
     });
     return {
@@ -47,10 +43,9 @@ async function lockEvent({ uid, instantEventId }: { uid: string; instantEventId:
   }
 }
 
-async function closeEvent({ uid, instantEventId }: { uid: string; instantEventId: string }) {
+async function closeEvent({ instantEventId }: { instantEventId: string }) {
   try {
-    await InstantMessageClientService.close({
-      uid,
+    await ChatClientService.close({
       instantEventId,
     });
     return {
@@ -65,7 +60,7 @@ async function closeEvent({ uid, instantEventId }: { uid: string; instantEventId
   }
 }
 
-const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEventInfo, onCompleteLockOrClose }: Props) {
+const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onCompleteLockOrClose }: Props) {
   return (
     <Menu>
       <MenuButton
@@ -82,7 +77,6 @@ const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEven
           <MenuItem
             onClick={() => {
               immediateCloseSendMessagePeriod({
-                uid: userInfo.uid,
                 instantEventId: instantEventInfo.instantEventId,
               })
                 .then(() => {
@@ -93,13 +87,13 @@ const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEven
                 });
             }}
           >
-            즉시 질문기간 종료
+            질문기간 종료
           </MenuItem>
         )}
         {eventState === 'reply' && (
           <MenuItem
             onClick={() => {
-              lockEvent({ uid: userInfo.uid, instantEventId: instantEventInfo.instantEventId })
+              lockEvent({ instantEventId: instantEventInfo.instantEventId })
                 .then(() => {
                   onCompleteLockOrClose();
                 })
@@ -108,7 +102,7 @@ const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEven
                 });
             }}
           >
-            즉석 질문 이벤트 댓글잠금
+            댓글잠금
           </MenuItem>
         )}
         <MenuItem
@@ -117,7 +111,7 @@ const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEven
           _hover={{ bg: 'red.500' }}
           _focus={{ bg: 'red.500' }}
           onClick={() => {
-            closeEvent({ uid: userInfo.uid, instantEventId: instantEventInfo.instantEventId })
+            closeEvent({ instantEventId: instantEventInfo.instantEventId })
               .then(() => {
                 onCompleteLockOrClose();
               })
@@ -126,7 +120,7 @@ const InstantEventHeaderSideMenu = function ({ eventState, userInfo, instantEven
               });
           }}
         >
-          즉석 질문 이벤트 종료
+          이벤트 종료
         </MenuItem>
       </MenuList>
     </Menu>

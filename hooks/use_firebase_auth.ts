@@ -73,7 +73,7 @@ export default function useFirebaseAuth() {
           token: idToken,
         });
         if (resp.status === 200 && resp.payload) {
-          window.location.href = resp.payload;
+          window.location.href = '/list';
         }
       }
     } catch (err) {

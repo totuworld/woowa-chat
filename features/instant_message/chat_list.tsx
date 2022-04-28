@@ -187,7 +187,7 @@ const ChatList = function () {
       )}
       <Box spacing="12px" mt="6">
         {eventList.map((eventInfo) => (
-          <Link key={`instantEventKey-${eventInfo.instantEventId}`} href={`/instant/${eventInfo.instantEventId}`}>
+          <Link key={`instantEventKey-${eventInfo.instantEventId}`} href={`/list/${eventInfo.instantEventId}`}>
             <Flex bg="white" p="2" alignItems="center" borderRadius="md">
               <Text>{eventInfo.title}</Text>
               <Spacer />
