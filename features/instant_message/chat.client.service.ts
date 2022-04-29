@@ -216,9 +216,11 @@ async function getMessageInfo({
 async function denyMessage({
   instantEventId,
   messageId,
+  deny = true,
 }: {
   instantEventId: string;
   messageId: string;
+  deny?: boolean;
 }): Promise<Resp<void>> {
   const url = '/api/instant-event.messages.deny';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -230,7 +232,37 @@ async function denyMessage({
         headers: {
           authorization: token ?? '',
         },
-        data: { instantEventId, messageId },
+        data: { instantEventId, messageId, deny },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function updateMessageSortWeight({
+  instantEventId,
+  messageId,
+  sortWeight,
+}: {
+  instantEventId: string;
+  messageId: string;
+  sortWeight: number;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.sort_weight';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, sortWeight },
       },
     });
     return { status: 200 };
@@ -245,10 +277,12 @@ async function denyReply({
   instantEventId,
   messageId,
   replyId,
+  deny = true,
 }: {
   instantEventId: string;
   messageId: string;
   replyId: string;
+  deny?: boolean;
 }): Promise<Resp<void>> {
   const url = '/api/instant-event.messages.deny_reply';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -260,7 +294,7 @@ async function denyReply({
         headers: {
           authorization: token ?? '',
         },
-        data: { instantEventId, messageId, replyId },
+        data: { instantEventId, messageId, replyId, deny },
       },
     });
     return { status: 200 };
@@ -311,6 +345,7 @@ const ChatClientService = {
   voteMessageInfo,
   close,
   post,
+  updateMessageSortWeight,
   postReply,
   getMessageInfo,
 };

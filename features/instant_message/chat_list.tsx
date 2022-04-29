@@ -119,7 +119,7 @@ const ChatList = function () {
               onOpen();
             }}
           >
-            즉석 질문 이벤트 생성
+            우수타 이벤트 생성
           </Button>
         )}
       </Box>

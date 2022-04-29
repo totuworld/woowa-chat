@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Flex, Spacer, Textarea, useToast, VStack } from '@
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import moment from 'moment';
@@ -55,6 +55,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
+  const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
 
   const isOwner = authUser !== null; // FIXME: 관리자 목록과 비교해서 찾도록 변경 필요.
 
@@ -227,7 +228,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {(eventState === 'reply' || eventState === 'locked' || isOwner) && (
           <VStack spacing="12px" mt="6">
-            {messageList.map((item) => (
+            {sortedMessageList.map((item) => (
               <InstantMessageItem
                 key={`instant-message-${instantEventInfo.instantEventId}-${item.id}`}
                 instantEventId={instantEventInfo.instantEventId}

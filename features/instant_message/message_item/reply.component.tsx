@@ -28,6 +28,7 @@ interface Props {
 const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId, messageId, onSendComplete }: Props) {
   const { authUser } = useAuth();
   const toast = useToast();
+  const isDeny = replyItem.deny !== undefined && replyItem.deny;
   function denyReply() {
     if (authUser === null) {
       toast({
@@ -40,6 +41,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
       instantEventId,
       messageId,
       replyId: replyItem.id,
+      deny: replyItem.deny === undefined ? true : !replyItem.deny,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
@@ -70,7 +72,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
             {convertDateToString(replyItem.createAt)}
           </Text>
           <Spacer />
-          {isOwner && replyItem.deny === undefined && (
+          {isOwner && (
             <Menu>
               <MenuButton
                 width="24px"
@@ -93,7 +95,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
                     denyReply();
                   }}
                 >
-                  Deny
+                  {isDeny ? 'Accept' : 'Deny'}
                 </MenuItem>
               </MenuList>
             </Menu>

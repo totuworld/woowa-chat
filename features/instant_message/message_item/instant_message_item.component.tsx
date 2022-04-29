@@ -7,12 +7,14 @@ import {
   Grid,
   GridItem,
   IconButton,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Spacer,
   Text,
+  useDisclosure,
   useToast,
 } from '@chakra-ui/react';
 import { useState } from 'react';
@@ -38,6 +40,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const { authUser } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
+  const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const isOwner = authUser !== null; // FIXME: 관리자 id와 비교해서 처리하도록 수정필요
 
   function sendVote(isUpvote: boolean) {
@@ -65,6 +69,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     });
   }
 
+  const isDeny = item.deny !== undefined && item.deny;
+
   function denyMessage() {
     if (authUser === null) {
       toast({
@@ -76,6 +82,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     ChatClientService.denyMessage({
       instantEventId,
       messageId: item.id,
+      deny: !isDeny,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
@@ -86,6 +93,39 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         return;
       }
       onSendComplete();
+    });
+  }
+
+  function updateSortWeight() {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    if (sortWeight === undefined) {
+      toast({
+        title: '정렬 가중치를 입력하세요',
+        position: 'top-right',
+      });
+      return;
+    }
+    ChatClientService.updateMessageSortWeight({
+      instantEventId,
+      messageId: item.id,
+      sortWeight,
+    }).then((resp) => {
+      if (resp.status !== 200 && resp.error !== undefined) {
+        toast({
+          title: (resp.error.data as { message: string }).message,
+          status: 'warning',
+          position: 'top-right',
+        });
+        return;
+      }
+      onSendComplete();
+      onClose();
     });
   }
 
@@ -101,7 +141,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             {convertDateToString(item.createAt)}
           </Text>
           <Spacer />
-          {isOwner && item.deny === undefined && (
+          {isOwner && (
             <Menu>
               <MenuButton
                 width="24px"
@@ -124,13 +164,52 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                     denyMessage();
                   }}
                 >
-                  Deny
+                  {isDeny ? 'Accept' : 'Deny'}
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    console.info('click');
+                    onOpen();
+                  }}
+                >
+                  정렬 가중치 변경
                 </MenuItem>
               </MenuList>
             </Menu>
           )}
         </Flex>
       </Box>
+      {isOpen && (
+        <Box p="2" display="flex">
+          <Input
+            mr="2"
+            width="full"
+            type="number"
+            value={sortWeight}
+            onChange={(e) => {
+              if (e.target.value.length === 0) {
+                setSortWeight(undefined);
+                return;
+              }
+              setSortWeight(parseInt(e.target.value, 10));
+            }}
+            placeholder="정렬 가중치"
+          />
+          <Button disabled={sortWeight === undefined} onClick={() => updateSortWeight()} mr="2" colorScheme="blue">
+            수정
+          </Button>
+          <Button
+            onClick={() => {
+              if (sortWeight !== item.sortWeight) {
+                setSortWeight(item.sortWeight);
+              }
+              onClose();
+            }}
+          >
+            닫기
+          </Button>
+        </Box>
+      )}
       <Box p="2">
         <Box p="2">
           <Text whiteSpace="pre-line" fontSize="sm">
@@ -138,7 +217,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           </Text>
         </Box>
         <Divider />
-        {item.deny === undefined && (
+        {(item.deny === undefined || item.deny === false) && (
           <Grid
             templateColumns="repeat(2, 1fr)"
             gap={2}
@@ -190,7 +269,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         {locked === false && toggleReplyInput && (
           <Box pt="2">
             <Divider />
-            {item.deny === undefined && (
+            {(item.deny === undefined || item.deny === false) && (
               <InstantMessageItemReplyInput
                 instantEventId={instantEventId}
                 messageId={item.id}

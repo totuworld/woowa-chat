@@ -6,6 +6,7 @@ export interface InInstantEventMessageBase {
   vote: number;
   voter?: string[];
   deny?: boolean;
+  sortWeight: number;
   reply: InInstantEventMessageReply[];
 }
 

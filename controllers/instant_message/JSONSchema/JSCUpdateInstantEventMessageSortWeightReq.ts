@@ -1,6 +1,6 @@
 import { JSONSchema6 } from 'json-schema';
 
-const JSCDenyInstantEventMessageReq: JSONSchema6 = {
+const JSCUpdateInstantEventMessageSortWeightReq: JSONSchema6 = {
   additionalProperties: false,
   properties: {
     body: {
@@ -12,12 +12,11 @@ const JSCDenyInstantEventMessageReq: JSONSchema6 = {
         messageId: {
           type: 'string',
         },
-        deny: {
-          type: 'boolean',
-          default: true,
+        sortWeight: {
+          type: 'number',
         },
       },
-      required: ['instantEventId', 'messageId'],
+      required: ['instantEventId', 'messageId', 'sortWeight'],
       type: 'object',
     },
   },
@@ -25,4 +24,4 @@ const JSCDenyInstantEventMessageReq: JSONSchema6 = {
   type: 'object',
 };
 
-export default JSCDenyInstantEventMessageReq;
+export default JSCUpdateInstantEventMessageSortWeightReq;

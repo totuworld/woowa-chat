@@ -164,7 +164,7 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
       }
     }
     const newPostRef = eventRef.collection(INSTANT_MESSAGE).doc();
-    await transaction.create(newPostRef, { message, vote: 0, createAt: FieldValue.serverTimestamp() });
+    await transaction.create(newPostRef, { message, vote: 0, sortWeight: 0, createAt: FieldValue.serverTimestamp() });
   });
 }
 
@@ -173,7 +173,8 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
     const colRef = FirebaseAdmin.getInstance()
       .Firestore.collection(INSTANT_EVENT)
       .doc(instantEventId)
-      .collection(INSTANT_MESSAGE);
+      .collection(INSTANT_MESSAGE)
+      .orderBy('sortWeight', 'desc');
     const colDocs = await transaction.get(colRef);
     const data = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
@@ -262,13 +263,14 @@ async function messageInfo({
   };
 }
 
-/** 특정 메시지를 deny 한다 */
-async function denyMessage({
+async function updateMessageSortWeight({
   instantEventId,
   messageId,
+  sortWeight,
 }: {
   instantEventId: string;
   messageId: string;
+  sortWeight: number;
 }): Promise<void> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -281,7 +283,32 @@ async function denyMessage({
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
     }
-    await transaction.update(messageRef, { deny: true });
+    await transaction.update(messageRef, { sortWeight });
+  });
+}
+
+/** 특정 메시지를 deny 한다 */
+async function denyMessage({
+  instantEventId,
+  messageId,
+  deny = true,
+}: {
+  instantEventId: string;
+  messageId: string;
+  deny?: boolean;
+}): Promise<void> {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    await transaction.update(messageRef, { deny });
   });
 }
 
@@ -290,10 +317,12 @@ async function denyReply({
   instantEventId,
   messageId,
   replyId,
+  deny = true,
 }: {
   instantEventId: string;
   messageId: string;
   replyId: string;
+  deny?: boolean;
 }): Promise<void> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -315,7 +344,7 @@ async function denyReply({
     if (replyIdx < 0) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
     }
-    prevReplyList[replyIdx].deny = true;
+    prevReplyList[replyIdx].deny = deny;
     await transaction.update(messageRef, { reply: prevReplyList });
   });
 }
@@ -431,6 +460,7 @@ const ChatModel = {
   close,
   lock,
   post,
+  updateMessageSortWeight,
   get,
   messageList,
   messageInfo,
