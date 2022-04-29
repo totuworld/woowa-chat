@@ -33,7 +33,7 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
       <ServiceLayout height="100vh" backgroundColor="gray.50">
-        <Box maxW="md" mx="auto">
+        <Box maxW="xl" mx="auto">
           <Center marginTop="20" marginBottom="10" p="6">
             <Box>
               <img src="/blahx2.svg" alt="hero" />

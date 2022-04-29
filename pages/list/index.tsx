@@ -12,7 +12,7 @@ import ChatList from '@/features/instant_message/chat_list';
 const ListPage: NextPage = function () {
   return (
     <ServiceLayout height="100vh" backgroundColor="gray.50">
-      <Box maxW="md" mx="auto">
+      <Box maxW="xl" mx="auto">
         <ChatList />
       </Box>
     </ServiceLayout>

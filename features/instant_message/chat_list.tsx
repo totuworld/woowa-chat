@@ -114,6 +114,7 @@ const ChatList = function () {
       <Box>
         {isOwner && !isOpen && (
           <Button
+            mt="6"
             width="full"
             onClick={() => {
               onOpen();
@@ -124,7 +125,7 @@ const ChatList = function () {
         )}
       </Box>
       {isOpen && (
-        <Box borderWidth="1px" borderRadius="lg" p="2" bg="white">
+        <Box borderWidth="1px" borderRadius="lg" p="2" mt="6" bg="white">
           <FormControl isRequired>
             <FormLabel>이벤트 이름</FormLabel>
             <Input

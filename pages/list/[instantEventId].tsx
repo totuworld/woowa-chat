@@ -124,7 +124,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
 
   return (
     <ServiceLayout height="100vh" backgroundColor="gray.200">
-      <Box maxW="md" mx="auto" pt="6">
+      <Box maxW="xl" mx="auto" pt="6">
         <Link href="/list">
           <a>
             <Button fontSize="sm" mb="2" leftIcon={<ChevronLeftIcon />}>
