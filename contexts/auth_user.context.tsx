@@ -8,6 +8,8 @@ interface InAuthUserContext {
   signInWithGoogle: () => void;
   signInWithTwitter: () => void;
   signOut: () => void;
+  isOwner: boolean;
+  token: string | null;
 }
 
 const AuthUserContext = createContext<InAuthUserContext>({
@@ -17,6 +19,8 @@ const AuthUserContext = createContext<InAuthUserContext>({
   signInWithTwitter: async () => ({ user: null, credential: null }),
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   signOut: () => {},
+  isOwner: false,
+  token: null,
 });
 
 export const AuthUserProvider = function ({ children }: { children: React.ReactNode }) {

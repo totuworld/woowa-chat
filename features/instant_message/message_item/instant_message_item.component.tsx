@@ -37,12 +37,11 @@ interface Props {
 }
 
 const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
-  const { authUser } = useAuth();
+  const { authUser, isOwner } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const isOwner = authUser !== null; // FIXME: 관리자 id와 비교해서 처리하도록 수정필요
 
   function sendVote(isUpvote: boolean) {
     if (authUser === null) {
