@@ -16,6 +16,8 @@ function formatAuthUser(user: User): InAuthUser {
 export default function useFirebaseAuth() {
   const [authUser, setAuthUser] = useState<InAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setOwner] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   const authStateChanged = async (authState: User | null) => {
     console.log({ authStateChanged: authState });
@@ -90,9 +92,9 @@ export default function useFirebaseAuth() {
         if (credential === null) {
           return;
         }
-        const token = credential.accessToken;
+        const { accessToken } = credential;
         const { secret } = credential;
-        if (token === undefined || secret === undefined) {
+        if (accessToken === undefined || secret === undefined) {
           throw new Error();
         }
         const idToken = await signInResult.user.getIdToken();
@@ -108,7 +110,7 @@ export default function useFirebaseAuth() {
             photoURL: photoURL || undefined,
             provider: 'twitter',
             twitterAuth: {
-              accessToken: token,
+              accessToken,
               secret,
               uid: signInResult.user.providerData[0].uid,
             },
@@ -136,11 +138,36 @@ export default function useFirebaseAuth() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (authUser === null) return;
+    async function getTokenId() {
+      const tokenId = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+      setToken(tokenId ?? null);
+    }
+    getTokenId();
+  }, [authUser]);
+
+  useEffect(() => {
+    if (authUser === null) return;
+    if (token === undefined || token === null) return;
+    async function checkExist() {
+      const resp = await fetch('/api/owner-member.exist', { headers: { authorization: token! } });
+      if (resp.status !== 200) {
+        return setOwner(false);
+      }
+      const respBody = await resp.json();
+      return setOwner(resp.status === 200 && respBody.result === true);
+    }
+    checkExist();
+  }, [authUser, token]);
+
   return {
     authUser,
     loading,
     signInWithGoogle,
     signInWithTwitter,
     signOut,
+    isOwner,
+    token,
   };
 }

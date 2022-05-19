@@ -50,14 +50,12 @@ async function postMessage({ message, instantEventId }: { message: string; insta
 
 const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
-  const { authUser } = useAuth();
+  const { authUser, isOwner } = useAuth();
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
-
-  const isOwner = authUser !== null; // FIXME: 관리자 목록과 비교해서 찾도록 변경 필요.
 
   const eventState = (() => {
     if (instantEventInfo === null) {

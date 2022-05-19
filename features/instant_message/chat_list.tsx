@@ -58,14 +58,13 @@ async function createEvent({
 }
 
 const ChatList = function () {
-  const { authUser } = useAuth();
+  const { isOwner } = useAuth();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [eventList, setEventList] = useState<InInstantEvent[]>([]);
 
   const initialRef = useRef<any>();
-  const isOwner = authUser !== null; // FIXME: 나중에 관리자 목록과 비교할 수 있도록 해야함.
 
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');

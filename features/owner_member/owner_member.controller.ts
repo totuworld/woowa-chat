@@ -86,6 +86,16 @@ async function remove(req: NextApiRequest, res: NextApiResponse) {
   res.status(200).end();
 }
 
-const OwnerMemberCtrl = { add, list, update, remove };
+async function isOwnerMember(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.headers.authorization;
+  if (token === undefined) {
+    throw new CustomServerError({ statusCode: 401, message: '인증이 필요합니다' });
+  }
+  const senderUid: string = await verifyFirebaseIdToken(token);
+  await OwnerMemberModel.find({ uid: senderUid });
+  res.status(200).json({ result: true });
+}
+
+const OwnerMemberCtrl = { add, list, update, remove, isOwnerMember };
 
 export default OwnerMemberCtrl;
