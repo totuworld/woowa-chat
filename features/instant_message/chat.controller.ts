@@ -134,6 +134,9 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   if (token !== undefined) {
     senderUid = await verifyFirebaseIdToken(token);
   }
+  if (senderUid === undefined) {
+    throw new BadReqError('authorization 누락');
+  }
   const validateResp = validateParamWithData<{
     query: {
       instantEventId: string;
@@ -156,6 +159,9 @@ async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   let senderUid: string | undefined;
   if (token !== undefined) {
     senderUid = await verifyFirebaseIdToken(token);
+  }
+  if (senderUid === undefined) {
+    throw new BadReqError('authorization 누락');
   }
   const validateResp = validateParamWithData<{
     query: {

@@ -50,7 +50,7 @@ async function postMessage({ message, instantEventId }: { message: string; insta
 
 const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
-  const { authUser, isOwner } = useAuth();
+  const { authUser, isOwner, token } = useAuth();
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
@@ -91,13 +91,13 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   useQuery(
     messageListQueryKey,
     async () => {
-      const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+      const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
       const resp = await axios.get<InInstantEventMessage[]>(
         `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}`,
         {
-          headers: token
+          headers: extractToken
             ? {
-                authorization: token,
+                authorization: extractToken,
               }
             : {},
         },
@@ -105,7 +105,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       return resp;
     },
     {
-      enabled: eventState === 'reply' || eventState === 'locked' || isOwner,
+      enabled: (eventState === 'reply' || eventState === 'locked' || isOwner) && token !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -121,7 +121,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   }
 
   return (
-    <ServiceLayout height="100vh" backgroundColor="gray.200">
+    <ServiceLayout minH="100vh" backgroundColor="gray.200">
       <Box maxW="xl" mx="auto" pt="6">
         <Link href="/list">
           <a>
@@ -234,6 +234,10 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 locked={eventState === 'locked'}
                 onSendComplete={() => {
                   console.info('send complete');
+                  toast({
+                    title: '댓글 등록이 완료 되었습니다',
+                    position: 'top-right',
+                  });
                   ChatClientService.getMessageInfo({
                     instantEventId: instantEventInfo.instantEventId,
                     messageId: item.id,

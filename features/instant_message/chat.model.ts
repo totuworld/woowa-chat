@@ -14,6 +14,8 @@ const INSTANT_EVENT = 'instants';
 const INSTANT_EVENT_INFO = 'collection_info/instants';
 const INSTANT_MESSAGE = 'messages';
 
+const OWNER_MEMBER_COLLECTION = 'owner_members';
+
 async function findAllEvent(): Promise<InInstantEvent[]> {
   const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT);
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -168,14 +170,18 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
   });
 }
 
-async function messageList({ instantEventId, currentUserUid }: { instantEventId: string; currentUserUid?: string }) {
+async function messageList({ instantEventId, currentUserUid }: { instantEventId: string; currentUserUid: string }) {
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const ownerMemberRef = FirebaseAdmin.getInstance()
+      .Firestore.collection(OWNER_MEMBER_COLLECTION)
+      .doc(currentUserUid);
     const colRef = FirebaseAdmin.getInstance()
       .Firestore.collection(INSTANT_EVENT)
       .doc(instantEventId)
       .collection(INSTANT_MESSAGE)
       .orderBy('sortWeight', 'desc');
     const colDocs = await transaction.get(colRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
     const data = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {
@@ -187,6 +193,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         }
         return docData.voter.findIndex((fv) => fv === currentUserUid) >= 0;
       })();
+      const isOwnerMember = ownerMemberDoc.exists;
       const returnData = {
         ...docData,
         id: mv.id,
@@ -194,7 +201,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         voted,
         message: docData.deny !== undefined && docData.deny === true ? '비공개 처리된 메시지입니다.' : docData.message,
         reply:
-          docData.reply !== undefined
+          docData.reply !== undefined && isOwnerMember
             ? docData.reply.map((replyMv) => {
                 if (replyMv.deny !== undefined && replyMv.deny) {
                   return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
@@ -219,37 +226,42 @@ async function messageInfo({
 }: {
   instantEventId: string;
   messageId: string;
-  currentUserUid?: string;
+  currentUserUid: string;
 }): Promise<InInstantEventMessage> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserUid);
   const resp = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
     const messageDoc = await transaction.get(messageRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
     if (eventDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트의 정보를 조회 중' });
     }
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지를 조회 중' });
     }
-    return messageDoc.data() as InInstantEventMessageServer;
+    return { docData: messageDoc.data() as InInstantEventMessageServer, isOwnerMember: ownerMemberDoc.exists };
   });
   const voted = (() => {
-    if (resp.voter === undefined) {
+    if (resp.docData.voter === undefined) {
       return false;
     }
     if (currentUserUid === undefined) {
       return false;
     }
-    return resp.voter.findIndex((fv) => fv === currentUserUid) >= 0;
+    return resp.docData.voter.findIndex((fv) => fv === currentUserUid) >= 0;
   })();
   return {
-    ...resp,
+    ...resp.docData,
     voted,
-    message: resp.deny !== undefined && resp.deny === true ? '비공개 처리된 메시지입니다.' : resp.message,
+    message:
+      resp.docData.deny !== undefined && resp.docData.deny === true
+        ? '비공개 처리된 메시지입니다.'
+        : resp.docData.message,
     reply:
-      resp.reply !== undefined
-        ? resp.reply.map((mv) => {
+      resp.docData.reply !== undefined && resp.isOwnerMember
+        ? resp.docData.reply.map((mv) => {
             if (mv.deny !== undefined && mv.deny) {
               return { ...mv, reply: '비공개 처리된 메시지입니다.' };
             }
@@ -258,8 +270,8 @@ async function messageInfo({
         : [],
     id: messageId,
     voter: [],
-    createAt: resp.createAt.toDate().toISOString(),
-    updateAt: resp.updateAt ? resp.updateAt.toDate().toISOString() : undefined,
+    createAt: resp.docData.createAt.toDate().toISOString(),
+    updateAt: resp.docData.updateAt ? resp.docData.updateAt.toDate().toISOString() : undefined,
   };
 }
 
