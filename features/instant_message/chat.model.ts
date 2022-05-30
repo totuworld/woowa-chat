@@ -124,6 +124,17 @@ async function close({ instantEventId }: { instantEventId: string }) {
   });
 }
 
+async function reopen({ instantEventId }: { instantEventId: string }) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트 ☠️' });
+    }
+    await transaction.update(eventRef, { closed: false });
+  });
+}
+
 /** 메시지 작성 기간을 즉시 종료하는 옵션 */
 async function closeSendMessage({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
@@ -470,6 +481,7 @@ const ChatModel = {
   findAllEvent,
   create,
   close,
+  reopen,
   lock,
   post,
   updateMessageSortWeight,

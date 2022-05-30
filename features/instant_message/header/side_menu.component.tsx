@@ -1,4 +1,19 @@
-import { Menu, MenuButton, MenuList, IconButton, MenuItem } from '@chakra-ui/react';
+import {
+  Button,
+  Menu,
+  MenuButton,
+  MenuList,
+  IconButton,
+  MenuItem,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  useDisclosure,
+} from '@chakra-ui/react';
+import { useRef } from 'react';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import ChatClientService from '../chat.client.service';
@@ -60,25 +75,87 @@ async function closeEvent({ instantEventId }: { instantEventId: string }) {
   }
 }
 
+async function reopenEvent({ instantEventId }: { instantEventId: string }) {
+  try {
+    await ChatClientService.reopen({
+      instantEventId,
+    });
+    return {
+      result: true,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '이벤트 재개 실패',
+    };
+  }
+}
+
 const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onCompleteLockOrClose }: Props) {
+  const cancelRef = useRef<any>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <Menu>
-      <MenuButton
-        as={IconButton}
-        aria-label="Options"
-        icon={<ExtraMenuIcon />}
-        borderRadius="full"
-        variant="solid"
-        size="xs"
-        _focus={{ boxShadow: 'none' }}
-      />
-      <MenuList>
-        {eventState === 'question' && (
+    <>
+      <Menu>
+        <MenuButton
+          as={IconButton}
+          aria-label="Options"
+          icon={<ExtraMenuIcon />}
+          borderRadius="full"
+          variant="solid"
+          size="xs"
+          _focus={{ boxShadow: 'none' }}
+        />
+        <MenuList>
+          {eventState === 'question' && (
+            <MenuItem
+              onClick={() => {
+                immediateCloseSendMessagePeriod({
+                  instantEventId: instantEventInfo.instantEventId,
+                })
+                  .then(() => {
+                    onCompleteLockOrClose();
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }}
+            >
+              질문기간 종료
+            </MenuItem>
+          )}
+          {eventState === 'reply' && (
+            <MenuItem
+              onClick={() => {
+                lockEvent({ instantEventId: instantEventInfo.instantEventId })
+                  .then(() => {
+                    onCompleteLockOrClose();
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }}
+            >
+              댓글잠금
+            </MenuItem>
+          )}
           <MenuItem
+            display={instantEventInfo.closed ? 'none' : ''}
+            bgColor="red.300"
+            textColor="white"
+            _hover={{ bg: 'red.500' }}
+            _focus={{ bg: 'red.500' }}
             onClick={() => {
-              immediateCloseSendMessagePeriod({
-                instantEventId: instantEventInfo.instantEventId,
-              })
+              onOpen();
+            }}
+          >
+            이벤트 종료
+          </MenuItem>
+          <MenuItem
+            display={instantEventInfo.closed ? '' : 'none'}
+            onClick={() => {
+              reopenEvent({ instantEventId: instantEventInfo.instantEventId })
                 .then(() => {
                   onCompleteLockOrClose();
                 })
@@ -87,43 +164,46 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
                 });
             }}
           >
-            질문기간 종료
+            이벤트 재개
           </MenuItem>
-        )}
-        {eventState === 'reply' && (
-          <MenuItem
-            onClick={() => {
-              lockEvent({ instantEventId: instantEventInfo.instantEventId })
-                .then(() => {
-                  onCompleteLockOrClose();
-                })
-                .catch((err) => {
-                  console.error(err);
-                });
-            }}
-          >
-            댓글잠금
-          </MenuItem>
-        )}
-        <MenuItem
-          bgColor="red.300"
-          textColor="white"
-          _hover={{ bg: 'red.500' }}
-          _focus={{ bg: 'red.500' }}
-          onClick={() => {
-            closeEvent({ instantEventId: instantEventInfo.instantEventId })
-              .then(() => {
-                onCompleteLockOrClose();
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-          }}
-        >
-          이벤트 종료
-        </MenuItem>
-      </MenuList>
-    </Menu>
+        </MenuList>
+      </Menu>
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              이벤트 종료
+            </AlertDialogHeader>
+
+            <AlertDialogBody>이 이벤트를 종료할까요?</AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                취소
+              </Button>
+              <Button
+                colorScheme="blue"
+                ml={3}
+                onClick={() => {
+                  closeEvent({ instantEventId: instantEventInfo.instantEventId })
+                    .then(() => {
+                      onCompleteLockOrClose();
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                    })
+                    .finally(() => {
+                      onClose();
+                    });
+                }}
+              >
+                종료
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    </>
   );
 };
 

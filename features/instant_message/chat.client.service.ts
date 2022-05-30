@@ -102,6 +102,26 @@ async function close({ instantEventId }: { instantEventId: string }): Promise<Re
   }
 }
 
+async function reopen({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/instant-event.reopen';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function immediateClosSendMessagePeriod({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
   const url = '/api/instant-event.close-send-message';
   try {
@@ -344,6 +364,7 @@ const ChatClientService = {
   lock,
   voteMessageInfo,
   close,
+  reopen,
   post,
   updateMessageSortWeight,
   postReply,

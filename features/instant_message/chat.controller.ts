@@ -99,6 +99,21 @@ async function close(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function reopen(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
+    {
+      body: req.body,
+    },
+    JSCCloseInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.reopen({ instantEventId });
+  return res.status(200).end();
+}
+
 async function closeSendMessage(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
@@ -309,6 +324,7 @@ const ChatCtrl = {
   get,
   lock,
   close,
+  reopen,
   post,
   updateMessageSortWeight,
   closeSendMessage,
