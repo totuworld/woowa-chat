@@ -242,7 +242,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   sendVote(!item.voted);
                 }}
               >
-                {locked === true ? `${item.vote}` : '추천해요'}
+                {locked === true ? `${item.vote}` : '궁금해요'}
               </Button>
             </GridItem>
             <GridItem w="100%">
