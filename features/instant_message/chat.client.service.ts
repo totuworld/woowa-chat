@@ -9,11 +9,15 @@ async function create({
   desc,
   startDate,
   endDate,
+  titleImg,
+  bgImg,
 }: {
   title: string;
   desc?: string;
   startDate?: string;
   endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.create';
   try {
@@ -22,6 +26,8 @@ async function create({
       desc,
       startDate,
       endDate,
+      titleImg,
+      bgImg,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {

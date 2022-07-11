@@ -41,11 +41,15 @@ async function create({
   desc,
   startDate,
   endDate,
+  titleImg,
+  bgImg,
 }: {
   title: string;
   desc?: string;
   startDate: string;
   endDate: string;
+  titleImg?: string;
+  bgImg?: string;
 }) {
   const newInstantEventBody: {
     title: string;
@@ -53,6 +57,8 @@ async function create({
     startDate: string;
     endDate: string;
     closed: boolean;
+    titleImg?: string;
+    bgImg?: string;
   } = {
     title,
     startDate,
@@ -61,6 +67,12 @@ async function create({
   };
   if (desc !== undefined) {
     newInstantEventBody.desc = desc;
+  }
+  if (titleImg !== undefined) {
+    newInstantEventBody.titleImg = titleImg;
+  }
+  if (bgImg !== undefined) {
+    newInstantEventBody.bgImg = bgImg;
   }
   const collectionInfoRef = FirebaseAdmin.getInstance().Firestore.doc(INSTANT_EVENT_INFO);
   const instantCollection = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT);
@@ -190,7 +202,8 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
       .Firestore.collection(INSTANT_EVENT)
       .doc(instantEventId)
       .collection(INSTANT_MESSAGE)
-      .orderBy('sortWeight', 'desc');
+      .orderBy('sortWeight', 'desc')
+      .orderBy('createAt', 'desc');
     const colDocs = await transaction.get(colRef);
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
     const data = colDocs.docs.map((mv) => {

@@ -121,8 +121,14 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   }
 
   return (
-    <ServiceLayout minH="100vh" backgroundColor="gray.200">
-      <Box maxW="xl" mx="auto" pt="6">
+    <ServiceLayout
+      minH="100vh"
+      backgroundColor="gray.200"
+      bgImage={instantEventInfo.bgImg ?? undefined}
+      bgSize="100% auto"
+      bgRepeat="no-repeat"
+    >
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh" overflow="scroll; height:200px;">
         <Link href="/list">
           <a>
             <Button fontSize="sm" mb="2" leftIcon={<ChevronLeftIcon />}>

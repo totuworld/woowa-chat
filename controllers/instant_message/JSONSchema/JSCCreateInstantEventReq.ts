@@ -22,6 +22,12 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
           type: 'string',
           format: 'date-time',
         },
+        titleImg: {
+          type: 'string',
+        },
+        bgImg: {
+          type: 'string',
+        },
       },
       required: ['title', 'startDate', 'endDate'],
       type: 'object',

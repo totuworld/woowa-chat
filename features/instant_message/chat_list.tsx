@@ -30,11 +30,15 @@ async function createEvent({
   desc,
   startDate,
   endDate,
+  titleImg,
+  bgImg,
 }: {
   title: string;
   desc?: string;
   startDate?: string;
   endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
 }) {
   if (title.length <= 0) {
     return {
@@ -43,7 +47,7 @@ async function createEvent({
     };
   }
   try {
-    const resp = await ChatClientService.create({ title, desc, startDate, endDate });
+    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg });
     return {
       result: true,
       instantEventId: resp.payload?.instantEventId,
@@ -69,6 +73,10 @@ const ChatList = function () {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
+
+  const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
+  const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
+
   const tempStartDate = moment();
   const tempEndDate = moment(tempStartDate).add({ days: 1 });
   const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
@@ -93,11 +101,39 @@ const ChatList = function () {
   );
 
   async function create() {
+    let titleImgUrl: string | null = null;
+    if (titleImageSrc !== null && typeof titleImageSrc === 'string') {
+      // 타이틀 이미지 전송
+      const titleImageResp = await fetch('/api/image.add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: titleImageSrc }),
+      });
+      const titleImageRespData = await titleImageResp.json();
+      titleImgUrl = titleImageRespData.secure_url;
+    }
+    let bgImgUrl: string | null = null;
+    if (bgImageSrc !== null && typeof bgImageSrc === 'string') {
+      // 타이틀 이미지 전송
+      const bgImageResp = await fetch('/api/image.add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: bgImageSrc }),
+      });
+      const bgImageRespData = await bgImageResp.json();
+      bgImgUrl = bgImageRespData.secure_url;
+    }
     const resp = await createEvent({
       title,
       desc,
       startDate: dateRange[0] !== null ? dateRange[0].toISOString() : undefined,
       endDate: dateRange[1] !== null ? dateRange[1].toISOString() : undefined,
+      titleImg: titleImgUrl ?? undefined,
+      bgImg: bgImgUrl ?? undefined,
     });
     if (resp.result === false) {
       toast({
@@ -157,6 +193,44 @@ const ChatList = function () {
               showTime={{ format: 'HH:mm' }}
               format="YYYY-MM-DD HH:mm"
               style={{ width: '100%' }}
+            />
+          </FormControl>
+          <FormControl mt={4}>
+            <FormLabel>타이틀 이미지</FormLabel>
+            <Input
+              placeholder="select image file"
+              type="file"
+              name="file"
+              onChange={(changeEvent) => {
+                const reader = new FileReader();
+                reader.onload = (onLoadEvent) => {
+                  if (onLoadEvent.target !== null && onLoadEvent.target.result !== null) {
+                    setTitleImageSrc(onLoadEvent.target.result);
+                  }
+                };
+                if (changeEvent.target.files !== undefined && changeEvent.target.files !== null) {
+                  reader.readAsDataURL(changeEvent.target.files[0]);
+                }
+              }}
+            />
+          </FormControl>
+          <FormControl mt={4}>
+            <FormLabel>배경 이미지</FormLabel>
+            <Input
+              placeholder="select image file"
+              type="file"
+              name="file"
+              onChange={(changeEvent) => {
+                const reader = new FileReader();
+                reader.onload = (onLoadEvent) => {
+                  if (onLoadEvent.target !== null && onLoadEvent.target.result !== null) {
+                    setBGImageSrc(onLoadEvent.target.result);
+                  }
+                };
+                if (changeEvent.target.files !== undefined && changeEvent.target.files !== null) {
+                  reader.readAsDataURL(changeEvent.target.files[0]);
+                }
+              }}
             />
           </FormControl>
           <Flex>

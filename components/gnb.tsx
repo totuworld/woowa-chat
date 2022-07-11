@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Button, Stack, useColorModeValue, useBreakpointValue, Spacer } from '@chakra-ui/react';
+import { Box, Flex, Button, Stack, useColorModeValue, Spacer } from '@chakra-ui/react';
 import { useAuth } from '@/contexts/auth_user.context';
 
 const GNB: React.FC = function () {
@@ -43,15 +43,9 @@ const GNB: React.FC = function () {
         maxW="xl"
         mx="auto"
       >
-        <Spacer />
-        <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }}>
-          <Text
-            textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
-            fontFamily="heading"
-            color={useColorModeValue('gray.800', 'white')}
-          >
-            <img style={{ height: '40px' }} src="/logo.svg" alt="logo" />
-          </Text>
+        <Spacer flex={{ base: 1 }} />
+        <Flex flex={{ base: 2 }} justify={{ base: 'center', md: 'start' }}>
+          <img style={{ height: '40px' }} src="/talktalk_logo.png" alt="logo" />
         </Flex>
 
         <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>

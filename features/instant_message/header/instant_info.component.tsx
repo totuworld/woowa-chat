@@ -7,16 +7,14 @@ interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
 }
 
+const DEFAULT_IMG =
+  'https://images.unsplash.com/photo-1590372648787-fa5a935c2c40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80';
+
 const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   return (
     <>
-      <Image
-        h="120px"
-        w="full"
-        src="https://images.unsplash.com/photo-1590372648787-fa5a935c2c40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80"
-        objectFit="cover"
-      />
+      <Image h="120px" w="full" src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{instantEventInfo?.title}</Text>
         <Text fontSize="xs">{instantEventInfo?.desc}</Text>
