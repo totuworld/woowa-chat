@@ -141,6 +141,12 @@ const ChatList = function () {
         position: 'top-right',
       });
     }
+    if (resp.result === true) {
+      toast({
+        title: '이벤트 생성 성공',
+        position: 'top-right',
+      });
+    }
     setListLoadTrigger((prev) => !prev);
   }
 
