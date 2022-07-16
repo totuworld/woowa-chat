@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Divider, Flex, Spacer, Text, Textarea } from '@chakra-ui/react';
+import { Avatar, Box, Button, Divider, Flex, Spacer, Text, Textarea, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { FaTwitter } from 'react-icons/fa';
@@ -20,6 +20,7 @@ interface Props {
 const MessageItem = function ({ uid, photoURL, displayName, isOwner, item, onSendComplete, screenName }: Props) {
   const { publicRuntimeConfig } = getConfig();
   const [message, updateMessage] = useState('');
+  const toast = useToast();
   const mainUrl = `https://${publicRuntimeConfig.mainDomain}`;
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
@@ -110,6 +111,10 @@ const MessageItem = function ({ uid, photoURL, displayName, isOwner, item, onSen
                 // borderRadius="full"
                 onClick={() => {
                   MessageClientService.postReplay({ uid, messageId: item.id, reply: message }).then(() => {
+                    toast({
+                      title: '댓글 등록이 완료 되었습니다',
+                      position: 'top-right',
+                    });
                     onSendComplete();
                   });
                 }}

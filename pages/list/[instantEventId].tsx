@@ -239,11 +239,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 item={item}
                 locked={eventState === 'locked'}
                 onSendComplete={() => {
-                  console.info('send complete');
-                  toast({
-                    title: '댓글 등록이 완료 되었습니다',
-                    position: 'top-right',
-                  });
                   ChatClientService.getMessageInfo({
                     instantEventId: instantEventInfo.instantEventId,
                     messageId: item.id,
