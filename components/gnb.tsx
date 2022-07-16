@@ -1,8 +1,21 @@
-import { Box, Flex, Button, Stack, useColorModeValue, Spacer } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Button,
+  Stack,
+  useColorModeValue,
+  Spacer,
+  Menu,
+  MenuButton,
+  Avatar,
+  MenuList,
+  MenuItem,
+  IconButton,
+} from '@chakra-ui/react';
 import { useAuth } from '@/contexts/auth_user.context';
 
 const GNB: React.FC = function () {
-  const { loading, authUser, signOut } = useAuth();
+  const { loading, authUser, signOut, isOwner } = useAuth();
 
   const loginBtn = (
     <Button
@@ -21,9 +34,34 @@ const GNB: React.FC = function () {
     </Button>
   );
   const logoutBtn = (
-    <Button as="a" fontSize="sm" fontWeight={400} variant="link" onClick={signOut}>
-      로그아웃
-    </Button>
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        icon={<Avatar size="md" src={authUser?.photoURL ?? 'https://bit.ly/broken-link'} />}
+        borderRadius="full"
+      />
+      <MenuList>
+        {isOwner && (
+          <MenuItem
+            onClick={() => {
+              window.location.href = '/list';
+            }}
+          >
+            우수타 목록
+          </MenuItem>
+        )}
+        {isOwner && (
+          <MenuItem
+            onClick={() => {
+              window.location.href = '/owner-members';
+            }}
+          >
+            관리자 추가/삭제
+          </MenuItem>
+        )}
+        <MenuItem onClick={signOut}>로그아웃</MenuItem>
+      </MenuList>
+    </Menu>
   );
   const authInitialized = loading || authUser === null;
 
