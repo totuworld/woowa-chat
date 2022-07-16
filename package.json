@@ -31,7 +31,8 @@
     "react-icons": "^4.3.1",
     "react-query": "^3.34.16",
     "react-textarea-autosize": "^8.3.3",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^16.11.13",

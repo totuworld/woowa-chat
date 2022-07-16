@@ -32,3 +32,12 @@ export interface InInstantEventMessageReply {
     photoURL?: string;
   };
 }
+
+export interface InInstantEventDownloadItem {
+  reply: string;
+  replyAt: string;
+  id: string;
+  message: string;
+  vote: number;
+  createAt: string;
+}

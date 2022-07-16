@@ -169,6 +169,32 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(result);
 }
 
+async function messageListForDownload(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.headers.authorization;
+  let senderUid: string | undefined;
+  if (token !== undefined) {
+    senderUid = await verifyFirebaseIdToken(token);
+  }
+  if (senderUid === undefined) {
+    throw new BadReqError('authorization 누락');
+  }
+  const validateResp = validateParamWithData<{
+    query: {
+      instantEventId: string;
+    };
+  }>(
+    {
+      query: req.query,
+    },
+    JSCInstantEventMessageListReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const result = await ChatModel.messageListForDownload({ ...validateResp.data.query, currentUserUid: senderUid });
+  return res.status(200).json(result);
+}
+
 async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   const token = req.headers.authorization;
   let senderUid: string | undefined;
@@ -329,6 +355,7 @@ const ChatCtrl = {
   updateMessageSortWeight,
   closeSendMessage,
   messageList,
+  messageListForDownload,
   getMessageInfo,
   denyMessage,
   denyReply,

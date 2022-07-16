@@ -1,6 +1,9 @@
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
-import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
+import {
+  InInstantEventDownloadItem,
+  InInstantEventMessage,
+} from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
 import { requester, Resp } from '@/utils/requester';
 
@@ -58,6 +61,31 @@ async function get({
       option: {
         url,
         method: 'GET',
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function getDownloadData({
+  instantEventId,
+}: {
+  instantEventId: string;
+}): Promise<Resp<InInstantEventDownloadItem[]>> {
+  const url = `/api/instant-event.messages.list.download/${instantEventId}`;
+  try {
+    const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+    const resp = await requester<InInstantEventDownloadItem[]>({
+      option: {
+        url,
+        method: 'GET',
+        headers: {
+          authorization: token ?? '',
+        },
       },
     });
     return resp;
@@ -364,6 +392,7 @@ async function voteMessageInfo({
 const ChatClientService = {
   create,
   get,
+  getDownloadData,
   immediateClosSendMessagePeriod,
   denyMessage,
   denyReply,

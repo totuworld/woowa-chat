@@ -1,11 +1,13 @@
 import { firestore } from 'firebase-admin';
 import moment from 'moment';
+import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
 import CustomServerError from '@/controllers/custom_error/custom_server_error';
 import FirebaseAdmin from '../../models/firebase_admin';
 import { InInstantEvent } from '../../models/instant_message/interface/in_instant_event';
 import FieldValue = firestore.FieldValue;
 import {
+  InInstantEventDownloadItem,
   InInstantEventMessage,
   InInstantEventMessageServer,
 } from '@/models/instant_message/interface/in_instant_event_message';
@@ -238,6 +240,59 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
       } as InInstantEventMessage;
       return returnData;
     });
+    return data;
+  });
+  return result;
+}
+
+/** 다운로드 처리를 위해서 데이터를 array로 제공 */
+async function messageListForDownload({
+  instantEventId,
+  currentUserUid,
+}: {
+  instantEventId: string;
+  currentUserUid: string;
+}) {
+  const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const ownerMemberRef = FirebaseAdmin.getInstance()
+      .Firestore.collection(OWNER_MEMBER_COLLECTION)
+      .doc(currentUserUid);
+    const colRef = FirebaseAdmin.getInstance()
+      .Firestore.collection(INSTANT_EVENT)
+      .doc(instantEventId)
+      .collection(INSTANT_MESSAGE)
+      .orderBy('sortWeight', 'desc')
+      .orderBy('createAt', 'desc');
+    const colDocs = await transaction.get(colRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const isOwnerMember = ownerMemberDoc.exists;
+    const data = colDocs.docs.reduce((acc: InInstantEventDownloadItem[], mv) => {
+      const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
+      const defaultInfo = {
+        id: mv.id,
+        vote: docData.vote,
+        message: docData.deny !== undefined && docData.deny === true ? '비공개 처리된 메시지입니다.' : docData.message,
+        createAt: DateTime.fromJSDate(docData.createAt.toDate()).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss'),
+      };
+      const returnData =
+        docData.reply !== undefined && isOwnerMember
+          ? docData.reply.map((replyMv) => {
+              if (replyMv.deny !== undefined && replyMv.deny) {
+                return {
+                  ...defaultInfo,
+                  reply: '비공개 처리된 메시지입니다.',
+                  replyAt: DateTime.fromISO(replyMv.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss'),
+                };
+              }
+              return {
+                ...defaultInfo,
+                reply: replyMv.reply,
+                replyAt: DateTime.fromISO(replyMv.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss'),
+              };
+            })
+          : [{ ...defaultInfo, reply: '', replyAt: '' }];
+      return [...acc, ...returnData];
+    }, []);
     return data;
   });
   return result;
@@ -500,6 +555,7 @@ const ChatModel = {
   updateMessageSortWeight,
   get,
   messageList,
+  messageListForDownload,
   messageInfo,
   closeSendMessage,
   denyMessage,

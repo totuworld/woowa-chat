@@ -14,9 +14,11 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { useRef } from 'react';
+import * as XLSX from 'xlsx';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import ChatClientService from '../chat.client.service';
+import { InInstantEventDownloadItem } from '@/models/instant_message/interface/in_instant_event_message';
 
 interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
@@ -92,6 +94,30 @@ async function reopenEvent({ instantEventId }: { instantEventId: string }) {
   }
 }
 
+const convertDownloadDataToExcelInfo = (infosList: InInstantEventDownloadItem[]) => {
+  const invoiceData = infosList.map((mv) => ({
+    id: mv.id,
+    메시지: mv.message,
+    '메시지 등록일자': mv.createAt,
+    궁금해요: mv.vote,
+    댓글: mv.reply,
+    '댓글 등록일자': mv.replyAt,
+  }));
+  return invoiceData;
+};
+
+async function downloadEventInfo({ instantEventId }: { instantEventId: string }) {
+  try {
+    const resp = await ChatClientService.getDownloadData({
+      instantEventId,
+    });
+    return resp.payload ?? [];
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
 const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onCompleteLockOrClose }: Props) {
   const cancelRef = useRef<any>();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -140,6 +166,26 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
               댓글잠금
             </MenuItem>
           )}
+          <MenuItem
+            onClick={async () => {
+              try {
+                const origin = await downloadEventInfo({ instantEventId: instantEventInfo.instantEventId });
+                const convertData = convertDownloadDataToExcelInfo(origin);
+                /* 워크시트 생성 */
+                const ws = XLSX.utils.json_to_sheet(convertData);
+
+                /* 워크북 추가 */
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '메시지'); //시트 이름설정
+
+                XLSX.writeFile(wb, `우수타공감톡톡_${instantEventInfo.title}_data.xlsx`);
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+          >
+            정보 다운로드
+          </MenuItem>
           <MenuItem
             display={instantEventInfo.closed ? 'none' : ''}
             bgColor="red.300"
