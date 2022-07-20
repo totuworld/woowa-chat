@@ -11,10 +11,10 @@ const IndexPage: NextPage = function () {
       <Box maxW="xl" mx="auto">
         <Center marginTop="20" marginBottom="10" p="6">
           <Box>
-            <img src="/blahx2.svg" alt="hero" />
+            <img src="/intro.png" alt="hero" />
             <Flex justify="center" alignItems="center" flexDir="column">
-              <Heading>#BlahBlah</Heading>
-              <Text fontSize="sm">익명으로 대화해보세요</Text>
+              <Heading>우수타 공감톡톡</Heading>
+              <Text fontSize="sm">우아한형제들만의 수다 문화, 우아한 수다 타임</Text>
             </Flex>
           </Box>
         </Center>

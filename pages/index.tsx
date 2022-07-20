@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { Box, Center, Flex, Heading } from '@chakra-ui/react';
+import { Box, Center, Flex, Heading, Text } from '@chakra-ui/react';
 import getConfig from 'next/config';
 import Head from 'next/head';
 import { ServiceLayout } from '@/components/containers/service_layout';
@@ -36,9 +36,10 @@ const IndexPage: NextPage = function () {
         <Box maxW="xl" mx="auto">
           <Center marginTop="20" marginBottom="10" p="6">
             <Box>
-              <img src="/blahx2.svg" alt="hero" />
-              <Flex justify="center">
-                <Heading>#BlahBlah</Heading>
+              <img src="/intro.png" alt="hero" />
+              <Flex justify="center" alignItems="center" flexDir="column">
+                <Heading>우수타 공감톡톡</Heading>
+                <Text fontSize="sm">우아한형제들만의 수다 문화, 우아한 수다 타임</Text>
               </Flex>
             </Box>
           </Center>
