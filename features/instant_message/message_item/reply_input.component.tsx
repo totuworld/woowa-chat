@@ -3,6 +3,9 @@ import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
+import ColorPalette from '@/styles/color_palette';
+
+import './reply_input.module.css';
 
 interface Props {
   instantEventId: string;
@@ -46,8 +49,9 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
         </Box>
         <Button
           disabled={message.length === 0 || locked === true}
-          colorScheme="pink"
-          bgColor="#FF75B5"
+          textColor="white"
+          bgColor={`${ColorPalette.red}`}
+          _hover={{ bg: ColorPalette.red_disabled }}
           variant="solid"
           size="sm"
           // borderRadius="full"
@@ -69,10 +73,14 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
           등록
         </Button>
       </Box>
-      <FormControl display="flex" alignItems="center" mt="1">
+      <FormControl
+        display="flex"
+        alignItems="center"
+        mt="1"
+        sx={{ '.chakra-switch > *[data-checked]': { backgroundColor: ColorPalette.mint } }}
+      >
         <Switch
-          size="sm"
-          colorScheme="orange"
+          className="test"
           id="anonymous"
           mr="1"
           isChecked={isAnonymous}
