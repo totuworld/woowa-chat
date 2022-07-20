@@ -19,6 +19,7 @@ import { useRef, useState } from 'react';
 import { memberFindByScreenNameForClient } from '@/models/member/member.client.service';
 import { InMemberInfo } from '@/models/member/in_member_info';
 import { useAuth } from '@/contexts/auth_user.context';
+import ColorPalette from '@/styles/color_palette';
 
 interface Props {
   completeAdd: () => void;
@@ -89,7 +90,9 @@ export const OwnerMemberSearch = function ({ completeAdd }: Props) {
             }}
           />
           <Button
-            colorScheme="blue"
+            bgColor={`${ColorPalette.mint}`}
+            textColor="white"
+            _hover={{ bg: ColorPalette.mint_disabled }}
             ml="2"
             onClick={() => {
               search();

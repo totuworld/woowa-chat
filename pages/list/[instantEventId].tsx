@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/auth_user.context';
 import InstantMessageItem from '@/features/instant_message/message_item/instant_message_item.component';
 import InstantEventHeaderSideMenu from '@/features/instant_message/header/side_menu.component';
 import ChatClientService from '@/features/instant_message/chat.client.service';
+import ColorPalette from '@/styles/color_palette';
 
 interface Props {
   host: string;
@@ -197,9 +198,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               />
               <Button
                 disabled={message.length === 0}
-                bgColor="#FFB86C"
-                color="white"
-                colorScheme="yellow"
+                bgColor={`${ColorPalette.mint}`}
+                textColor="white"
+                _hover={{ bg: ColorPalette.mint_disabled }}
                 variant="solid"
                 size="sm"
                 onClick={async () => {

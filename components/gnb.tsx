@@ -13,6 +13,7 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { useAuth } from '@/contexts/auth_user.context';
+import ColorPalette from '@/styles/color_palette';
 
 const GNB: React.FC = function () {
   const { loading, authUser, signOut, isOwner } = useAuth();
@@ -21,11 +22,9 @@ const GNB: React.FC = function () {
     <Button
       fontSize="sm"
       fontWeight={600}
-      color="white"
-      bg="pink.400"
-      _hover={{
-        bg: 'pink.300',
-      }}
+      bgColor={`${ColorPalette.mint}`}
+      textColor="white"
+      _hover={{ bg: ColorPalette.mint_disabled }}
       onClick={() => {
         window.location.href = '/login';
       }}
