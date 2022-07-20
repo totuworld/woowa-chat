@@ -278,7 +278,7 @@ const ChatList = function () {
       </Box>
       {eventList.length === 0 && (
         <Box mt="6">
-          <img style={{ width: '50%', margin: '0 auto' }} src="/blahx2.svg" alt="hero" />
+          <img style={{ width: '50%', margin: '0 auto' }} src="/empty.png" alt="목록 없음" />
           <Flex justify="center">
             <Box mb="6" height="100vh" fontSize="sm">
               생성된 이벤트가 없어요.
