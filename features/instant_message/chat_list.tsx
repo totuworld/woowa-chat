@@ -90,6 +90,7 @@ const ChatList = function () {
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
     {
+      enabled: isOwner,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -276,7 +277,7 @@ const ChatList = function () {
           </Link>
         ))}
       </Box>
-      {eventList.length === 0 && (
+      {eventList.length === 0 && isOwner && (
         <Box mt="6">
           <img style={{ width: '50%', margin: '0 auto' }} src="/empty.png" alt="목록 없음" />
           <Flex justify="center">
