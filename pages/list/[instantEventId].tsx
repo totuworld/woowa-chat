@@ -1,5 +1,17 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Avatar, Box, Button, Flex, Spacer, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Center,
+  Flex,
+  Heading,
+  Spacer,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
@@ -20,6 +32,7 @@ import ColorPalette from '@/styles/color_palette';
 import InstantEventUtil from '@/features/instant_message/instant_event.util';
 import CreateEvent from '@/features/instant_message/create_event.component';
 import MessageList from '@/features/instant_message/message_list';
+import GoogleLoginButton from '@/components/google_login_button';
 
 async function updateEvent({
   instantEventId,
@@ -98,7 +111,7 @@ async function postMessage({ message, instantEventId }: { message: string; insta
 
 const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
-  const { authUser, isOwner, token } = useAuth();
+  const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
@@ -315,22 +328,43 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             </Flex>
           </Box>
         )}
-        <MessageList
-          messageLoadingStatus={status}
-          messageList={sortedMessageList}
-          eventInfo={instantEventInfo}
-          onSendComplete={(info) => {
-            setMessageList((prev) => {
-              const findPrevIndex = prev.findIndex((fv) => fv.id === info.id);
-              if (findPrevIndex < 0) {
-                return prev;
-              }
-              const updateArr = [...prev];
-              updateArr[findPrevIndex] = info!;
-              return updateArr;
-            });
-          }}
-        />
+        {authUser === null && (
+          <Box maxW="xl" mx="auto">
+            <Center marginBottom="10" p="6">
+              <Box>
+                <img src="/intro.png" alt="hero" />
+                <Flex justify="center" alignItems="center" flexDir="column">
+                  <Heading>우수타 공감톡톡</Heading>
+                  <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
+                </Flex>
+              </Box>
+            </Center>
+            <GoogleLoginButton
+              isStart={false}
+              onClickLogin={() => {
+                signInWithGoogle(`/list/${instantEventInfo.instantEventId}`);
+              }}
+            />
+          </Box>
+        )}
+        {authUser !== null && (
+          <MessageList
+            messageLoadingStatus={status}
+            messageList={sortedMessageList}
+            eventInfo={instantEventInfo}
+            onSendComplete={(info) => {
+              setMessageList((prev) => {
+                const findPrevIndex = prev.findIndex((fv) => fv.id === info.id);
+                if (findPrevIndex < 0) {
+                  return prev;
+                }
+                const updateArr = [...prev];
+                updateArr[findPrevIndex] = info!;
+                return updateArr;
+              });
+            }}
+          />
+        )}
       </Box>
     </ServiceLayout>
   );

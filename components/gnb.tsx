@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
 
 const GNB: React.FC = function () {
-  const { loading, authUser, signOut, isOwner } = useAuth();
+  const { loading, authUser, signOut, isOwner, signInWithGoogle } = useAuth();
 
   const loginBtn = (
     <Button
@@ -26,7 +26,7 @@ const GNB: React.FC = function () {
       textColor="white"
       _hover={{ bg: ColorPalette.mint_disabled }}
       onClick={() => {
-        window.location.href = '/login';
+        signInWithGoogle(window.location.pathname);
       }}
     >
       로그인

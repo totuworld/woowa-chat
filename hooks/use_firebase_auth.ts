@@ -51,7 +51,7 @@ export default function useFirebaseAuth() {
   //   }
   // };
 
-  async function signInWithGoogle(): Promise<void> {
+  async function signInWithGoogle(redirect?: string): Promise<void> {
     const provider = new GoogleAuthProvider();
     try {
       const signInResult = await signInWithPopup(FirebaseAuthClient.getInstance().Auth, provider);
@@ -75,7 +75,8 @@ export default function useFirebaseAuth() {
           token: idToken,
         });
         if (resp.status === 200 && resp.payload) {
-          window.location.href = '/list';
+          console.info('redirect');
+          window.location.href = redirect ?? '/list';
         }
       }
     } catch (err) {

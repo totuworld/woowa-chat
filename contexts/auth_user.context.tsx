@@ -5,7 +5,7 @@ import useFirebaseAuth from '../hooks/use_firebase_auth';
 interface InAuthUserContext {
   authUser: InAuthUser | null;
   loading: boolean;
-  signInWithGoogle: () => void;
+  signInWithGoogle: (redirect?: string) => void;
   signInWithTwitter: () => void;
   signOut: () => void;
   isOwner: boolean;
