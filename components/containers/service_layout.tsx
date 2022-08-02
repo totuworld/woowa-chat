@@ -15,7 +15,7 @@ export const ServiceLayout: React.FC<Props & BoxProps> = function ({ title = 'bl
     <Box {...boxProps}>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/static/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <GNB />
       {children}
