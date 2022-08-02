@@ -163,7 +163,7 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
                   });
               }}
             >
-              댓글잠금
+              댓글 및 투표 종료
             </MenuItem>
           )}
           <MenuItem
