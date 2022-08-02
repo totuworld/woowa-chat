@@ -1,22 +1,6 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Spacer,
-  useDisclosure,
-  useToast,
-  Text,
-  Badge,
-  Textarea,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Spacer, useDisclosure, useToast, Text, Badge } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import { useRef, useState } from 'react';
-import { DatePicker } from 'antd';
-import moment, { Moment } from 'moment';
+import { useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -26,8 +10,7 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 import ChatClientService from './chat.client.service';
 import InstantEventHeaderSideMenu from './header/side_menu.component';
 import InstantEventUtil from './instant_event.util';
-
-const { RangePicker } = DatePicker;
+import CreateEvent from './create_event.component';
 
 async function createEvent({
   title,
@@ -73,20 +56,7 @@ const ChatList = function () {
 
   const [eventList, setEventList] = useState<InInstantEvent[]>([]);
 
-  const initialRef = useRef<any>();
-
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
-
-  const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
-  const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
-
-  const tempStartDate = moment();
-  const tempEndDate = moment(tempStartDate).add({ days: 1 });
-  const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
-
-  const afterTwoWeekMoment = moment().add(2, 'week');
 
   const queryKey = ['chatEventList', listLoadTrigger];
 
@@ -106,41 +76,15 @@ const ChatList = function () {
     },
   );
 
-  async function create() {
-    let titleImgUrl: string | null = null;
-    if (titleImageSrc !== null && typeof titleImageSrc === 'string') {
-      // 타이틀 이미지 전송
-      const titleImageResp = await fetch('/api/image.add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: titleImageSrc }),
-      });
-      const titleImageRespData = await titleImageResp.json();
-      titleImgUrl = titleImageRespData.secure_url;
-    }
-    let bgImgUrl: string | null = null;
-    if (bgImageSrc !== null && typeof bgImageSrc === 'string') {
-      // 타이틀 이미지 전송
-      const bgImageResp = await fetch('/api/image.add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: bgImageSrc }),
-      });
-      const bgImageRespData = await bgImageResp.json();
-      bgImgUrl = bgImageRespData.secure_url;
-    }
-    const resp = await createEvent({
-      title,
-      desc,
-      startDate: dateRange[0] !== null ? dateRange[0].toISOString() : undefined,
-      endDate: dateRange[1] !== null ? dateRange[1].toISOString() : undefined,
-      titleImg: titleImgUrl ?? undefined,
-      bgImg: bgImgUrl ?? undefined,
-    });
+  async function create(data: {
+    title: string;
+    desc?: string;
+    startDate?: string;
+    endDate?: string;
+    titleImg?: string;
+    bgImg?: string;
+  }) {
+    const resp = await createEvent(data);
     if (resp.result === false) {
       toast({
         title: '이벤트 생성 실패',
@@ -172,104 +116,14 @@ const ChatList = function () {
         )}
       </Box>
       {isOpen && (
-        <Box borderWidth="1px" borderRadius="lg" p="2" mt="6" bg="white">
-          <FormControl isRequired>
-            <FormLabel>이벤트 이름</FormLabel>
-            <Input
-              onChange={(e) => {
-                setTitle(e.target.value);
-              }}
-              ref={initialRef}
-              placeholder="질문 목록 이름"
-            />
-          </FormControl>
-
-          <FormControl mt={4}>
-            <FormLabel>설명</FormLabel>
-            <Textarea
-              onChange={(e) => {
-                setDesc(e.target.value);
-              }}
-              placeholder="설명"
-            />
-          </FormControl>
-          <FormControl mt={4} isRequired>
-            <FormLabel>질문 가능 날짜</FormLabel>
-            <RangePicker
-              size="large"
-              value={dateRange}
-              disabledDate={(current) => current < moment().endOf('day') || current > afterTwoWeekMoment}
-              onChange={(v) => {
-                if (v !== null) setDateRange(v);
-              }}
-              showTime={{ format: 'HH:mm' }}
-              format="YYYY-MM-DD HH:mm"
-              style={{ width: '100%' }}
-            />
-          </FormControl>
-          <FormControl mt={4}>
-            <FormLabel>타이틀 이미지</FormLabel>
-            <Input
-              placeholder="select image file"
-              type="file"
-              name="file"
-              onChange={(changeEvent) => {
-                const reader = new FileReader();
-                reader.onload = (onLoadEvent) => {
-                  if (onLoadEvent.target !== null && onLoadEvent.target.result !== null) {
-                    setTitleImageSrc(onLoadEvent.target.result);
-                  }
-                };
-                if (changeEvent.target.files !== undefined && changeEvent.target.files !== null) {
-                  reader.readAsDataURL(changeEvent.target.files[0]);
-                }
-              }}
-            />
-          </FormControl>
-          <FormControl mt={4}>
-            <FormLabel>배경 이미지</FormLabel>
-            <Input
-              placeholder="select image file"
-              type="file"
-              name="file"
-              onChange={(changeEvent) => {
-                const reader = new FileReader();
-                reader.onload = (onLoadEvent) => {
-                  if (onLoadEvent.target !== null && onLoadEvent.target.result !== null) {
-                    setBGImageSrc(onLoadEvent.target.result);
-                  }
-                };
-                if (changeEvent.target.files !== undefined && changeEvent.target.files !== null) {
-                  reader.readAsDataURL(changeEvent.target.files[0]);
-                }
-              }}
-            />
-          </FormControl>
-          <Flex>
-            <Spacer />
-            <ButtonGroup variant="outline" spacing="6" mt="2">
-              <Button
-                colorScheme="blue"
-                onClick={() => {
-                  create().then(() => {
-                    // 닫기 해버린다.
-                    onClose();
-                    // query로 신규 데이터를 긁는다.
-                  });
-                }}
-              >
-                저장
-              </Button>
-              <Button
-                onClick={() => {
-                  onClose();
-                }}
-              >
-                닫기
-              </Button>
-            </ButtonGroup>
-          </Flex>
-        </Box>
+        <CreateEvent
+          onClose={onClose}
+          onClickSave={(saveData) => {
+            create(saveData).then(() => {
+              onClose();
+            });
+          }}
+        />
       )}
       <Box spacing="12px" mt="6">
         {eventList.map((eventInfo) => {
