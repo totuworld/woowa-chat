@@ -1,7 +1,6 @@
-import { Avatar, Box, Button, FormControl, FormLabel, Switch, Textarea, useToast } from '@chakra-ui/react';
+import { Avatar, Box, Button, Textarea } from '@chakra-ui/react';
 import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
 import ColorPalette from '@/styles/color_palette';
 
@@ -15,91 +14,59 @@ interface Props {
 }
 
 const InstantMessageItemReplyInput = function ({ locked, instantEventId, messageId, onSendComplete }: Props) {
-  const { authUser } = useAuth();
   const [message, updateMessage] = useState('');
-  const [isAnonymous, setAnonymous] = useState(true);
-  const toast = useToast();
+  const [isSending, setSending] = useState(false);
   return (
-    <>
-      <Box display="flex" mt="2">
-        <Box pt="1">
-          <Avatar
-            size="xs"
-            src={isAnonymous ? 'https://bit.ly/broken-link' : authUser?.photoURL ?? 'https://bit.ly/broken-link'}
-            mr="2"
-          />
-        </Box>
-        <Box borderRadius="md" width="full" bg="gray.100" mr="2">
-          <Textarea
-            disabled={locked}
-            border="none"
-            boxShadow="none !important"
-            resize="none"
-            minH="unset"
-            minRows={1}
-            overflow="hidden"
-            fontSize="xs"
-            as={ResizeTextarea}
-            placeholder="댓글을 입력하세요..."
-            value={message}
-            onChange={(e) => {
-              updateMessage(e.target.value);
-            }}
-          />
-        </Box>
-        <Button
-          disabled={message.length === 0 || locked === true}
-          textColor="white"
-          bgColor={`${ColorPalette.red}`}
-          _hover={{ bg: ColorPalette.red_disabled }}
-          variant="solid"
-          size="sm"
-          // borderRadius="full"
-          onClick={() => {
-            ChatClientService.postReply({
-              instantEventId,
-              messageId,
-              reply: message,
-              author:
-                isAnonymous === false
-                  ? { displayName: authUser?.displayName ?? '', photoURL: authUser?.photoURL ?? undefined }
-                  : undefined,
-            }).then(() => {
-              updateMessage('');
-              onSendComplete();
-            });
-          }}
-        >
-          등록
-        </Button>
+    <Box display="flex" mt="2">
+      <Box pt="1">
+        <Avatar size="xs" src="https://bit.ly/broken-link" mr="2" />
       </Box>
-      <FormControl
-        display="flex"
-        alignItems="center"
-        mt="1"
-        sx={{ '.chakra-switch > *[data-checked]': { backgroundColor: ColorPalette.mint } }}
-      >
-        <Switch
-          className="test"
-          id="anonymous"
-          mr="1"
-          isChecked={isAnonymous}
-          onChange={() => {
-            if (authUser === null) {
-              toast({
-                title: '로그인이 필요합니다',
-                position: 'top-right',
-              });
-              return;
-            }
-            setAnonymous((prev) => !prev);
+      <Box borderRadius="md" width="full" bg="gray.100" mr="2">
+        <Textarea
+          disabled={locked}
+          border="none"
+          boxShadow="none !important"
+          resize="none"
+          minH="unset"
+          minRows={1}
+          overflow="hidden"
+          fontSize="xs"
+          as={ResizeTextarea}
+          placeholder="댓글을 입력하세요..."
+          value={message}
+          onChange={(e) => {
+            updateMessage(e.target.value);
           }}
         />
-        <FormLabel htmlFor="anonymous" mb="0" fontSize="xx-small">
-          Anonymous
-        </FormLabel>
-      </FormControl>
-    </>
+      </Box>
+      <Button
+        isLoading={isSending}
+        disabled={isSending || message.length === 0 || locked === true}
+        textColor="white"
+        bgColor={`${ColorPalette.red}`}
+        _hover={{ bg: ColorPalette.red_disabled }}
+        variant="solid"
+        size="sm"
+        // borderRadius="full"
+        onClick={() => {
+          setSending(true);
+          ChatClientService.postReply({
+            instantEventId,
+            messageId,
+            reply: message,
+          })
+            .then(() => {
+              updateMessage('');
+              onSendComplete();
+            })
+            .finally(() => {
+              setSending(false);
+            });
+        }}
+      >
+        등록
+      </Button>
+    </Box>
   );
 };
 

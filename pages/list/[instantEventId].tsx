@@ -117,6 +117,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
+  const [isSending, setSending] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -294,13 +295,15 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 }}
               />
               <Button
-                disabled={message.length === 0}
+                isLoading={isSending}
+                disabled={isSending || message.length === 0}
                 bgColor={`${ColorPalette.mint}`}
                 textColor="white"
                 _hover={{ bg: ColorPalette.mint_disabled }}
                 variant="solid"
                 size="sm"
                 onClick={async () => {
+                  setSending(true);
                   const resp = await postMessage({
                     message,
                     instantEventId: instantEventInfo.instantEventId,
@@ -321,6 +324,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                     setListLoadTrigger((prev) => !prev);
                   }
                   updateMessage('');
+                  setSending(false);
                 }}
               >
                 등록
