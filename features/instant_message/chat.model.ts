@@ -68,7 +68,7 @@ async function create({
     closed: false,
   };
   if (desc !== undefined) {
-    newInstantEventBody.desc = desc;
+    newInstantEventBody.desc = desc.replace(/\n/g, '\\n');
   }
   if (titleImg !== undefined) {
     newInstantEventBody.titleImg = titleImg;

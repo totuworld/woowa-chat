@@ -12,12 +12,15 @@ const DEFAULT_IMG =
 
 const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
+  const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   return (
     <>
       <Image h="120px" w="full" src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{instantEventInfo?.title}</Text>
-        <Text fontSize="xs">{instantEventInfo?.desc}</Text>
+        <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>
+          {printDesc}
+        </Text>
         {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
         {eventState === 'locked' && (
           <Center width="full" fontSize="xs">

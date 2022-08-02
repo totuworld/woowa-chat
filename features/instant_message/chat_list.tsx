@@ -11,6 +11,7 @@ import {
   useToast,
   Text,
   Badge,
+  Textarea,
 } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { useRef, useState } from 'react';
@@ -185,7 +186,7 @@ const ChatList = function () {
 
           <FormControl mt={4}>
             <FormLabel>설명</FormLabel>
-            <Input
+            <Textarea
               onChange={(e) => {
                 setDesc(e.target.value);
               }}
