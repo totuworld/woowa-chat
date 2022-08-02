@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Spacer, useDisclosure, useToast, Text, Badge } from '@chakra-ui/react';
+import { Box, Button, Flex, Spacer, useDisclosure, useToast, Text, Badge, Spinner } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -60,7 +60,7 @@ const ChatList = function () {
 
   const queryKey = ['chatEventList', listLoadTrigger];
 
-  useQuery(
+  const { status } = useQuery(
     queryKey,
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
@@ -183,9 +183,14 @@ const ChatList = function () {
           );
         })}
       </Box>
-      {eventList.length === 0 && isOwner && (
+      {!(status === 'success' || status === 'error') && isOwner && (
+        <Flex alignContent="center" justifyContent="center" paddingTop="100">
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+        </Flex>
+      )}
+      {(status === 'success' || status === 'error') && eventList.length === 0 && isOwner && (
         <Box mt="6">
-          <img style={{ width: '50%', margin: '0 auto' }} src="/empty.png" alt="목록 없음" />
+          <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
           <Flex justify="center">
             <Box mb="6" height="100vh" fontSize="sm">
               생성된 이벤트가 없어요.

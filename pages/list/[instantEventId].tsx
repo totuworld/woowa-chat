@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Avatar, Box, Button, Flex, Spacer, Textarea, useDisclosure, useToast, VStack } from '@chakra-ui/react';
+import { Avatar, Box, Button, Flex, Spacer, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
@@ -14,12 +14,12 @@ import getStringValueFromQuery from '@/utils/get_value_from_query';
 import InstantInfo from '@/features/instant_message/header/instant_info.component';
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { useAuth } from '@/contexts/auth_user.context';
-import InstantMessageItem from '@/features/instant_message/message_item/instant_message_item.component';
 import InstantEventHeaderSideMenu from '@/features/instant_message/header/side_menu.component';
 import ChatClientService from '@/features/instant_message/chat.client.service';
 import ColorPalette from '@/styles/color_palette';
 import InstantEventUtil from '@/features/instant_message/instant_event.util';
 import CreateEvent from '@/features/instant_message/create_event.component';
+import MessageList from '@/features/instant_message/message_list';
 
 async function updateEvent({
   instantEventId,
@@ -110,7 +110,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
-  useQuery(
+  const { status } = useQuery(
     messageListQueryKey,
     async () => {
       const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -315,47 +315,22 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             </Flex>
           </Box>
         )}
-        {(eventState === 'reply' || eventState === 'locked' || isOwner) && sortedMessageList.length === 0 && (
-          <Box mt="6">
-            <img style={{ width: '50%', margin: '0 auto' }} src="/empty.png" alt="목록 없음" />
-            <Flex justify="center">
-              <Box mb="6" height="100vh" fontSize="sm">
-                등록된 메시지가 없어요
-              </Box>
-            </Flex>
-          </Box>
-        )}
-        {(eventState === 'reply' || eventState === 'locked' || isOwner) && (
-          <VStack spacing="12px" mt="6">
-            {sortedMessageList.map((item) => (
-              <InstantMessageItem
-                key={`instant-message-${instantEventInfo.instantEventId}-${item.id}`}
-                instantEventId={instantEventInfo.instantEventId}
-                item={item}
-                locked={eventState === 'locked'}
-                onSendComplete={() => {
-                  ChatClientService.getMessageInfo({
-                    instantEventId: instantEventInfo.instantEventId,
-                    messageId: item.id,
-                  }).then((info) => {
-                    if (info.payload === undefined) {
-                      return;
-                    }
-                    setMessageList((prev) => {
-                      const findPrevIndex = prev.findIndex((fv) => fv.id === info.payload!.id);
-                      if (findPrevIndex < 0) {
-                        return prev;
-                      }
-                      const updateArr = [...prev];
-                      updateArr[findPrevIndex] = info.payload!;
-                      return updateArr;
-                    });
-                  });
-                }}
-              />
-            ))}
-          </VStack>
-        )}
+        <MessageList
+          messageLoadingStatus={status}
+          messageList={sortedMessageList}
+          eventInfo={instantEventInfo}
+          onSendComplete={(info) => {
+            setMessageList((prev) => {
+              const findPrevIndex = prev.findIndex((fv) => fv.id === info.id);
+              if (findPrevIndex < 0) {
+                return prev;
+              }
+              const updateArr = [...prev];
+              updateArr[findPrevIndex] = info!;
+              return updateArr;
+            });
+          }}
+        />
       </Box>
     </ServiceLayout>
   );
