@@ -1,12 +1,11 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Avatar, Box, Button, Flex, Spacer, Textarea, useToast, VStack } from '@chakra-ui/react';
+import { Avatar, Box, Button, Flex, Spacer, Textarea, useDisclosure, useToast, VStack } from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
-import moment from 'moment';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
@@ -20,6 +19,53 @@ import InstantEventHeaderSideMenu from '@/features/instant_message/header/side_m
 import ChatClientService from '@/features/instant_message/chat.client.service';
 import ColorPalette from '@/styles/color_palette';
 import InstantEventUtil from '@/features/instant_message/instant_event.util';
+import CreateEvent from '@/features/instant_message/create_event.component';
+
+async function updateEvent({
+  instantEventId,
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+}: {
+  instantEventId: string;
+  title: string;
+  desc?: string;
+  startDate?: string;
+  endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
+}) {
+  if (title.length <= 0) {
+    return {
+      result: false,
+      message: '제목을 입력해주세요',
+    };
+  }
+  try {
+    const resp = await ChatClientService.updateInfo({
+      instantEventId,
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+    });
+    return {
+      result: true,
+      instantEventId: resp.payload?.instantEventId,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '수정 실패',
+    };
+  }
+}
 
 interface Props {
   host: string;
@@ -59,6 +105,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
@@ -94,6 +142,30 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     return <p>정보를 찾을 수 없습니다.</p>;
   }
 
+  async function modify(data: {
+    instantEventId: string;
+    title: string;
+    desc?: string;
+    startDate?: string;
+    endDate?: string;
+    titleImg?: string;
+    bgImg?: string;
+  }) {
+    const resp = await updateEvent(data);
+    if (resp.result === false) {
+      toast({
+        title: '이벤트 정보 수정 실패',
+        position: 'top-right',
+      });
+    }
+    if (resp.result === true) {
+      toast({
+        title: '이벤트 정보 수정 성공',
+        position: 'top-right',
+      });
+    }
+  }
+
   return (
     <ServiceLayout
       minH="100vh"
@@ -101,15 +173,54 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
+      title="우수타 공감톡톡"
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh" overflow="scroll; height:200px;">
-        <Link href="/list">
-          <a>
-            <Button fontSize="sm" mb="2" leftIcon={<ChevronLeftIcon />}>
-              리스트로 이동
+        {isOwner && (
+          <Box mb="2">
+            <Link href="/list">
+              <a>
+                <Button fontSize="sm" leftIcon={<ChevronLeftIcon />}>
+                  리스트로 이동
+                </Button>
+              </a>
+            </Link>
+            <Button
+              fontSize="sm"
+              onClick={() => {
+                onOpen();
+              }}
+            >
+              정보 수정
             </Button>
-          </a>
-        </Link>
+          </Box>
+        )}
+        {isOpen && (
+          <CreateEvent
+            mode="MODIFY"
+            origin={{ ...instantEventInfo }}
+            onClose={onClose}
+            onClickSave={(saveData) => {
+              modify({ ...saveData, instantEventId: instantEventInfo.instantEventId })
+                .then(() =>
+                  ChatClientService.get({
+                    instantEventId: instantEventInfo.instantEventId,
+                  }),
+                )
+                .then((resp) => {
+                  if (resp.status === 200 && resp.payload) {
+                    setInstantEventInfo(resp.payload);
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                })
+                .finally(() => {
+                  onClose();
+                });
+            }}
+          />
+        )}
         <Box rounded="md" overflow="hidden" bg="white">
           {isOwner && (
             <Box width="full" float="left" height="0">

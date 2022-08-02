@@ -97,6 +97,56 @@ async function create({
   });
 }
 
+async function update({
+  instantEventId,
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+}: {
+  instantEventId: string;
+  title: string;
+  desc?: string;
+  startDate: string;
+  endDate: string;
+  titleImg?: string;
+  bgImg?: string;
+}) {
+  const updateInstantEventBody: {
+    title: string;
+    desc?: string;
+    startDate: string;
+    endDate: string;
+    closed: boolean;
+    titleImg?: string;
+    bgImg?: string;
+  } = {
+    title,
+    startDate,
+    endDate,
+    closed: false,
+  };
+  if (desc !== undefined) {
+    updateInstantEventBody.desc = desc.replace(/\n/g, '\\n');
+  }
+  if (titleImg !== undefined) {
+    updateInstantEventBody.titleImg = titleImg;
+  }
+  if (bgImg !== undefined) {
+    updateInstantEventBody.bgImg = bgImg;
+  }
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트 ☠️' });
+    }
+    await transaction.update(eventRef, { ...updateInstantEventBody });
+  });
+}
+
 /** 우수타 이벤트 정보를 조회 */
 async function get({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
@@ -548,6 +598,7 @@ async function postReply({
 const ChatModel = {
   findAllEvent,
   create,
+  update,
   close,
   reopen,
   lock,

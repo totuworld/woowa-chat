@@ -11,7 +11,7 @@ import ChatList from '@/features/instant_message/chat_list';
  */
 const ListPage: NextPage = function () {
   return (
-    <ServiceLayout height="100vh" backgroundColor="gray.50">
+    <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타 공감톡톡">
       <Box maxW="xl" mx="auto">
         <ChatList />
       </Box>

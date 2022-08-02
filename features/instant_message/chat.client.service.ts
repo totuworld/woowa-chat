@@ -47,6 +47,49 @@ async function create({
   }
 }
 
+async function updateInfo({
+  instantEventId,
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+}: {
+  instantEventId: string;
+  title: string;
+  desc?: string;
+  startDate?: string;
+  endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
+}): Promise<Resp<{ instantEventId: string }>> {
+  const url = '/api/instant-event.update';
+  try {
+    const postData = {
+      instantEventId,
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+    };
+    const resp = await requester<{ instantEventId: string }>({
+      option: {
+        url,
+        method: 'PUT',
+        data: postData,
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function get({
   instantEventId,
   isServer = false,
@@ -391,6 +434,7 @@ async function voteMessageInfo({
 
 const ChatClientService = {
   create,
+  updateInfo,
   get,
   getDownloadData,
   immediateClosSendMessagePeriod,

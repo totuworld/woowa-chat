@@ -15,7 +15,7 @@ const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   return (
     <>
-      <Image h="120px" w="full" src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
+      <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{instantEventInfo?.title}</Text>
         <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>

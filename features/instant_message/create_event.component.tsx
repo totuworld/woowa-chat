@@ -8,6 +8,8 @@ const { RangePicker } = DatePicker;
 const afterTwoWeekMoment = moment().add(2, 'week');
 
 const CreateEvent = function ({
+  mode,
+  origin,
   onClickSave,
   onClose,
 }: {
@@ -20,12 +22,28 @@ const CreateEvent = function ({
     bgImg?: string;
   }) => void;
   onClose: () => void;
+  mode: 'CREATE' | 'MODIFY';
+  // eslint-disable-next-line react/require-default-props
+  origin?: {
+    title: string;
+    desc?: string;
+    startDate: string;
+    endDate: string;
+    /** 종료 여부를 확인 */
+    closed: boolean;
+    /** 댓글 등록이 불가능 여부 */
+    locked?: boolean;
+    /** 상단 타이틀바 이미지 */
+    titleImg?: string;
+    /** 배경 이미지 */
+    bgImg?: string;
+  };
 }) {
   const initialRef = useRef<any>();
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const tempStartDate = moment();
-  const tempEndDate = moment(tempStartDate).add({ days: 1 });
+  const [title, setTitle] = useState(origin?.title ?? '');
+  const [desc, setDesc] = useState(origin?.desc ?? '');
+  const tempStartDate = origin?.startDate ? moment(origin?.startDate) : moment();
+  const tempEndDate = origin?.endDate ? moment(origin.endDate) : moment(tempStartDate).add({ days: 1 });
   const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
@@ -57,13 +75,35 @@ const CreateEvent = function ({
       const bgImageRespData = await bgImageResp.json();
       bgImgUrl = bgImageRespData.secure_url;
     }
+    const titleImg = (() => {
+      if (mode === 'CREATE') {
+        return titleImgUrl ?? undefined;
+      }
+      // 수정일 때.
+      const newTitleImg = titleImgUrl ?? undefined;
+      if (newTitleImg === undefined) {
+        return origin?.titleImg;
+      }
+      return newTitleImg;
+    })();
+    const bgImg = (() => {
+      if (mode === 'CREATE') {
+        return bgImgUrl ?? undefined;
+      }
+      // 수정일 때.
+      const newBgImg = bgImgUrl ?? undefined;
+      if (newBgImg === undefined) {
+        return origin?.bgImg;
+      }
+      return newBgImg;
+    })();
     const saveData = {
       title,
       desc,
       startDate: dateRange[0] !== null ? dateRange[0].toISOString() : undefined,
       endDate: dateRange[1] !== null ? dateRange[1].toISOString() : undefined,
-      titleImg: titleImgUrl ?? undefined,
-      bgImg: bgImgUrl ?? undefined,
+      titleImg,
+      bgImg,
     };
     return saveData;
   }
@@ -73,6 +113,7 @@ const CreateEvent = function ({
       <FormControl isRequired>
         <FormLabel>이벤트 이름</FormLabel>
         <Input
+          defaultValue={title}
           onChange={(e) => {
             setTitle(e.target.value);
           }}
@@ -84,6 +125,7 @@ const CreateEvent = function ({
       <FormControl mt={4}>
         <FormLabel>설명</FormLabel>
         <Textarea
+          defaultValue={desc}
           onChange={(e) => {
             setDesc(e.target.value);
           }}
@@ -95,7 +137,12 @@ const CreateEvent = function ({
         <RangePicker
           size="large"
           value={dateRange}
-          disabledDate={(current) => current < moment().endOf('day') || current > afterTwoWeekMoment}
+          disabledDate={(current) => {
+            if (mode === 'CREATE') {
+              return current < moment().endOf('day') || current > afterTwoWeekMoment;
+            }
+            return current > afterTwoWeekMoment;
+          }}
           onChange={(v) => {
             if (v !== null) setDateRange(v);
           }}

@@ -117,6 +117,7 @@ const ChatList = function () {
       </Box>
       {isOpen && (
         <CreateEvent
+          mode="CREATE"
           onClose={onClose}
           onClickSave={(saveData) => {
             create(saveData).then(() => {

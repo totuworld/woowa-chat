@@ -19,6 +19,8 @@ import JSCVoteInstantEventMessageReq from '@/controllers/instant_message/JSONSch
 import JSCPostInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCPostInstantEventMessageReplyReq';
 import JSCDenyInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCDenyInstantEventMessageReplyReq';
 import JSCUpdateInstantEventMessageSortWeightReq from '@/controllers/instant_message/JSONSchema/JSCUpdateInstantEventMessageSortWeightReq';
+import { UpdateInstantEventReq } from '@/controllers/instant_message/interface/UpdateInstantEventReq';
+import JSCUpdateInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCUpdateInstantEventReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -37,6 +39,25 @@ async function create(req: NextApiRequest, res: NextApiResponse) {
   const { title, desc, startDate, endDate, titleImg, bgImg } = validateResp.data.body;
   await ChatModel.create({ title, desc, startDate, endDate, titleImg, bgImg });
   return res.status(201).end();
+}
+
+async function update(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<UpdateInstantEventReq>(
+    {
+      body: req.body,
+    },
+    JSCUpdateInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+
+  // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
+  // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
+
+  const { title, desc, startDate, endDate, titleImg, bgImg, instantEventId } = validateResp.data.body;
+  await ChatModel.update({ title, desc, startDate, endDate, titleImg, bgImg, instantEventId });
+  return res.status(200).end();
 }
 
 async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
@@ -347,6 +368,7 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
 const ChatCtrl = {
   findAllEvent,
   create,
+  update,
   get,
   lock,
   close,
