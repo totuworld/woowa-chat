@@ -19,6 +19,7 @@ import InstantMessageItem from '@/features/instant_message/message_item/instant_
 import InstantEventHeaderSideMenu from '@/features/instant_message/header/side_menu.component';
 import ChatClientService from '@/features/instant_message/chat.client.service';
 import ColorPalette from '@/styles/color_palette';
+import InstantEventUtil from '@/features/instant_message/instant_event.util';
 
 interface Props {
   host: string;
@@ -58,35 +59,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
 
-  const eventState = (() => {
-    if (instantEventInfo === null) {
-      return 'none';
-    }
-    if (
-      instantEventInfo.locked !== undefined &&
-      instantEventInfo.locked === true &&
-      instantEventInfo.closed === false
-    ) {
-      // 잠긴경우
-      return 'locked';
-    }
-    if (instantEventInfo.closed === true) {
-      // 완전히 종료된 경우
-      return 'closed';
-    }
-    const now = moment();
-    const startDate = moment(instantEventInfo.startDate, moment.ISO_8601);
-    const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
-    // 질문 가능한 기간 내 인가?
-    if (now.isBetween(startDate, endDate, undefined, '[]')) {
-      return 'question';
-    }
-    // 질문 가능한 기간이 넘었나?
-    if (now.isAfter(endDate)) {
-      return 'reply';
-    }
-    return 'pre';
-  })();
+  const eventState = InstantEventUtil.calEventState(instantEventInfo);
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
   useQuery(

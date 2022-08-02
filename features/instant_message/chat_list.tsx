@@ -10,18 +10,21 @@ import {
   useDisclosure,
   useToast,
   Text,
+  Badge,
 } from '@chakra-ui/react';
-import { ArrowRightIcon } from '@chakra-ui/icons';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { useRef, useState } from 'react';
 import { DatePicker } from 'antd';
 import moment, { Moment } from 'moment';
 import { useQuery } from 'react-query';
 import axios from 'axios';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/auth_user.context';
 import 'antd/dist/antd.css';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import ChatClientService from './chat.client.service';
+import InstantEventHeaderSideMenu from './header/side_menu.component';
+import InstantEventUtil from './instant_event.util';
 
 const { RangePicker } = DatePicker;
 
@@ -65,6 +68,7 @@ const ChatList = function () {
   const { isOwner } = useAuth();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const router = useRouter();
 
   const [eventList, setEventList] = useState<InInstantEvent[]>([]);
 
@@ -267,15 +271,61 @@ const ChatList = function () {
         </Box>
       )}
       <Box spacing="12px" mt="6">
-        {eventList.map((eventInfo) => (
-          <Link key={`instantEventKey-${eventInfo.instantEventId}`} href={`/list/${eventInfo.instantEventId}`}>
-            <Flex bg="white" p="2" alignItems="center" borderRadius="md" mb="2">
-              <Text>{eventInfo.title}</Text>
+        {eventList.map((eventInfo) => {
+          const eventState = InstantEventUtil.calEventState(eventInfo);
+          const badgeColor = (() => {
+            if (eventState === 'closed' || eventState === 'locked') return 'red';
+            if (eventState === 'question' || eventState === 'reply') return 'green';
+            return 'gray';
+          })();
+          return (
+            <Flex
+              key={`instantEventKey-${eventInfo.instantEventId}`}
+              bg="white"
+              p="2"
+              alignItems="center"
+              borderRadius="md"
+              mb="2"
+            >
+              <Badge colorScheme={badgeColor}>{InstantEventUtil.EventStateTOKorText[eventState]}</Badge>
+              <Text style={{ marginLeft: '10px' }}>{eventInfo.title}</Text>
               <Spacer />
-              <ArrowRightIcon />
+              <Button
+                size="xs"
+                style={{ marginRight: '10px' }}
+                rightIcon={<ExternalLinkIcon />}
+                onClick={() => {
+                  router.push(`/list/${eventInfo.instantEventId}`);
+                }}
+              >
+                이동
+              </Button>
+              <InstantEventHeaderSideMenu
+                instantEventInfo={eventInfo}
+                eventState={eventState}
+                onCompleteLockOrClose={() => {
+                  ChatClientService.get({
+                    instantEventId: eventInfo.instantEventId,
+                  }).then((resp) => {
+                    if (resp.status === 200 && resp.payload !== undefined) {
+                      setEventList((prev) => {
+                        const updateArr = [...prev];
+                        const findIndex = prev.findIndex((fv) => {
+                          const checked = fv.instantEventId === resp.payload!.instantEventId;
+                          return checked;
+                        });
+                        if (findIndex > -1 && updateArr[findIndex] !== undefined && resp.payload !== undefined) {
+                          updateArr[findIndex] = resp.payload;
+                        }
+                        return updateArr;
+                      });
+                    }
+                  });
+                }}
+              />
             </Flex>
-          </Link>
-        ))}
+          );
+        })}
       </Box>
       {eventList.length === 0 && isOwner && (
         <Box mt="6">
