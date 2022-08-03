@@ -21,7 +21,7 @@ const MessageList = function ({
   const eventState = InstantEventUtil.calEventState(eventInfo);
 
   if (isOwner === false && !(messageLoadingStatus === 'success' || messageLoadingStatus === 'error')) {
-    return '';
+    return <div>-</div>;
   }
 
   if (!(messageLoadingStatus === 'success' || messageLoadingStatus === 'error')) {

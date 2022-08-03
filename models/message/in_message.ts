@@ -4,6 +4,7 @@ export interface InMessage {
   id: string;
   messageNo: number;
   message: string;
+  deny?: boolean;
   /** 메시지를 작성한 사람의 정보 */
   author?: {
     displayName: string;

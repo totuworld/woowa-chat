@@ -258,7 +258,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
       .orderBy('createAt', 'desc');
     const colDocs = await transaction.get(colRef);
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
-    const data = colDocs.docs.map((mv) => {
+    const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {
         if (docData.voter === undefined) {
@@ -270,12 +270,15 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         return docData.voter.findIndex((fv) => fv === currentUserUid) >= 0;
       })();
       const isOwnerMember = ownerMemberDoc.exists;
+      if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
+        return null;
+      }
       const returnData = {
         ...docData,
         id: mv.id,
         voter: [],
         voted,
-        message: docData.deny !== undefined && docData.deny === true ? '비공개 처리된 메시지입니다.' : docData.message,
+        message: docData.message,
         reply:
           docData.reply !== undefined && isOwnerMember
             ? docData.reply.map((replyMv) => {
@@ -290,7 +293,8 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
       } as InInstantEventMessage;
       return returnData;
     });
-    return data;
+    const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
+    return filteredData;
   });
   return result;
 }
