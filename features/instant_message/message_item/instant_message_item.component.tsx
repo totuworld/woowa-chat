@@ -43,6 +43,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isSendingVote, setSendingVote] = useState(false);
 
   function sendVote(isUpvote: boolean) {
     if (authUser === null) {
@@ -52,21 +53,26 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       });
       return;
     }
+    setSendingVote(true);
     ChatClientService.voteMessageInfo({
       instantEventId,
       messageId: item.id,
       isUpvote,
-    }).then((resp) => {
-      if (resp.status !== 200 && resp.error !== undefined) {
-        toast({
-          title: (resp.error.data as { message: string }).message,
-          status: 'warning',
-          position: 'top-right',
-        });
-        return;
-      }
-      onSendComplete();
-    });
+    })
+      .then((resp) => {
+        if (resp.status !== 200 && resp.error !== undefined) {
+          toast({
+            title: (resp.error.data as { message: string }).message,
+            status: 'warning',
+            position: 'top-right',
+          });
+          return;
+        }
+        onSendComplete();
+      })
+      .finally(() => {
+        setSendingVote(false);
+      });
   }
 
   const isDeny = item.deny !== undefined && item.deny;
@@ -231,7 +237,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           >
             <GridItem w="100%">
               <Button
-                disabled={locked === true}
+                isLoading={isSendingVote}
+                disabled={locked === true || isSendingVote}
                 fontSize="xs"
                 leftIcon={item.voted ? <HeartIcon /> : <HeartEmptyIcon />}
                 width="full"
