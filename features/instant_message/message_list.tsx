@@ -20,6 +20,10 @@ const MessageList = function ({
   const { isOwner } = useAuth();
   const eventState = InstantEventUtil.calEventState(eventInfo);
 
+  if (isOwner === false && !(messageLoadingStatus === 'success' || messageLoadingStatus === 'error')) {
+    return '';
+  }
+
   if (!(messageLoadingStatus === 'success' || messageLoadingStatus === 'error')) {
     return (
       <Flex alignContent="center" justifyContent="center" paddingTop="100">
