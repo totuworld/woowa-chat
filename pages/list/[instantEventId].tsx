@@ -349,7 +349,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           </Box>
         )}
         {authUser === null && (
-          <Box maxW="xl" mx="auto">
+          <Box maxW="xl" mx="auto" minH="80vh">
             <Center marginBottom="10" p="6">
               <Box>
                 <img src="/intro.png" alt="hero" />
