@@ -19,7 +19,7 @@ const INSTANT_MESSAGE = 'messages';
 const OWNER_MEMBER_COLLECTION = 'owner_members';
 
 async function findAllEvent(): Promise<InInstantEvent[]> {
-  const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT);
+  const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).orderBy('createCount', 'desc');
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventListSnap = await transaction.get(eventColRef);
 
