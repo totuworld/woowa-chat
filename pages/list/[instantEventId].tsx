@@ -258,7 +258,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           )}
           <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} />
         </Box>
-        {eventState === 'question' && (
+        {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
               <Box pt="1" pr="2">
