@@ -303,6 +303,22 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 variant="solid"
                 size="sm"
                 onClick={async () => {
+                  if (message.trim().length <= 0) {
+                    toast({
+                      title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
+                      position: 'top-right',
+                      status: 'warning',
+                    });
+                    return;
+                  }
+                  if (message.trim().length > 1000) {
+                    toast({
+                      title: '1000자 내로 입력해주세요',
+                      position: 'top-right',
+                      status: 'warning',
+                    });
+                    return;
+                  }
                   setSending(true);
                   const resp = await postMessage({
                     message,

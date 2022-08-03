@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Textarea } from '@chakra-ui/react';
+import { Avatar, Box, Button, Textarea, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import ChatClientService from '../chat.client.service';
@@ -14,6 +14,7 @@ interface Props {
 }
 
 const InstantMessageItemReplyInput = function ({ locked, instantEventId, messageId, onSendComplete }: Props) {
+  const toast = useToast();
   const [message, updateMessage] = useState('');
   const [isSending, setSending] = useState(false);
   return (
@@ -49,6 +50,22 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
         size="sm"
         // borderRadius="full"
         onClick={() => {
+          if (message.trim().length <= 0) {
+            toast({
+              title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
+              position: 'top-right',
+              status: 'warning',
+            });
+            return;
+          }
+          if (message.trim().length > 1000) {
+            toast({
+              title: '1000자 내로 입력해주세요',
+              position: 'top-right',
+              status: 'warning',
+            });
+            return;
+          }
           setSending(true);
           ChatClientService.postReply({
             instantEventId,
