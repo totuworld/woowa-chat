@@ -18,7 +18,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import convertDateToString from '@/utils/convert_date_to_string';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
@@ -44,6 +44,11 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSendingVote, setSendingVote] = useState(false);
+  const [voted, setVoted] = useState(item.voted);
+
+  useEffect(() => {
+    setVoted(item.voted);
+  }, [item]);
 
   function sendVote(isUpvote: boolean) {
     if (authUser === null) {
@@ -54,6 +59,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       return;
     }
     setSendingVote(true);
+    setVoted((prev) => !prev);
     ChatClientService.voteMessageInfo({
       instantEventId,
       messageId: item.id,
@@ -240,7 +246,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 isLoading={isSendingVote}
                 disabled={locked === true || isSendingVote}
                 fontSize="xs"
-                leftIcon={item.voted ? <HeartIcon /> : <HeartEmptyIcon />}
+                leftIcon={voted ? <HeartIcon /> : <HeartEmptyIcon />}
                 width="full"
                 variant="ghost"
                 height="4"
@@ -248,7 +254,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  sendVote(!item.voted);
+                  sendVote(!voted);
                 }}
               >
                 {locked === true ? `${item.vote}` : '궁금해요'}
