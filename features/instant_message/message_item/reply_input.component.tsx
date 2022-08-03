@@ -70,7 +70,7 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
           ChatClientService.postReply({
             instantEventId,
             messageId,
-            reply: message,
+            reply: message.trim(),
           })
             .then(() => {
               updateMessage('');
