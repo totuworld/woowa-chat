@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { InAuthUser } from './interface/in_auth_user';
 import { memberAddForClient } from '@/models/member/member.client.service';
+import isOfType from '@/utils/type_guard';
 
 function formatAuthUser(user: User): InAuthUser {
   return {
@@ -57,7 +58,6 @@ export default function useFirebaseAuth() {
       const signInResult = await signInWithPopup(FirebaseAuthClient.getInstance().Auth, provider);
 
       if (signInResult.user) {
-        console.log(signInResult.user);
         const idToken = await signInResult.user.getIdToken();
         const { uid, displayName, photoURL, email } = signInResult.user;
         // uid
@@ -74,6 +74,15 @@ export default function useFirebaseAuth() {
           },
           token: idToken,
         });
+        if (
+          resp.status === 400 &&
+          resp.error &&
+          resp.error.data &&
+          isOfType<{ message: string }>(resp.error.data, 'message')
+        ) {
+          alert(resp.error.data.message);
+          signOut();
+        }
         if (resp.status === 200 && resp.payload) {
           console.info('redirect');
           window.location.href = redirect ?? '/list';

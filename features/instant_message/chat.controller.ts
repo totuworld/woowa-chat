@@ -21,6 +21,7 @@ import JSCDenyInstantEventMessageReplyReq from '@/controllers/instant_message/JS
 import JSCUpdateInstantEventMessageSortWeightReq from '@/controllers/instant_message/JSONSchema/JSCUpdateInstantEventMessageSortWeightReq';
 import { UpdateInstantEventReq } from '@/controllers/instant_message/interface/UpdateInstantEventReq';
 import JSCUpdateInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCUpdateInstantEventReq';
+import FirebaseAdmin from '@/models/firebase_admin';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -172,6 +173,11 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   }
   if (senderUid === undefined) {
     throw new BadReqError('authorization 누락');
+  }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  // 우아한형제들 email이 아닌 경우!
+  if (userInfoByAuth.email !== undefined && /@woowahan\.com$/.test(userInfoByAuth.email) === false) {
+    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
   }
   const validateResp = validateParamWithData<{
     query: {
