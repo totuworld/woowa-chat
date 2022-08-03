@@ -280,12 +280,12 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 as={ResizeTextarea}
                 value={message}
                 onChange={(e) => {
-                  // 최대 7줄만 스크린샷에 표현되니 10줄 넘게 입력하면 제한걸어야한다.
+                  // 최대 10줄만 스크린샷에 표현되니 10줄 넘게 입력하면 제한걸어야한다.
                   if (e.target.value) {
                     const lineCount = (e.target.value.match(/[^\n]*\n[^\n]*/gi)?.length ?? 1) + 1;
                     if (lineCount > 10) {
                       toast({
-                        title: '최대 7줄까지만 입력가능합니다',
+                        title: '최대 10줄까지만 입력가능합니다',
                         position: 'top-right',
                       });
                       return;
