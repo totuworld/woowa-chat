@@ -7,8 +7,7 @@ interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
 }
 
-const DEFAULT_IMG =
-  'https://images.unsplash.com/photo-1590372648787-fa5a935c2c40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80';
+const DEFAULT_IMG = '/default_title.png';
 
 const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
