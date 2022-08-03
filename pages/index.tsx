@@ -32,7 +32,7 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:url" content={mainUrl} />
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
-      <ServiceLayout height="100vh" backgroundColor="gray.50">
+      <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타 공감톡톡">
         <Box maxW="xl" mx="auto">
           <Center marginTop="20" marginBottom="10" p="6">
             <Box>
