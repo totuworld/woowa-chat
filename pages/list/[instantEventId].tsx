@@ -296,7 +296,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               />
               <Button
                 isLoading={isSending}
-                disabled={isSending || message.length === 0}
+                disabled={isSending}
                 bgColor={`${ColorPalette.mint}`}
                 textColor="white"
                 _hover={{ bg: ColorPalette.mint_disabled }}
