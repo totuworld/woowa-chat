@@ -5,7 +5,7 @@ import moment, { Moment } from 'moment';
 
 const { RangePicker } = DatePicker;
 
-const afterTwoWeekMoment = moment().add(2, 'week');
+const afterThreeWeekMoment = moment().add(3, 'week');
 
 const CreateEvent = function ({
   mode,
@@ -139,9 +139,9 @@ const CreateEvent = function ({
           value={dateRange}
           disabledDate={(current) => {
             if (mode === 'CREATE') {
-              return current < moment().endOf('day') || current > afterTwoWeekMoment;
+              return current < moment().endOf('day') || current > afterThreeWeekMoment;
             }
-            return current > afterTwoWeekMoment;
+            return current > afterThreeWeekMoment;
           }}
           onChange={(v) => {
             if (v !== null) setDateRange(v);

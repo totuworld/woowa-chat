@@ -80,7 +80,7 @@ const InstantPanel = function ({ userInfo }: Props) {
   const tempEndDate = moment(tempStartDate).add({ days: 1 });
   const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
 
-  const afterTwoWeekMoment = moment().add(2, 'week');
+  const afterThreeWeekMoment = moment().add(3, 'week');
 
   const queryKey = ['instantEventList', userInfo.uid];
 
@@ -160,7 +160,7 @@ const InstantPanel = function ({ userInfo }: Props) {
             <RangePicker
               size="large"
               value={dateRange}
-              disabledDate={(current) => current < moment().endOf('day') || current > afterTwoWeekMoment}
+              disabledDate={(current) => current < moment().endOf('day') || current > afterThreeWeekMoment}
               onChange={(v) => {
                 if (v !== null) setDateRange(v);
               }}
