@@ -389,7 +389,7 @@ async function messageInfo({
     ...resp.docData,
     voted,
     message:
-      resp.docData.deny !== undefined && resp.docData.deny === true
+      resp.isOwnerMember === false && resp.docData.deny !== undefined && resp.docData.deny === true
         ? '비공개 처리된 메시지입니다.'
         : resp.docData.message,
     reply:
