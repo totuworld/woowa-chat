@@ -12,6 +12,7 @@ import {
   MenuItem,
   IconButton,
 } from '@chakra-ui/react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
 
@@ -82,7 +83,9 @@ const GNB: React.FC = function () {
       >
         <Spacer flex={{ base: 1 }} />
         <Flex flex={{ base: 2 }} justify={{ base: 'center', md: 'start' }}>
-          <img style={{ height: '40px' }} src="/talktalk_logo.png" alt="logo" />
+          <Link href="/">
+            <img style={{ height: '40px', cursor: 'pointer' }} src="/talktalk_logo.png" alt="logo" />
+          </Link>
         </Flex>
 
         <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
