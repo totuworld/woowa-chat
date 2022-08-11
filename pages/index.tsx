@@ -1,10 +1,10 @@
 import { NextPage } from 'next';
-import { Box, Center, Flex, Heading, Text } from '@chakra-ui/react';
 import getConfig from 'next/config';
 import Head from 'next/head';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { useAuth } from '@/contexts/auth_user.context';
-import GoogleLoginButton from '@/components/google_login_button';
+import MainInfo from '@/features/home/MainInfo';
+import EventList from '@/features/home/EventList';
 
 /** 최초 진입 페이지
  *
@@ -15,7 +15,7 @@ import GoogleLoginButton from '@/components/google_login_button';
 const IndexPage: NextPage = function () {
   const { publicRuntimeConfig } = getConfig();
   const mainUrl = `https://${publicRuntimeConfig.mainDomain}`;
-  const { signInWithGoogle } = useAuth();
+  const { authUser } = useAuth();
   return (
     <>
       <Head>
@@ -33,18 +33,8 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
       <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타 공감톡톡">
-        <Box maxW="xl" mx="auto">
-          <Center marginTop="20" marginBottom="10" p="6">
-            <Box>
-              <img src="/intro.png" alt="hero" />
-              <Flex justify="center" alignItems="center" flexDir="column">
-                <Heading>우수타 공감톡톡</Heading>
-                <Text fontSize="sm">우아한형제들만의 수다 문화, 우아한 수다 타임</Text>
-              </Flex>
-            </Box>
-          </Center>
-        </Box>
-        <GoogleLoginButton isStart onClickLogin={signInWithGoogle} />
+        <EventList />
+        {authUser === null && <MainInfo />}
       </ServiceLayout>
     </>
   );

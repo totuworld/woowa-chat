@@ -24,7 +24,7 @@ const GoogleLoginButton = function ({ isStart, onClickLogin }: Props) {
           </Button>
         </Center>
       </Box>
-      <Box position="fixed" width="full" bottom="10" display={{ md: 'none' }}>
+      <Box width="full" display={{ md: 'none' }}>
         <Center>
           <Button
             size="lg"
