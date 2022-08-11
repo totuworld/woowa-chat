@@ -297,11 +297,10 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           {item.reply &&
             item.reply.length > 0 &&
             item.reply.map((replyItem, idx) => (
-              <Box pt="2">
+              <Box pt="2" key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
                 {idx === 0 && <Divider />}
                 <InstantEventMessageReply
                   // eslint-disable-next-line react/no-array-index-key
-                  key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}
                   replyItem={replyItem}
                   instantEventId={instantEventId}
                   messageId={item.id}

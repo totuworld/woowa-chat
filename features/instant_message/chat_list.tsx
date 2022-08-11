@@ -115,17 +115,16 @@ const ChatList = function () {
           </Button>
         )}
       </Box>
-      {isOpen && (
-        <CreateEvent
-          mode="CREATE"
-          onClose={onClose}
-          onClickSave={(saveData) => {
-            create(saveData).then(() => {
-              onClose();
-            });
-          }}
-        />
-      )}
+      <CreateEvent
+        isShow={isOpen}
+        mode="CREATE"
+        onClose={onClose}
+        onClickSave={(saveData) => {
+          create(saveData).then(() => {
+            onClose();
+          });
+        }}
+      />
       <Box spacing="12px" mt="6">
         {eventList.map((eventInfo) => {
           const eventState = InstantEventUtil.calEventState(eventInfo);

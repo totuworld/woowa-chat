@@ -8,6 +8,7 @@ const { RangePicker } = DatePicker;
 const afterThreeWeekMoment = moment().add(3, 'week');
 
 const CreateEvent = function ({
+  isShow = true,
   mode,
   origin,
   onClickSave,
@@ -23,6 +24,8 @@ const CreateEvent = function ({
   }) => void;
   onClose: () => void;
   mode: 'CREATE' | 'MODIFY';
+  // eslint-disable-next-line react/require-default-props
+  isShow?: boolean;
   // eslint-disable-next-line react/require-default-props
   origin?: {
     title: string;
@@ -109,7 +112,7 @@ const CreateEvent = function ({
   }
 
   return (
-    <Box borderWidth="1px" borderRadius="lg" p="2" mt="6" bg="white">
+    <Box borderWidth="1px" borderRadius="lg" p="2" mt="6" bg="white" display={isShow ? '' : 'none'}>
       <FormControl isRequired>
         <FormLabel>이벤트 이름</FormLabel>
         <Input

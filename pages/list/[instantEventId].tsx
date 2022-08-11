@@ -18,6 +18,7 @@ import ResizeTextarea from 'react-textarea-autosize';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
+import 'antd/dist/antd.css';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
@@ -209,32 +210,31 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             </Button>
           </Box>
         )}
-        {isOpen && (
-          <CreateEvent
-            mode="MODIFY"
-            origin={{ ...instantEventInfo }}
-            onClose={onClose}
-            onClickSave={(saveData) => {
-              modify({ ...saveData, instantEventId: instantEventInfo.instantEventId })
-                .then(() =>
-                  ChatClientService.get({
-                    instantEventId: instantEventInfo.instantEventId,
-                  }),
-                )
-                .then((resp) => {
-                  if (resp.status === 200 && resp.payload) {
-                    setInstantEventInfo(resp.payload);
-                  }
-                })
-                .catch((err) => {
-                  console.error(err);
-                })
-                .finally(() => {
-                  onClose();
-                });
-            }}
-          />
-        )}
+        <CreateEvent
+          isShow={isOpen}
+          mode="MODIFY"
+          origin={{ ...instantEventInfo }}
+          onClose={onClose}
+          onClickSave={(saveData) => {
+            modify({ ...saveData, instantEventId: instantEventInfo.instantEventId })
+              .then(() =>
+                ChatClientService.get({
+                  instantEventId: instantEventInfo.instantEventId,
+                }),
+              )
+              .then((resp) => {
+                if (resp.status === 200 && resp.payload) {
+                  setInstantEventInfo(resp.payload);
+                }
+              })
+              .catch((err) => {
+                console.error(err);
+              })
+              .finally(() => {
+                onClose();
+              });
+          }}
+        />
         <Box rounded="md" overflow="hidden" bg="white">
           {isOwner && (
             <Box width="full" float="left" height="0">
