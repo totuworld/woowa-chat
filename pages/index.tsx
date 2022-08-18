@@ -21,14 +21,14 @@ const IndexPage: NextPage = function () {
       <Head>
         <meta property="og:url" content={mainUrl} />
         <meta property="og:image" content={`https://${publicRuntimeConfig.mainDomain}/main.jpg`} />
-        <meta property="og:site_name" content="blahX2" />
-        <meta property="og:title" content="blahX2 - 익명으로 나누는 대화" />
-        <meta property="og:description" content="blahX2는 익명으로 질문을 받을 수 있어요" />
-        <meta name="twitter:title" content="blahX2 - 익명으로 나누는 대화" />
-        <meta name="twitter:description" content="blahX2는 익명으로 질문을 받을 수 있어요" />
+        <meta property="og:site_name" content="우수타 공감톡톡" />
+        <meta property="og:title" content="우수타 공감톡톡 - 질문과 댓글 도우미" />
+        <meta property="og:description" content="우수타 공감톡톡은 우수타 질문과 댓글을 돕는 서비스입니다." />
+        <meta name="twitter:title" content="우수타 공감톡톡 - 질문과 댓글 도우미" />
+        <meta name="twitter:description" content="우수타 공감톡톡은 우수타 질문과 댓글을 돕는 서비스입니다." />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={`https://${publicRuntimeConfig.mainDomain}/main.jpg`} />
-        <meta name="twitter:image:alt" content="blahX2" />
+        <meta name="twitter:image" content={`https://${publicRuntimeConfig.mainDomain}/main2.jpg`} />
+        <meta name="twitter:image:alt" content="우수타 공감톡톡" />
         <meta name="twitter:url" content={mainUrl} />
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
