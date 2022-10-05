@@ -4,7 +4,7 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 
 interface Props {
   instantEventInfo: InInstantEvent;
-  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
 }
 
 const DEFAULT_IMG = '/default_title.png';

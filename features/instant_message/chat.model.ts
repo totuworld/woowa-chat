@@ -11,6 +11,7 @@ import {
   InInstantEventMessage,
   InInstantEventMessageServer,
 } from '@/models/instant_message/interface/in_instant_event_message';
+import InstantEventUtil from './instant_event.util';
 
 const INSTANT_EVENT = 'instants';
 const INSTANT_EVENT_INFO = 'collection_info/instants';
@@ -176,6 +177,30 @@ async function lock({ instantEventId }: { instantEventId: string }) {
   });
 }
 
+/** 우수타 이벤트 공개 처리 - 일반 사용자도 댓글까지 조회가능 */
+async function publish({ instantEventId }: { instantEventId: string }) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트 ☠️' });
+    }
+    await transaction.update(eventRef, { showAllReply: true });
+  });
+}
+
+/** 우수타 이벤트 비공개 처리 - lock 상태로 돌린다. */
+async function unpublish({ instantEventId }: { instantEventId: string }) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트 ☠️' });
+    }
+    await transaction.update(eventRef, { showAllReply: false });
+  });
+}
+
 /** 우수타 이벤트 종료 처리 - 질문이나 댓글을 미노출 */
 async function close({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
@@ -250,14 +275,15 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
     const ownerMemberRef = FirebaseAdmin.getInstance()
       .Firestore.collection(OWNER_MEMBER_COLLECTION)
       .doc(currentUserUid);
-    const colRef = FirebaseAdmin.getInstance()
-      .Firestore.collection(INSTANT_EVENT)
-      .doc(instantEventId)
-      .collection(INSTANT_MESSAGE)
-      .orderBy('sortWeight', 'desc')
-      .orderBy('createAt', 'desc');
+    const eventDocRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+    const colRef = eventDocRef.collection(INSTANT_MESSAGE).orderBy('sortWeight', 'desc').orderBy('createAt', 'desc');
+    const eventDoc = await transaction.get(eventDocRef);
     const colDocs = await transaction.get(colRef);
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const eventInfo = eventDoc.data() as InInstantEvent;
+    const eventState = InstantEventUtil.calEventState(eventInfo);
+    const isShowAll = eventState === 'showAll';
+    console.info({ isShowAll, eventState });
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {
@@ -280,7 +306,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         voted,
         message: docData.message,
         reply:
-          docData.reply !== undefined && isOwnerMember
+          docData.reply !== undefined && (isOwnerMember || isShowAll)
             ? docData.reply.map((replyMv) => {
                 if (replyMv.deny !== undefined && replyMv.deny) {
                   return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
@@ -606,6 +632,8 @@ const ChatModel = {
   close,
   reopen,
   lock,
+  publish,
+  unpublish,
   post,
   updateMessageSortWeight,
   get,

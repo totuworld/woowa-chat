@@ -106,6 +106,36 @@ async function lock(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function publish(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
+    {
+      body: req.body,
+    },
+    JSCCloseInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.publish({ instantEventId });
+  return res.status(200).end();
+}
+
+async function unpublish(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
+    {
+      body: req.body,
+    },
+    JSCCloseInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.unpublish({ instantEventId });
+  return res.status(200).end();
+}
+
 async function close(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
@@ -377,6 +407,8 @@ const ChatCtrl = {
   update,
   get,
   lock,
+  publish,
+  unpublish,
   close,
   reopen,
   post,
