@@ -33,24 +33,25 @@ const MessageList = function ({
   }
   return (
     <>
-      {(eventState === 'reply' || eventState === 'locked' || isOwner) && messageList.length === 0 && (
-        <Box mt="6">
-          <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
-          <Flex justify="center">
-            <Box mb="6" height="100vh" fontSize="sm">
-              등록된 메시지가 없어요
-            </Box>
-          </Flex>
-        </Box>
-      )}
-      {(eventState === 'reply' || eventState === 'locked' || isOwner) && (
+      {(eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) &&
+        messageList.length === 0 && (
+          <Box mt="6">
+            <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
+            <Flex justify="center">
+              <Box mb="6" height="100vh" fontSize="sm">
+                등록된 메시지가 없어요
+              </Box>
+            </Flex>
+          </Box>
+        )}
+      {(eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) && (
         <VStack spacing="12px" mt="6">
           {messageList.map((item) => (
             <InstantMessageItem
               key={`instant-message-${eventInfo.instantEventId}-${item.id}`}
               instantEventId={eventInfo.instantEventId}
               item={item}
-              locked={eventState === 'locked'}
+              locked={eventState === 'locked' || eventState === 'showAll'}
               onSendComplete={() => {
                 ChatClientService.getMessageInfo({
                   instantEventId: eventInfo.instantEventId,

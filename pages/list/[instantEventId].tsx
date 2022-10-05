@@ -123,6 +123,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
+  console.info({ eventState });
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
   const { status } = useQuery(
@@ -142,7 +143,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       return resp;
     },
     {
-      enabled: (eventState === 'reply' || eventState === 'locked' || isOwner) && token !== null,
+      enabled:
+        (eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) && token !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {

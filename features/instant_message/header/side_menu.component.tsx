@@ -21,7 +21,7 @@ import ChatClientService from '../chat.client.service';
 import { InInstantEventDownloadItem } from '@/models/instant_message/interface/in_instant_event_message';
 
 interface Props {
-  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre';
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
   instantEventInfo: InInstantEvent;
   onCompleteLockOrClose: () => void;
 }
@@ -56,6 +56,40 @@ async function lockEvent({ instantEventId }: { instantEventId: string }) {
     return {
       result: false,
       message: '이벤트 잠금 실패',
+    };
+  }
+}
+
+async function publishEvent({ instantEventId }: { instantEventId: string }) {
+  try {
+    await ChatClientService.publish({
+      instantEventId,
+    });
+    return {
+      result: true,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '공개 전환 실패',
+    };
+  }
+}
+
+async function unpublishEvent({ instantEventId }: { instantEventId: string }) {
+  try {
+    await ChatClientService.unpublish({
+      instantEventId,
+    });
+    return {
+      result: true,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '비공개 전환 실패',
     };
   }
 }
@@ -164,6 +198,36 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
               }}
             >
               댓글 및 투표 종료
+            </MenuItem>
+          )}
+          {eventState === 'locked' && (
+            <MenuItem
+              onClick={() => {
+                publishEvent({ instantEventId: instantEventInfo.instantEventId })
+                  .then(() => {
+                    onCompleteLockOrClose();
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }}
+            >
+              전체 공개로 전환
+            </MenuItem>
+          )}
+          {eventState === 'showAll' && (
+            <MenuItem
+              onClick={() => {
+                unpublishEvent({ instantEventId: instantEventInfo.instantEventId })
+                  .then(() => {
+                    onCompleteLockOrClose();
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }}
+            >
+              전체 비공개로 전환
             </MenuItem>
           )}
           <MenuItem

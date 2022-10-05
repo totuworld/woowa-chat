@@ -5,9 +5,21 @@ function calEventState(instantEventInfo: InInstantEvent | null) {
   if (instantEventInfo === null) {
     return 'none';
   }
-  if (instantEventInfo.locked !== undefined && instantEventInfo.locked === true && instantEventInfo.closed === false) {
+  if (
+    instantEventInfo.locked !== undefined &&
+    (instantEventInfo.showAllReply === undefined || instantEventInfo.showAllReply === false) &&
+    instantEventInfo.locked === true &&
+    instantEventInfo.closed === false
+  ) {
     // 잠긴경우
     return 'locked';
+  }
+  if (
+    instantEventInfo.showAllReply !== undefined &&
+    instantEventInfo.showAllReply === true &&
+    instantEventInfo.closed === false
+  ) {
+    return 'showAll';
   }
   if (instantEventInfo.closed === true) {
     // 완전히 종료된 경우
@@ -33,6 +45,7 @@ const EventStateTOKorText = {
   question: '질문 등록 기간',
   closed: '종료',
   locked: '댓글 등록 잠금',
+  showAll: '결과 공개',
   none: '-',
 };
 

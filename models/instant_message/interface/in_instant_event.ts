@@ -8,6 +8,8 @@ export interface InInstantEvent {
   closed: boolean;
   /** 댓글 등록이 불가능 여부 */
   locked?: boolean;
+  /** 일반 사용자에게 댓글까지 공개할지 여부 */
+  showAllReply?: boolean;
   /** 상단 타이틀바 이미지 */
   titleImg?: string;
   /** 배경 이미지 */

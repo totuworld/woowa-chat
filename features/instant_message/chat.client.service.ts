@@ -159,6 +159,46 @@ async function lock({ instantEventId }: { instantEventId: string }): Promise<Res
   }
 }
 
+async function publish({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/instant-event.publish';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function unpublish({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/instant-event.unpublish';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function close({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
   const url = '/api/instant-event.close';
   try {
@@ -440,6 +480,8 @@ const ChatClientService = {
   immediateClosSendMessagePeriod,
   denyMessage,
   denyReply,
+  publish,
+  unpublish,
   lock,
   voteMessageInfo,
   close,
