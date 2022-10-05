@@ -262,7 +262,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
               <Box pt="1" pr="2">
-                <Avatar size="xs" src="https://bit.ly/broken-link" />
+                <Avatar size="xs" src="/profile_anonymous.png" />
               </Box>
               <Textarea
                 bg="gray.100"

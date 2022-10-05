@@ -28,7 +28,7 @@ const MessageItem = function ({ uid, photoURL, displayName, isOwner, item, onSen
         <Flex pl="2" pt="2" alignItems="center">
           <Avatar
             size="xs"
-            src={item.author ? item.author.photoURL ?? 'https://bit.ly/broken-link' : 'https://bit.ly/broken-link'}
+            src={item.author ? item.author.photoURL ?? '/profile_anonymous.png' : '/profile_anonymous.png'}
           />
           <Text fontSize="xx-small" ml="1">
             {item.author ? item.author.displayName : 'anonymous'}

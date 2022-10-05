@@ -60,7 +60,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
         <Avatar
           size="xs"
           src={
-            replyItem.author ? replyItem.author.photoURL ?? 'https://bit.ly/broken-link' : 'https://bit.ly/broken-link'
+            replyItem.author ? replyItem.author.photoURL ?? '/profile_anonymous.png' : '/profile_anonymous.png'
           }
           mr="2"
         />

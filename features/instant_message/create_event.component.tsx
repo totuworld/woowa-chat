@@ -67,7 +67,7 @@ const CreateEvent = function ({
     }
     let bgImgUrl: string | null = null;
     if (bgImageSrc !== null && typeof bgImageSrc === 'string') {
-      // 타이틀 이미지 전송
+      // 배경 이미지 전송
       const bgImageResp = await fetch('/api/image.add', {
         method: 'POST',
         headers: {
