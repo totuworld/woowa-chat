@@ -37,7 +37,7 @@ const GNB: React.FC = function () {
     <Menu>
       <MenuButton
         as={IconButton}
-        icon={<Avatar size="md" src={authUser?.photoURL ?? 'https://bit.ly/broken-link'} />}
+        icon={<Avatar size="md" src={authUser?.photoURL ?? '/profile_anonymous.png'} />}
         borderRadius="full"
       />
       <MenuList>

@@ -145,7 +145,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
         <Flex px="2" pt="2" alignItems="center">
-          <Avatar size="xs" src="https://bit.ly/broken-link" />
+          <Avatar size="xs" src="/profile_anonymous.png" />
           <Text fontSize="xx-small" ml="1">
             anonymous
           </Text>

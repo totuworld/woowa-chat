@@ -72,7 +72,7 @@ const DefaultPanel = function ({ userInfo }: Props) {
     } = { uid: userInfo?.uid ?? '', message };
     if (isAnonymous === false) {
       postData.author = {
-        photoURL: authUser?.photoURL ?? 'https://bit.ly/broken-link',
+        photoURL: authUser?.photoURL ?? '/profile_anonymous.png',
         displayName: authUser?.displayName ?? 'anonymous',
       };
     }
@@ -118,7 +118,7 @@ const DefaultPanel = function ({ userInfo }: Props) {
           <Box pt="1" pr="2">
             <Avatar
               size="xs"
-              src={isAnonymous ? 'https://bit.ly/broken-link' : authUser?.photoURL ?? 'https://bit.ly/broken-link'}
+              src={isAnonymous ? '/profile_anonymous.png' : authUser?.photoURL ?? '/profile_anonymous.png'}
             />
           </Box>
           <Textarea
