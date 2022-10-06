@@ -352,6 +352,10 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
   return result;
 }
 
+interface ReactionReduce {
+  [key: string]: number;
+}
+
 /** 다운로드 처리를 위해서 데이터를 array로 제공 */
 async function messageListForDownload({
   instantEventId,
@@ -375,9 +379,27 @@ async function messageListForDownload({
     const isOwnerMember = ownerMemberDoc.exists;
     const data = colDocs.docs.reduce((acc: InInstantEventDownloadItem[], mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
+      const reduceReaction = (docData.reaction ?? []).reduce(
+        (reAcc: ReactionReduce, reCur) => {
+          reAcc[reCur.type] += 1;
+          return reAcc;
+        },
+        {
+          LIKE: 0,
+          NEXT: 0,
+          HAHA: 0,
+          EYE: 0,
+          CHEERUP: 0,
+        },
+      );
       const defaultInfo = {
         id: mv.id,
-        vote: docData.vote,
+        vote: 0,
+        LIKE: reduceReaction.LIKE ?? 0,
+        NEXT: reduceReaction.NEXT ?? 0,
+        HAHA: reduceReaction.HAHA ?? 0,
+        EYE: reduceReaction.EYE ?? 0,
+        CHEERUP: reduceReaction.CHEERUP ?? 0,
         message: docData.deny !== undefined && docData.deny === true ? '비공개 처리된 메시지입니다.' : docData.message,
         createAt: DateTime.fromJSDate(docData.createAt.toDate()).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss'),
       };
