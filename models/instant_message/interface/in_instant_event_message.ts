@@ -1,10 +1,12 @@
 import { firestore } from 'firebase-admin';
+import { REACTION_TYPE } from '@/features/instant_message/message_item/reaction_type';
 
 export interface InInstantEventMessageBase {
   id: string;
   message: string;
   vote: number;
   voter?: string[];
+  reaction?: { type: REACTION_TYPE; voter: string }[];
   deny?: boolean;
   sortWeight: number;
   reply: InInstantEventMessageReply[];

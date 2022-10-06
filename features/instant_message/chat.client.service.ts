@@ -6,6 +6,7 @@ import {
 } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
 import { requester, Resp } from '@/utils/requester';
+import { REACTION_TYPE } from './message_item/reaction_type';
 
 async function create({
   title,
@@ -472,6 +473,36 @@ async function voteMessageInfo({
   }
 }
 
+async function reactionMessageInfo({
+  instantEventId,
+  messageId,
+  reaction,
+}: {
+  instantEventId: string;
+  messageId: string;
+  reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+}): Promise<Resp<InInstantEventMessage>> {
+  const url = '/api/instant-event.messages.reaction';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const resp = await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, reaction },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 const ChatClientService = {
   create,
   updateInfo,
@@ -484,6 +515,7 @@ const ChatClientService = {
   unpublish,
   lock,
   voteMessageInfo,
+  reactionMessageInfo,
   close,
   reopen,
   post,

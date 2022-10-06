@@ -12,6 +12,7 @@ import {
   InInstantEventMessageServer,
 } from '@/models/instant_message/interface/in_instant_event_message';
 import InstantEventUtil from './instant_event.util';
+import { REACTION_TYPE } from './message_item/reaction_type';
 
 const INSTANT_EVENT = 'instants';
 const INSTANT_EVENT_INFO = 'collection_info/instants';
@@ -270,6 +271,31 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
   });
 }
 
+function extractReaction({
+  reaction,
+  isOwnerMember,
+  isShowAll,
+  voted,
+  UID,
+}: {
+  reaction: InInstantEventMessage['reaction'];
+  isOwnerMember: boolean;
+  isShowAll: boolean;
+  voted: boolean;
+  UID: string;
+}) {
+  if (reaction === undefined) {
+    return [];
+  }
+  if (reaction !== undefined && (isOwnerMember || isShowAll)) {
+    return reaction.map((reactionMv) => ({ type: reactionMv.type, voter: '' }));
+  }
+  if (voted) {
+    return reaction.filter((fv) => fv.voter === UID);
+  }
+  return [];
+}
+
 async function messageList({ instantEventId, currentUserUid }: { instantEventId: string; currentUserUid: string }) {
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const ownerMemberRef = FirebaseAdmin.getInstance()
@@ -287,13 +313,13 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {
-        if (docData.voter === undefined) {
+        if (docData.reaction === undefined) {
           return false;
         }
         if (currentUserUid === undefined) {
           return false;
         }
-        return docData.voter.findIndex((fv) => fv === currentUserUid) >= 0;
+        return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
       const isOwnerMember = ownerMemberDoc.exists;
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
@@ -304,6 +330,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         id: mv.id,
         voter: [],
         voted,
+        reaction: extractReaction({ reaction: docData.reaction, isOwnerMember, isShowAll, voted, UID: currentUserUid }),
         message: docData.message,
         reply:
           docData.reply !== undefined && (isOwnerMember || isShowAll)
@@ -400,20 +427,33 @@ async function messageInfo({
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지를 조회 중' });
     }
-    return { docData: messageDoc.data() as InInstantEventMessageServer, isOwnerMember: ownerMemberDoc.exists };
+    const eventInfo = eventDoc.data() as InInstantEvent;
+    const eventState = InstantEventUtil.calEventState(eventInfo);
+    return {
+      docData: messageDoc.data() as InInstantEventMessageServer,
+      isOwnerMember: ownerMemberDoc.exists,
+      isShowAll: eventState === 'showAll',
+    };
   });
   const voted = (() => {
-    if (resp.docData.voter === undefined) {
+    if (resp.docData.reaction === undefined) {
       return false;
     }
     if (currentUserUid === undefined) {
       return false;
     }
-    return resp.docData.voter.findIndex((fv) => fv === currentUserUid) >= 0;
+    return resp.docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
   })();
   return {
     ...resp.docData,
     voted,
+    reaction: extractReaction({
+      reaction: resp.docData.reaction,
+      isOwnerMember: resp.isOwnerMember,
+      isShowAll: resp.isShowAll,
+      voted,
+      UID: currentUserUid,
+    }),
     message:
       resp.isOwnerMember === false && resp.docData.deny !== undefined && resp.docData.deny === true
         ? '비공개 처리된 메시지입니다.'
@@ -569,6 +609,63 @@ async function voteMessage({
   });
 }
 
+async function reactionMessage({
+  instantEventId,
+  messageId,
+  voter,
+  reaction,
+}: {
+  instantEventId: string;
+  messageId: string;
+  voter: string;
+  reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+}) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    const eventInfo = eventDoc.data() as InInstantEvent;
+    // 이미 폐쇄된 이벤트인가?
+    if (eventInfo.closed !== undefined && eventInfo.closed) {
+      throw new CustomServerError({ statusCode: 400, message: '종료된 이벤트' });
+    }
+    // 잠긴 이벤트인가?
+    if (eventInfo.locked !== undefined && eventInfo.locked) {
+      throw new CustomServerError({ statusCode: 400, message: '잠긴 이벤트' });
+    }
+    const messageData = messageDoc.data() as InInstantEventMessageServer;
+    const reactionList = (() => {
+      // 리액션 정보 없으면 무조건 추가
+      if (messageData.reaction === undefined) {
+        return [{ voter, type: reaction.isAdd === false ? 'LIKE' : reaction.type }];
+      }
+      const findVoterIndex = messageData.reaction.findIndex((fv) => fv.voter === voter);
+      // 리액션 변경
+      if (findVoterIndex > -1 && reaction.isAdd) {
+        const origin = [...messageData.reaction];
+        origin[findVoterIndex] = { type: reaction.type, voter };
+        return origin;
+      }
+      // 리액션 제거
+      if (findVoterIndex > -1 && reaction.isAdd === false) {
+        return [...messageData.reaction].filter((fv) => fv.voter !== voter);
+      }
+      // 리액션 추가
+      return [...messageData.reaction, { type: reaction.isAdd === false ? 'LIKE' : reaction.type, voter }];
+    })();
+    await transaction.update(messageRef, {
+      reaction: reactionList,
+    });
+  });
+}
+
 async function postReply({
   instantEventId,
   messageId,
@@ -643,6 +740,7 @@ const ChatModel = {
   closeSendMessage,
   denyMessage,
   voteMessage,
+  reactionMessage,
   postReply,
   denyReply,
 };
