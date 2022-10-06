@@ -42,4 +42,9 @@ export interface InInstantEventDownloadItem {
   message: string;
   vote: number;
   createAt: string;
+  LIKE: number;
+  NEXT: number;
+  HAHA: number;
+  EYE: number;
+  CHEERUP: number;
 }
