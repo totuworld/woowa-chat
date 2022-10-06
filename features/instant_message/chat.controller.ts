@@ -22,6 +22,8 @@ import JSCUpdateInstantEventMessageSortWeightReq from '@/controllers/instant_mes
 import { UpdateInstantEventReq } from '@/controllers/instant_message/interface/UpdateInstantEventReq';
 import JSCUpdateInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCUpdateInstantEventReq';
 import FirebaseAdmin from '@/models/firebase_admin';
+import { REACTION_TYPE } from './message_item/reaction_type';
+import JSCReactionInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCReactionInstantEventMessageReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -374,6 +376,28 @@ async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const senderUid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+      reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCReactionInstantEventMessageReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  await ChatModel.reactionMessage({ ...validateResp.data.body, voter: senderUid });
+  return res.status(200).end();
+}
+
 async function postReply(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{
     query: {
@@ -420,6 +444,7 @@ const ChatCtrl = {
   denyMessage,
   denyReply,
   voteMessage,
+  reactionMessage,
   postReply,
 };
 

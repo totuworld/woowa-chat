@@ -18,17 +18,62 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import convertDateToString from '@/utils/convert_date_to_string';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
-import HeartIcon from '@/components/heart_icon';
 import InstantMessageItemReplyInput from './reply_input.component';
 import InstantEventMessageReply from './reply.component';
 import ChatClientService from '../chat.client.service';
-import HeartEmptyIcon from '@/components/heart_empty_icon';
 import ReplyIcon from '@/components/reply_icon';
+
+import buildInStyles from './instant_message_temp.module.css';
+import ReactionEmojiSelector from './reaction_emoji_selector';
+import ReactionConst, { REACTION_TYPE } from './reaction_type';
+
+const ReactionEmoji = styled.div<{ image: string }>`
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  border-radius: 8px;
+  background-image: url(${({ image }) => image});
+  box-shadow: 0 0 0 2px #fff;
+  position: relative;
+  z-index: 5;
+`;
+
+const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
+
+const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessage['reaction'] }) {
+  const memoReduceReaction = useMemo(() => {
+    if (reaction === undefined) return [];
+    return reaction.reduce((acc: REACTION_TYPE[], cur) => {
+      const findIndex = acc.findIndex((fv) => fv === cur.type);
+      if (findIndex === -1) {
+        return [...acc, cur.type];
+      }
+      return acc;
+    }, []);
+  }, [reaction]);
+  return (
+    <div style={{ position: 'relative' }}>
+      <div className={buildInStyles.counter}>
+        {memoReduceReaction.map((emojiItem) => (
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          <ReactionEmoji image={ReactionConst.TYPE_TO_IMAGE[emojiItem]} />
+        ))}
+        {memoReduceReaction.length === 1 && (
+          <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
+        )}
+        {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
+          <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface Props {
   instantEventId: string;
@@ -45,12 +90,13 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSendingVote, setSendingVote] = useState(false);
   const [voted, setVoted] = useState(item.voted);
+  const [showEmotionSelector, setEmotionSelector] = useState(false);
 
   useEffect(() => {
     setVoted(item.voted);
   }, [item]);
 
-  function sendVote(isUpvote: boolean) {
+  function sendReaction(reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false }) {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
@@ -59,11 +105,11 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       return;
     }
     setSendingVote(true);
-    setVoted((prev) => !prev);
-    ChatClientService.voteMessageInfo({
+    // setVoted((prev) => !prev);
+    ChatClientService.reactionMessageInfo({
       instantEventId,
       messageId: item.id,
-      isUpvote,
+      reaction,
     })
       .then((resp) => {
         if (resp.status !== 200 && resp.error !== undefined) {
@@ -78,6 +124,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       })
       .finally(() => {
         setSendingVote(false);
+        setEmotionSelector(false);
       });
   }
 
@@ -230,6 +277,19 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
         <Divider />
+        {showEmotionSelector && (
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', left: '20%', bottom: '100%' }}>
+              <ReactionEmojiSelector
+                onClickReaction={(reactionType) => {
+                  sendReaction({ isAdd: true, type: reactionType });
+                }}
+                showCount={locked}
+                reaction={item.reaction}
+              />
+            </div>
+          </div>
+        )}
         {(item.deny === undefined || item.deny === false) && (
           <Grid
             templateColumns="repeat(2, 1fr)"
@@ -244,9 +304,13 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             <GridItem w="100%">
               <Button
                 isLoading={isSendingVote}
-                disabled={locked === true || isSendingVote}
+                disabled={isSendingVote}
                 fontSize="xs"
-                leftIcon={voted ? <HeartIcon /> : <HeartEmptyIcon />}
+                leftIcon={
+                  item.reaction === undefined || item.reaction.length === 0 ? (
+                    <ReactionEmoji image="/reaction_empty_thumb.png" />
+                  ) : undefined
+                }
                 width="full"
                 variant="ghost"
                 height="4"
@@ -254,10 +318,20 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  sendVote(!voted);
+                  if (locked) {
+                    setEmotionSelector((prev) => !prev);
+                    return;
+                  }
+                  // 이미 리액션을 등록한 상태라면 기존에 들어간 리액션을 제거.
+                  if (voted) {
+                    sendReaction({ isAdd: false });
+                    return;
+                  }
+                  setEmotionSelector((prev) => !prev);
                 }}
               >
-                {locked === true ? `${item.vote}` : '궁금해요'}
+                {(item.reaction === undefined || item.reaction.length === 0) && <Box>공감해요</Box>}
+                <ReactionCounter reaction={item.reaction} />
               </Button>
             </GridItem>
             <GridItem w="100%">
