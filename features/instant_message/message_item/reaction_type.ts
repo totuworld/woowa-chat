@@ -13,7 +13,7 @@ interface ReactionTypeToImage {
 }
 
 const TYPE_TO_IMAGE: ReactionTypeToImage = {
-  LIKE: '/reaction_heart.png',
+  LIKE: '/reaction_heart.gif',
   NEXT: '/reaction_confuse.gif',
   HAHA: '/reaction_haha.gif',
   EYE: '/reaction_donggong.gif',
