@@ -278,7 +278,12 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         </Box>
         <Divider />
         {showEmotionSelector && (
-          <div style={{ position: 'relative' }}>
+          <div
+            style={{ position: 'relative' }}
+            onMouseLeave={() => {
+              setEmotionSelector(false);
+            }}
+          >
             <div style={{ position: 'absolute', left: '20%', bottom: '100%' }}>
               <ReactionEmojiSelector
                 onClickReaction={(reactionType) => {
@@ -317,6 +322,9 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 color="black"
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
+                onMouseOver={() => {
+                  setEmotionSelector(true);
+                }}
                 onClick={() => {
                   if (locked) {
                     setEmotionSelector((prev) => !prev);

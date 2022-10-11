@@ -31,6 +31,7 @@ const ReactionLabel = styled.div`
   transform: translateX(-50%);
   transition: 200ms transform cubic-bezier(0.23, 1, 0.32, 1);
   opacity: 0;
+  z-index: 1;
 `;
 
 const ReactionIconWrap = styled.div`
