@@ -33,7 +33,7 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
       <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타 공감톡톡">
-        <EventList />
+        {authUser !== null && <EventList />}
         {authUser === null && <MainInfo />}
       </ServiceLayout>
     </>
