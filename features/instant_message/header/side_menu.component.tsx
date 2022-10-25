@@ -23,6 +23,7 @@ import { InInstantEventDownloadItem } from '@/models/instant_message/interface/i
 interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
   instantEventInfo: InInstantEvent;
+  isPreview: boolean;
   onCompleteLockOrClose: () => void;
 }
 
@@ -156,7 +157,12 @@ async function downloadEventInfo({ instantEventId }: { instantEventId: string })
   }
 }
 
-const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onCompleteLockOrClose }: Props) {
+const InstantEventHeaderSideMenu = function ({
+  eventState,
+  instantEventInfo,
+  isPreview,
+  onCompleteLockOrClose,
+}: Props) {
   const cancelRef = useRef<any>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
@@ -232,6 +238,15 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
               }}
             >
               전체 비공개로 전환
+            </MenuItem>
+          )}
+          {(eventState === 'showAll' || eventState === 'locked') && (
+            <MenuItem
+              onClick={() => {
+                window.open(`/list/${instantEventInfo.instantEventId}?isPreview=true`, '_blank');
+              }}
+            >
+              전체 공개 프리뷰 보기 👀
             </MenuItem>
           )}
           <MenuItem

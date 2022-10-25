@@ -5,11 +5,12 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 interface Props {
   instantEventInfo: InInstantEvent;
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
+  isPreview: boolean;
 }
 
 const DEFAULT_IMG = '/default_title.png';
 
-const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
+const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   return (
@@ -29,6 +30,11 @@ const InstantInfo = function ({ instantEventInfo, eventState }: Props) {
         {eventState === 'closed' && (
           <Center width="full" fontSize="xs">
             🚨 종료된 이벤트 입니다 🚨
+          </Center>
+        )}
+        {isPreview === true && (
+          <Center width="full" fontSize="xs">
+            🎨 프리뷰 모드 🎨
           </Center>
         )}
       </Box>

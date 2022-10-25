@@ -214,6 +214,7 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{
     query: {
       instantEventId: string;
+      isPreview: boolean;
     };
   }>(
     {

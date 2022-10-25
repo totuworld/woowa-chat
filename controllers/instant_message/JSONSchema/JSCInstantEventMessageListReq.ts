@@ -9,6 +9,10 @@ const JSCInstantEventMessageListReq: JSONSchema6 = {
         instantEventId: {
           type: 'string',
         },
+        isPreview: {
+          type: 'boolean',
+          default: false,
+        },
       },
       required: ['instantEventId'],
       type: 'object',

@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
+import { useRouter } from 'next/router';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
@@ -112,6 +113,7 @@ async function postMessage({ message, instantEventId }: { message: string; insta
 
 const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
+  const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
@@ -119,6 +121,12 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
   const [isSending, setSending] = useState(false);
+
+  const isPreview = (() => {
+    if (query.isPreview === undefined) return false;
+    if (typeof query.isPreview === 'string') return query.isPreview === 'true';
+    return query.isPreview[0] === 'true';
+  })();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -131,7 +139,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     async () => {
       const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
       const resp = await axios.get<InInstantEventMessage[]>(
-        `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}`,
+        `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}?isPreview=${isPreview}`,
         {
           headers: extractToken
             ? {
@@ -193,7 +201,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       title="우수타 공감톡톡"
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh" overflow="scroll; height:200px;">
-        {isOwner && (
+        {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">
               <a>
@@ -245,6 +253,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 <InstantEventHeaderSideMenu
                   instantEventInfo={instantEventInfo}
                   eventState={eventState}
+                  isPreview={isPreview}
                   onCompleteLockOrClose={() => {
                     ChatClientService.get({
                       instantEventId: instantEventInfo.instantEventId,
@@ -258,7 +267,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               </Flex>
             </Box>
           )}
-          <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} />
+          <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} isPreview={isPreview} />
         </Box>
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">

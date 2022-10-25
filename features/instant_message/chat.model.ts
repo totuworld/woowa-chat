@@ -296,7 +296,15 @@ function extractReaction({
   return [];
 }
 
-async function messageList({ instantEventId, currentUserUid }: { instantEventId: string; currentUserUid: string }) {
+async function messageList({
+  instantEventId,
+  currentUserUid,
+  isPreview = false,
+}: {
+  instantEventId: string;
+  currentUserUid: string;
+  isPreview?: boolean;
+}) {
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const ownerMemberRef = FirebaseAdmin.getInstance()
       .Firestore.collection(OWNER_MEMBER_COLLECTION)
@@ -309,7 +317,7 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
     const eventInfo = eventDoc.data() as InInstantEvent;
     const eventState = InstantEventUtil.calEventState(eventInfo);
     const isShowAll = eventState === 'showAll';
-    console.info({ isShowAll, eventState });
+    const isOwnerMember = ownerMemberDoc.exists;
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {
@@ -321,7 +329,6 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
         }
         return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
-      const isOwnerMember = ownerMemberDoc.exists;
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
         return null;
       }
@@ -347,6 +354,20 @@ async function messageList({ instantEventId, currentUserUid }: { instantEventId:
       return returnData;
     });
     const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
+    // T상태가 전체 공개 혹은 preview flag가 있을 때 sort 룰 적용.
+    // 전체 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
+    if (isShowAll || (isPreview && isOwnerMember)) {
+      const sortedData = filteredData.sort((a, b) => {
+        const aReaction = a.reaction === undefined || a.reaction.length === 0 ? 90_000 : a.reaction.length;
+        const bReaction = b.reaction === undefined || b.reaction.length === 0 ? 90_000 : b.reaction.length;
+        return aReaction - bReaction;
+      });
+      const mapData = sortedData.map((mv) => ({
+        ...mv,
+        sortWeight: 0,
+      }));
+      return mapData;
+    }
     return filteredData;
   });
   return result;
