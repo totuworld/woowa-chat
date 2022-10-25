@@ -158,7 +158,6 @@ const ChatList = function () {
               <InstantEventHeaderSideMenu
                 instantEventInfo={eventInfo}
                 eventState={eventState}
-                isPreview={false}
                 onCompleteLockOrClose={() => {
                   ChatClientService.get({
                     instantEventId: eventInfo.instantEventId,

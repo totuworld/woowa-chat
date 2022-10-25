@@ -253,7 +253,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 <InstantEventHeaderSideMenu
                   instantEventInfo={instantEventInfo}
                   eventState={eventState}
-                  isPreview={isPreview}
                   onCompleteLockOrClose={() => {
                     ChatClientService.get({
                       instantEventId: instantEventInfo.instantEventId,

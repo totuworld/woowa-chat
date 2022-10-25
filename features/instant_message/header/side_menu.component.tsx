@@ -23,7 +23,6 @@ import { InInstantEventDownloadItem } from '@/models/instant_message/interface/i
 interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
   instantEventInfo: InInstantEvent;
-  isPreview: boolean;
   onCompleteLockOrClose: () => void;
 }
 
@@ -157,12 +156,7 @@ async function downloadEventInfo({ instantEventId }: { instantEventId: string })
   }
 }
 
-const InstantEventHeaderSideMenu = function ({
-  eventState,
-  instantEventInfo,
-  isPreview,
-  onCompleteLockOrClose,
-}: Props) {
+const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onCompleteLockOrClose }: Props) {
   const cancelRef = useRef<any>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
