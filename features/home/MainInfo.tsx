@@ -7,7 +7,12 @@ const MainInfo = function () {
   return (
     <Box maxW="xl" mx="auto">
       <Box marginTop="20">
-        <GoogleLoginButton isStart onClickLogin={signInWithGoogle} />
+        <GoogleLoginButton
+          isStart
+          onClickLogin={() => {
+            signInWithGoogle(window.location.pathname);
+          }}
+        />
       </Box>
       <Center marginBottom="10" p="6">
         <Box>
