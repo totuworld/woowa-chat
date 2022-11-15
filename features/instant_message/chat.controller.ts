@@ -396,6 +396,8 @@ async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function postReply(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const senderUid = await verifyFirebaseIdToken(token);
   const validateResp = validateParamWithData<{
     query: {
       instantEventId: string;
@@ -418,7 +420,7 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await ChatModel.postReply({ ...validateResp.data.query, ...validateResp.data.body });
+  await ChatModel.postReply({ ...validateResp.data.query, ...validateResp.data.body, currentUserId: senderUid });
   return res.status(200).end();
 }
 
