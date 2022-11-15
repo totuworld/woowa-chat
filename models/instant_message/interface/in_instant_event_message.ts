@@ -33,6 +33,7 @@ export interface InInstantEventMessageReply {
     displayName: string;
     photoURL?: string;
   };
+  createByOwner?: boolean;
 }
 
 export interface InInstantEventDownloadItem {

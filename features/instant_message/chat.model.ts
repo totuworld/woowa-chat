@@ -341,12 +341,24 @@ async function messageList({
         message: docData.message,
         reply:
           docData.reply !== undefined && (isOwnerMember || isShowAll)
-            ? docData.reply.map((replyMv) => {
-                if (replyMv.deny !== undefined && replyMv.deny) {
-                  return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
-                }
-                return { ...replyMv };
-              })
+            ? docData.reply
+                .map((replyMv) => {
+                  if (replyMv.deny !== undefined && replyMv.deny) {
+                    return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
+                  }
+                  return { ...replyMv };
+                })
+                .sort((a, b) => {
+                  const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
+                  const isBOwnerCreate = b.createByOwner !== undefined && b.createByOwner === true;
+                  if (isAOwnerCreate === true && isBOwnerCreate === false) {
+                    return -1;
+                  }
+                  if (isAOwnerCreate === false && isBOwnerCreate === true) {
+                    return 1;
+                  }
+                  return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
+                })
             : [],
         createAt: docData.createAt.toDate().toISOString(),
         updateAt: docData.updateAt ? docData.updateAt.toDate().toISOString() : undefined,
@@ -727,11 +739,13 @@ async function postReply({
   instantEventId,
   messageId,
   reply,
+  currentUserId,
   author,
 }: {
   instantEventId: string;
   messageId: string;
   reply: string;
+  currentUserId: string;
   author?: {
     displayName: string;
     photoURL?: string;
@@ -739,9 +753,12 @@ async function postReply({
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
     const messageDoc = await transaction.get(messageRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const isOwnerMember = ownerMemberDoc.exists === true;
     if (eventDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트의 정보를 조회 중' });
     }
@@ -768,9 +785,14 @@ async function postReply({
         displayName: string;
         photoURL?: string;
       };
+      createByOwner?: boolean;
     } = { reply, createAt: moment().toISOString(), id: newId };
     if (author !== undefined) {
       addReply.author = author;
+    }
+    // 관리자멤버가 author을 지정해서 올린경우
+    if (isOwnerMember && author !== undefined) {
+      addReply.createByOwner = true;
     }
     await transaction.update(messageRef, {
       reply: info.reply !== undefined ? [addReply, ...info.reply] : [addReply],
