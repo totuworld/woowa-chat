@@ -300,9 +300,7 @@ async function denyMessage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  //TODO: 관리자가 아니면 deny 못하게 한다.
-  console.info(uid);
-  const result = await ChatModel.denyMessage({ ...validateResp.data.body });
+  const result = await ChatModel.denyMessage({ ...validateResp.data.body, currentUserId: uid });
   return res.status(200).json(result);
 }
 
@@ -349,9 +347,7 @@ async function denyReply(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  //TODO: 관리자가 아니면 deny 못하게 한다.
-  console.info(uid);
-  const result = await ChatModel.denyReply({ ...validateResp.data.body });
+  const result = await ChatModel.denyReply({ ...validateResp.data.body, currentUserId: uid });
   return res.status(200).json(result);
 }
 
