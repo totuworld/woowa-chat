@@ -296,6 +296,7 @@ async function postReply({
   };
 }) {
   const url = `/api/instant-event.messages.add.reply/${instantEventId}/${messageId}`;
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
   try {
     const sendData: {
       reply: string;
@@ -312,6 +313,11 @@ async function postReply({
         url,
         method: 'POST',
         data: sendData,
+        headers: token
+          ? {
+              authorization: token,
+            }
+          : {},
       },
     });
     return resp;
