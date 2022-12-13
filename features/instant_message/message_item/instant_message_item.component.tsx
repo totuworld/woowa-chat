@@ -193,12 +193,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       <Box>
         <Flex px="2" pt="2" alignItems="center">
           <Avatar size="xs" src="/profile_anonymous.png" />
-          <Text fontSize="xx-small" ml="1">
-            anonymous
-          </Text>
-          <Text whiteSpace="pre-line" fontSize="xx-small" color="gray.500" ml="1">
-            {convertDateToString(item.createAt)}
-          </Text>
           <Spacer />
           {isOwner && (
             <Menu>
