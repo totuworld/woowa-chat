@@ -352,10 +352,10 @@ async function messageList({
                   const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
                   const isBOwnerCreate = b.createByOwner !== undefined && b.createByOwner === true;
                   if (isAOwnerCreate === true && isBOwnerCreate === false) {
-                    return -1;
+                    return 1;
                   }
                   if (isAOwnerCreate === false && isBOwnerCreate === true) {
-                    return 1;
+                    return -1;
                   }
                   return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
                 })
@@ -515,12 +515,24 @@ async function messageInfo({
         : resp.docData.message,
     reply:
       resp.docData.reply !== undefined && resp.isOwnerMember
-        ? resp.docData.reply.map((mv) => {
-            if (mv.deny !== undefined && mv.deny) {
-              return { ...mv, reply: '비공개 처리된 메시지입니다.' };
-            }
-            return { ...mv };
-          })
+        ? resp.docData.reply
+            .map((mv) => {
+              if (mv.deny !== undefined && mv.deny) {
+                return { ...mv, reply: '비공개 처리된 메시지입니다.' };
+              }
+              return { ...mv };
+            })
+            .sort((a, b) => {
+              const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
+              const isBOwnerCreate = b.createByOwner !== undefined && b.createByOwner === true;
+              if (isAOwnerCreate === true && isBOwnerCreate === false) {
+                return 1;
+              }
+              if (isAOwnerCreate === false && isBOwnerCreate === true) {
+                return -1;
+              }
+              return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
+            })
         : [],
     id: messageId,
     voter: [],

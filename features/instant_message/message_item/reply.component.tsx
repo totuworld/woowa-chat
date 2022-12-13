@@ -3,6 +3,7 @@ import { InInstantEventMessageReply } from '@/models/instant_message/interface/i
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
+import ColorPalette from '@/styles/color_palette';
 
 interface Props {
   instantEventId: string;
@@ -50,7 +51,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
           mr="2"
         />
       </Box>
-      <Box borderRadius="md" p="2" width="full" bg="gray.100">
+      <Box borderRadius="md" p="2" width="full" bg={replyItem.author ? ColorPalette.mint : 'gray.100'}>
         {isOwner && (
           <div style={{ float: 'right' }}>
             <Menu>
@@ -81,8 +82,19 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
             </Menu>
           </div>
         )}
-        {replyItem.author && <Text fontSize="xs">{replyItem.author.displayName}</Text>}
-        <Text whiteSpace="pre-line" fontSize="xs">
+        {replyItem.author && (
+          <Text
+            fontSize="xs"
+            color={ColorPalette.mint}
+            bgColor="white"
+            display="inline-block"
+            paddingX="2"
+            borderRadius="2xl"
+          >
+            {replyItem.author.displayName}
+          </Text>
+        )}
+        <Text whiteSpace="pre-line" fontSize="xs" color={replyItem.author ? 'white' : 'black'}>
           {replyItem.reply}
         </Text>
       </Box>
