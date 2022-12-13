@@ -1,18 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Flex,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Spacer,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { Avatar, Box, IconButton, Menu, MenuButton, MenuItem, MenuList, Text, useToast } from '@chakra-ui/react';
 import { InInstantEventMessageReply } from '@/models/instant_message/interface/in_instant_event_message';
-import convertDateToString from '@/utils/convert_date_to_string';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
@@ -59,20 +46,13 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
       <Box pt="2">
         <Avatar
           size="xs"
-          src={
-            replyItem.author ? replyItem.author.photoURL ?? '/profile_anonymous.png' : '/profile_anonymous.png'
-          }
+          src={replyItem.author ? replyItem.author.photoURL ?? '/profile_anonymous.png' : '/profile_anonymous.png'}
           mr="2"
         />
       </Box>
       <Box borderRadius="md" p="2" width="full" bg="gray.100">
-        <Flex alignItems="center">
-          <Text fontSize="xs">{replyItem.author ? replyItem.author.displayName : 'anonymous'}</Text>
-          <Text whiteSpace="pre-line" fontSize="xs" color="gray">
-            {convertDateToString(replyItem.createAt)}
-          </Text>
-          <Spacer />
-          {isOwner && (
+        {isOwner && (
+          <div style={{ float: 'right' }}>
             <Menu>
               <MenuButton
                 width="24px"
@@ -99,8 +79,9 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
                 </MenuItem>
               </MenuList>
             </Menu>
-          )}
-        </Flex>
+          </div>
+        )}
+        {replyItem.author && <Text fontSize="xs">{replyItem.author.displayName}</Text>}
         <Text whiteSpace="pre-line" fontSize="xs">
           {replyItem.reply}
         </Text>
