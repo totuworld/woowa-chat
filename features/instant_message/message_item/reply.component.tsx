@@ -89,7 +89,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
             bgColor="white"
             display="inline-block"
             paddingX="2"
-            borderRadius="2xl"
+            borderRadius="base"
           >
             {replyItem.author.displayName}
           </Text>
