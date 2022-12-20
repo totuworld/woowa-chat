@@ -1,36 +1,8 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useQuery } from 'react-query';
 import { Box } from '@chakra-ui/react';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import EventListItem from './EventListItem';
-import { useAuth } from '@/contexts/auth_user.context';
 
-const EventList = function () {
-  const { authUser } = useAuth();
-  const [eventList, setEventList] = useState<InInstantEvent[]>([]);
-
-  const queryKey = ['chatEventList_for_main'];
-
-  useQuery(
-    queryKey,
-    // eslint-disable-next-line no-return-await
-    async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
-    {
-      enabled: authUser !== null,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      onSuccess: (data) => {
-        if (data.status === 200 && data.data) {
-          const filterData = data.data.filter(
-            (fv) => fv.closed === false && (fv.locked !== undefined ? fv.locked === false : true),
-          );
-          setEventList(filterData);
-        }
-      },
-    },
-  );
-
+const EventList = function ({ eventList }: { eventList: InInstantEvent[] }) {
   return (
     <Box maxW="xl" mx="auto" minH="95vh" overflow="scroll; height:200px;">
       <Box spacing="12px" mt="6">

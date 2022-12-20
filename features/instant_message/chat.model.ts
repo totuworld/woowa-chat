@@ -39,6 +39,50 @@ async function findAllEvent(): Promise<InInstantEvent[]> {
   return result;
 }
 
+async function findAllEventWithPage({ page = 1, size = 10 }: { page?: number; size?: number }) {
+  const collectionInfoRef = FirebaseAdmin.getInstance().Firestore.doc(INSTANT_EVENT_INFO);
+  const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const collectionInfoDoc = await transaction.get(collectionInfoRef);
+    // 전체 갯수를 조회
+    const { count = 0 } = collectionInfoDoc.data() as { count?: number };
+    const totalElements = count !== 0 ? count - 1 : 0;
+    const remains = totalElements % size;
+    const totalPages = (totalElements - remains) / size + (remains > 0 ? 1 : 0);
+    // 전체 갯수에서 page 숫자만큼 숫자를 미뤄서 검색한다.
+    const startAt = totalElements - (page - 1) * size;
+    if (startAt < 0) {
+      return {
+        totalElements,
+        totalPages: 0,
+        page,
+        size,
+        content: [],
+      };
+    }
+    const colRef = FirebaseAdmin.getInstance()
+      .Firestore.collection(INSTANT_EVENT)
+      .orderBy('createCount', 'desc')
+      .startAt(startAt)
+      .limit(size);
+    const eventListSnap = await transaction.get(colRef);
+
+    const data = eventListSnap.docs;
+
+    const allEvent: InInstantEvent[] = data.map((doc) => {
+      const innerData = doc.data() as InInstantEvent;
+      return { ...innerData, instantEventId: doc.id };
+    });
+    return {
+      totalElements,
+      totalPages,
+      page,
+      size,
+      content: allEvent,
+    };
+  });
+  return result;
+}
+
 /** 우수타 이벤트 생성 */
 async function create({
   title,
@@ -815,6 +859,7 @@ async function postReply({
 
 const ChatModel = {
   findAllEvent,
+  findAllEventWithPage,
   create,
   update,
   close,

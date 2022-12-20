@@ -78,6 +78,23 @@ async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(instantEventInfo);
 }
 
+async function findAllEventWithPage(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<{ query: { page: number; size: number } }>(
+    {
+      query: req.query,
+    },
+    JSCFindAllInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const instantEventInfo = await ChatModel.findAllEventWithPage({
+    page: validateResp.data.query.page,
+    size: validateResp.data.query.size,
+  });
+  return res.status(200).json(instantEventInfo);
+}
+
 async function get(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<GetInstantEventReq>(
     {
@@ -426,6 +443,7 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
 
 const ChatCtrl = {
   findAllEvent,
+  findAllEventWithPage,
   create,
   update,
   get,
