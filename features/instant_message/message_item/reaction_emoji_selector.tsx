@@ -45,7 +45,7 @@ const ReactionIconWrap = styled.div`
   }
 `;
 
-const ReactionIconImg = styled.div<{ url: string }>`
+const ReactionIconImg = styled.div<{ url: string; selected: boolean }>`
   padding-bottom: 100%;
   background-image: url(${({ url }) => url});
   background-size: 100% 100%;
@@ -55,6 +55,19 @@ const ReactionIconImg = styled.div<{ url: string }>`
   transition: 200ms transform cubic-bezier(0.23, 1, 0.32, 1);
   &:hover {
     transform: scale(1.3);
+  }
+  ::after {
+    ${({ selected }) => {
+      if (selected === false) return;
+      return css`
+        content: '';
+        position: absolute;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+      `;
+    }}
   }
 `;
 
@@ -80,14 +93,15 @@ interface Props {
 }
 
 const ReactionEmojiSelector = function ({ onClickReaction, showCount = false, reaction = [] }: Props) {
-  const memoReduceReaction = useMemo(() => {
+  const memoReduceReactionCount = useMemo(() => {
     if (reaction === undefined)
       return {
         LIKE: 0,
-        NEXT: 0,
+        CARE: 0,
         HAHA: 0,
-        EYE: 0,
-        CHEERUP: 0,
+        WOW: 0,
+        SAD: 0,
+        ANGRY: 0,
       };
     return reaction.reduce(
       (acc, cur) => {
@@ -96,31 +110,35 @@ const ReactionEmojiSelector = function ({ onClickReaction, showCount = false, re
       },
       {
         LIKE: 0,
-        NEXT: 0,
+        CARE: 0,
         HAHA: 0,
-        EYE: 0,
-        CHEERUP: 0,
+        WOW: 0,
+        SAD: 0,
+        ANGRY: 0,
       },
     );
   }, [reaction]);
   return (
     <Selector>
-      {ReactionConst.REACTION.map((iconData) => (
-        <ReactionIcon
-          iconSize={32}
-          key={`${iconData.index}`}
-          onClick={() => {
-            if (showCount) return;
-            onClickReaction(iconData.type);
-          }}
-        >
-          <ReactionIconWrap>
-            <ReactionLabel>{iconData.title}</ReactionLabel>
-            <ReactionIconImg url={iconData.image} />
-            {showCount && <ReactionCount>{memoReduceReaction[iconData.type]}</ReactionCount>}
-          </ReactionIconWrap>
-        </ReactionIcon>
-      ))}
+      {ReactionConst.REACTION.map((iconData) => {
+        const selected = reaction.findIndex((fv) => fv.type === iconData.type && fv.voter !== '') > -1;
+        return (
+          <ReactionIcon
+            iconSize={32}
+            key={`${iconData.index}`}
+            onClick={() => {
+              if (showCount) return;
+              onClickReaction(iconData.type);
+            }}
+          >
+            <ReactionIconWrap>
+              <ReactionLabel>{iconData.title}</ReactionLabel>
+              <ReactionIconImg url={iconData.image} selected={selected} />
+              {showCount && <ReactionCount>{memoReduceReactionCount[iconData.type]}</ReactionCount>}
+            </ReactionIconWrap>
+          </ReactionIcon>
+        );
+      })}
     </Selector>
   );
 };

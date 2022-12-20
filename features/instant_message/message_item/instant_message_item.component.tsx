@@ -324,11 +324,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                     setEmotionSelector((prev) => !prev);
                     return;
                   }
-                  // 이미 리액션을 등록한 상태라면 기존에 들어간 리액션을 제거.
-                  if (voted) {
-                    sendReaction({ isAdd: false });
-                    return;
-                  }
                   setEmotionSelector((prev) => !prev);
                 }}
               >

@@ -14,15 +14,12 @@ const JSCReactionInstantEventMessageReq: JSONSchema6 = {
         },
         reaction: {
           properties: {
-            isAdd: {
-              type: 'boolean',
-            },
             type: {
               type: 'string',
-              enum: ['LIKE', 'NEXT', 'HAHA', 'EYE', 'CHEERUP'],
+              enum: ['LIKE', 'CARE', 'HAHA', 'WOW', 'SAD', 'ANGRY'],
             },
           },
-          required: ['isAdd'],
+          required: ['type'],
         },
       },
       required: ['instantEventId', 'messageId', 'reaction'],

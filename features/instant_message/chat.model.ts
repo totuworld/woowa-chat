@@ -367,12 +367,18 @@ async function messageList({
     });
     const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
     // T상태가 전체 공개 혹은 preview flag가 있을 때 sort 룰 적용.
-    // 전체 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
+    // 공감해요 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
     if (isShowAll || (isPreview && isOwnerMember)) {
       const sortedData = filteredData.sort((a, b) => {
-        const aReaction = a.reaction === undefined || a.reaction.length === 0 ? 90_000 : a.reaction.length;
-        const bReaction = b.reaction === undefined || b.reaction.length === 0 ? 90_000 : b.reaction.length;
-        return aReaction - bReaction;
+        const aReaction =
+          a.reaction === undefined || a.reaction.length === 0
+            ? 0
+            : a.reaction.filter((fv) => fv.type === 'LIKE').length;
+        const bReaction =
+          b.reaction === undefined || b.reaction.length === 0
+            ? 0
+            : b.reaction.filter((fv) => fv.type === 'LIKE').length;
+        return bReaction - aReaction;
       });
       const mapData = sortedData.map((mv) => ({
         ...mv,
@@ -699,7 +705,7 @@ async function reactionMessage({
   instantEventId: string;
   messageId: string;
   voter: string;
-  reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+  reaction: { type: REACTION_TYPE };
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -725,21 +731,15 @@ async function reactionMessage({
     const reactionList = (() => {
       // 리액션 정보 없으면 무조건 추가
       if (messageData.reaction === undefined) {
-        return [{ voter, type: reaction.isAdd === false ? 'LIKE' : reaction.type }];
+        return [{ voter, type: reaction.type }];
       }
-      const findVoterIndex = messageData.reaction.findIndex((fv) => fv.voter === voter);
-      // 리액션 변경
-      if (findVoterIndex > -1 && reaction.isAdd) {
-        const origin = [...messageData.reaction];
-        origin[findVoterIndex] = { type: reaction.type, voter };
-        return origin;
-      }
-      // 리액션 제거
-      if (findVoterIndex > -1 && reaction.isAdd === false) {
-        return [...messageData.reaction].filter((fv) => fv.voter !== voter);
+      const findVoterIndex = messageData.reaction.findIndex((fv) => fv.voter === voter && fv.type === reaction.type);
+      // 특정 리액션 제거
+      if (findVoterIndex > -1) {
+        return [...messageData.reaction].filter((_, idx) => idx !== findVoterIndex);
       }
       // 리액션 추가
-      return [...messageData.reaction, { type: reaction.isAdd === false ? 'LIKE' : reaction.type, voter }];
+      return [...messageData.reaction, { type: reaction.type, voter }];
     })();
     await transaction.update(messageRef, {
       reaction: reactionList,

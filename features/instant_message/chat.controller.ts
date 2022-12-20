@@ -380,7 +380,7 @@ async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
     body: {
       instantEventId: string;
       messageId: string;
-      reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+      reaction: { type: REACTION_TYPE };
     };
   }>(
     {
