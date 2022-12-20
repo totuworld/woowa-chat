@@ -18,9 +18,8 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import convertDateToString from '@/utils/convert_date_to_string';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
@@ -89,12 +88,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSendingVote, setSendingVote] = useState(false);
-  const [voted, setVoted] = useState(item.voted);
   const [showEmotionSelector, setEmotionSelector] = useState(false);
-
-  useEffect(() => {
-    setVoted(item.voted);
-  }, [item]);
 
   function sendReaction(reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false }) {
     if (authUser === null) {
@@ -105,7 +99,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       return;
     }
     setSendingVote(true);
-    // setVoted((prev) => !prev);
     ChatClientService.reactionMessageInfo({
       instantEventId,
       messageId: item.id,
