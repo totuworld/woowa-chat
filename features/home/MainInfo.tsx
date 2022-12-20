@@ -1,19 +1,8 @@
 import { Box, Center, Flex, Heading, Text } from '@chakra-ui/react';
-import GoogleLoginButton from '@/components/google_login_button';
-import { useAuth } from '@/contexts/auth_user.context';
 
 const MainInfo = function () {
-  const { signInWithGoogle } = useAuth();
   return (
     <Box maxW="xl" mx="auto">
-      <Box marginTop="20">
-        <GoogleLoginButton
-          isStart
-          onClickLogin={() => {
-            signInWithGoogle(window.location.pathname);
-          }}
-        />
-      </Box>
       <Center marginBottom="10" p="6">
         <Box>
           <img src="/intro.png" alt="hero" />
