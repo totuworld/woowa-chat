@@ -1,4 +1,4 @@
-export type REACTION_TYPE = 'LIKE' | 'NEXT' | 'HAHA' | 'EYE' | 'CHEERUP';
+export type REACTION_TYPE = 'LIKE' | 'CARE' | 'HAHA' | 'WOW' | 'SAD' | 'ANGRY';
 
 interface ReactionItem {
   image: string;
@@ -14,18 +14,20 @@ interface ReactionTypeToImage {
 
 const TYPE_TO_IMAGE: ReactionTypeToImage = {
   LIKE: '/reaction_heart.gif',
-  NEXT: '/reaction_confuse.gif',
-  HAHA: '/reaction_haha.gif',
-  EYE: '/reaction_donggong.gif',
-  CHEERUP: '/reaction_todak.gif',
+  CARE: '/reaction_care.png',
+  HAHA: '/reaction_haha.png',
+  WOW: '/reaction_wow.png',
+  SAD: '/reaction_sad.png',
+  ANGRY: '/reaction_angry.png',
 };
 
 const TYPE_TO_TITLE: ReactionTypeToImage = {
   LIKE: '공감해요',
-  NEXT: '다르게 생각해요',
-  HAHA: 'ㅋㅋㅋㅋ',
-  EYE: '동공지진',
-  CHEERUP: '토닥토닥',
+  CARE: '힘내요',
+  HAHA: '웃겨요',
+  WOW: '멋져요',
+  SAD: '슬퍼요',
+  ANGRY: '화나요',
 };
 
 const REACTION: ReactionItem[] = [
@@ -37,11 +39,11 @@ const REACTION: ReactionItem[] = [
     type: 'LIKE',
   },
   {
-    image: TYPE_TO_IMAGE.NEXT,
+    image: TYPE_TO_IMAGE.CARE,
     bg: '#fff',
     index: 5,
-    title: TYPE_TO_TITLE.NEXT,
-    type: 'NEXT',
+    title: TYPE_TO_TITLE.CARE,
+    type: 'CARE',
   },
   {
     image: TYPE_TO_IMAGE.HAHA,
@@ -51,18 +53,25 @@ const REACTION: ReactionItem[] = [
     type: 'HAHA',
   },
   {
-    image: TYPE_TO_IMAGE.EYE,
+    image: TYPE_TO_IMAGE.WOW,
     bg: '#fff',
     index: 5,
-    title: TYPE_TO_TITLE.EYE,
-    type: 'EYE',
+    title: TYPE_TO_TITLE.WOW,
+    type: 'WOW',
   },
   {
-    image: TYPE_TO_IMAGE.CHEERUP,
+    image: TYPE_TO_IMAGE.SAD,
     bg: '#fff',
     index: 5,
-    title: TYPE_TO_TITLE.CHEERUP,
-    type: 'CHEERUP',
+    title: TYPE_TO_TITLE.SAD,
+    type: 'SAD',
+  },
+  {
+    image: TYPE_TO_IMAGE.ANGRY,
+    bg: '#fff',
+    index: 5,
+    title: TYPE_TO_TITLE.ANGRY,
+    type: 'ANGRY',
   },
 ];
 
