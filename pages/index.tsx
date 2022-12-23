@@ -43,34 +43,6 @@ const IndexPage: NextPage = function () {
     },
   );
 
-  // useQuery(
-  //   ['chatEventList_withpage_for_main', isAdminMode, page],
-  //   async () =>
-  //     // eslint-disable-next-line no-return-await
-  // await axios.get<{
-  //   totalElements: number;
-  //   totalPages: number;
-  //   page: number;
-  //   size: number;
-  //   content: InInstantEvent[];
-  // }>(`/api/instant-event.list/page?page=${page}`),
-  //   {
-  //     enabled: authUser !== null && isAdminMode === true,
-  //     keepPreviousData: true,
-  //     refetchOnWindowFocus: false,
-  //     onSuccess: (data) => {
-  //       setEventListWithPage((prev) => {
-  //         const older = [...prev];
-  //         const newData = data.data.content.filter((fv) => {
-  //           const findIdx = older.findIndex((ofv) => fv.instantEventId === ofv.instantEventId);
-  //           return findIdx === -1;
-  //         });
-  //         return [...older, ...newData];
-  //       });
-  //     },
-  //   },
-  // );
-
   const {
     hasNextPage,
     fetchNextPage,
