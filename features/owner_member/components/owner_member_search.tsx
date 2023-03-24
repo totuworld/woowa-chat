@@ -34,7 +34,7 @@ export const OwnerMemberSearch = function ({ completeAdd }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<any>();
   async function search() {
-    const searchText = emailText.trim().replace('@woowahan.com', '');
+    const searchText = emailText.trim().replace(/@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3}$/i, '');
     if (searchText.length === 0) {
       toast({
         title: 'email 입력을 확인해주세요',
