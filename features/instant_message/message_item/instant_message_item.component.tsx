@@ -43,37 +43,6 @@ const ReactionEmoji = styled.div<{ image: string }>`
   z-index: 5;
 `;
 
-const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
-
-const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessage['reaction'] }) {
-  const memoReduceReaction = useMemo(() => {
-    if (reaction === undefined) return [];
-    return reaction.reduce((acc: REACTION_TYPE[], cur) => {
-      const findIndex = acc.findIndex((fv) => fv === cur.type);
-      if (findIndex === -1) {
-        return [...acc, cur.type];
-      }
-      return acc;
-    }, []);
-  }, [reaction]);
-  return (
-    <div style={{ position: 'relative' }}>
-      <div className={buildInStyles.counter}>
-        {memoReduceReaction.map((emojiItem) => (
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          <ReactionEmoji image={ReactionConst.TYPE_TO_IMAGE[emojiItem]} />
-        ))}
-        {memoReduceReaction.length === 1 && (
-          <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
-        )}
-        {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
-          <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 interface Props {
   instantEventId: string;
   locked: boolean;
@@ -295,37 +264,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           >
             <GridItem w="100%">
               <Button
-                isLoading={isSendingVote}
-                disabled={isSendingVote}
-                fontSize="xs"
-                leftIcon={
-                  item.reaction === undefined || item.reaction.length === 0 ? (
-                    <ReactionEmoji image="/reaction_empty_thumb.png" />
-                  ) : undefined
-                }
-                width="full"
-                variant="ghost"
-                height="4"
-                color="black"
-                _hover={{ bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                onMouseOver={() => {
-                  setEmotionSelector(true);
-                }}
-                onClick={() => {
-                  if (locked) {
-                    setEmotionSelector((prev) => !prev);
-                    return;
-                  }
-                  setEmotionSelector((prev) => !prev);
-                }}
-              >
-                {(item.reaction === undefined || item.reaction.length === 0) && <Box>공감해요</Box>}
-                <ReactionCounter reaction={item.reaction} />
-              </Button>
-            </GridItem>
-            <GridItem w="100%">
-              <Button
                 disabled={locked === true}
                 fontSize="xs"
                 leftIcon={<ReplyIcon />}
@@ -344,7 +282,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             </GridItem>
           </Grid>
         )}
-        {locked === false && toggleReplyInput && (
+        {locked === false && isOwner && toggleReplyInput && (
           <Box pt="2">
             <Divider />
             {(item.deny === undefined || item.deny === false) && (
