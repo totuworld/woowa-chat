@@ -13,6 +13,9 @@ import {
   Text,
   useDisclosure,
   useToast,
+  Badge,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { useQuery } from 'react-query';
@@ -21,17 +24,26 @@ import { ServiceLayout } from '@/components/containers/service_layout';
 import { useAuth } from '@/contexts/auth_user.context';
 import { InOwnerMember } from '@/features/owner_member/model/in_owner_member';
 import { OwnerMemberSearch } from '@/features/owner_member/components/owner_member_search';
+import { PRIVILEGE_MAP, PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
+import OwnerMemberRoleControl from '@/features/owner_member/components/owner_member_role_control';
 
 const IndexPage: NextPage = function () {
-  const { isOwner, token } = useAuth();
+  const { isOwner, token, hasPrivilege } = useAuth();
   const toast = useToast();
-  const [memberListCallAction, updateMemberListCallAction] = useState(false);
   const [ownerList, setOwnerList] = useState<InOwnerMember[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<InOwnerMember | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpenRole, setIsOpenRole] = useState(false);
+  function onCloseRole() {
+    setIsOpenRole(false);
+  }
+  function turnOnRole(targetMember: InOwnerMember) {
+    setDeleteTarget(targetMember);
+    setIsOpenRole(true);
+  }
   const cancelRef = useRef<any>();
-  const queryKey = ['owner-members', isOwner, memberListCallAction];
-  useQuery(
+  const queryKey = ['owner-members', isOwner];
+  const { refetch } = useQuery(
     queryKey,
     // eslint-disable-next-line no-return-await
     async () =>
@@ -51,6 +63,38 @@ const IndexPage: NextPage = function () {
       },
     },
   );
+
+  function generateRightButtons(info: InOwnerMember) {
+    const buttons = [];
+    if (hasPrivilege(PRIVILEGE_NO.addOrRemoveAdmin)) {
+      buttons.push(
+        <Button
+          key={`button-${info.uid}-${PRIVILEGE_NO.addOrRemoveAdmin}`}
+          colorScheme="red"
+          onClick={() => {
+            setDeleteTarget(info);
+            onOpen();
+          }}
+        >
+          제거
+        </Button>,
+      );
+    }
+    if (hasPrivilege(PRIVILEGE_NO.addOrRemoveRole)) {
+      buttons.push(
+        <Button
+          key={`button-${info.uid}-${PRIVILEGE_NO.addOrRemoveRole}`}
+          onClick={() => {
+            turnOnRole(info);
+          }}
+        >
+          권한
+        </Button>,
+      );
+    }
+    return buttons;
+  }
+
   return (
     <ServiceLayout height="100vh" backgroundColor="gray.50">
       <Box maxW="xl" mx="auto">
@@ -58,31 +102,36 @@ const IndexPage: NextPage = function () {
           <Box px="2">
             <OwnerMemberSearch
               completeAdd={() => {
-                updateMemberListCallAction((prev) => !prev);
+                refetch();
               }}
             />
           </Box>
-          {ownerList.map((item) => (
-            <Flex key={`flex-${item.uid}`} bg="white" p="2" alignItems="center" borderRadius="md" mb="2">
-              <Box>
-                <Text fontSize="lg">{item.displayName}</Text>
-                <Text fontSize="sm">{item.email}</Text>
-                <Text fontSize="sm">{item.desc}</Text>
-              </Box>
-              <Spacer />
-              <Box>
-                <Button
-                  colorScheme="red"
-                  onClick={() => {
-                    setDeleteTarget(item);
-                    onOpen();
-                  }}
-                >
-                  제거
-                </Button>
-              </Box>
-            </Flex>
-          ))}
+          {ownerList.map((item) => {
+            const rightButtons = generateRightButtons(item);
+            return (
+              <Flex key={`flex-${item.uid}`} bg="white" p="2" alignItems="center" borderRadius="md" mb="2">
+                <Box>
+                  <Text fontSize="lg">{item.displayName}</Text>
+                  <Text fontSize="sm">{item.email}</Text>
+                  <Text fontSize="sm">{item.desc}</Text>
+                  <Wrap>
+                    {item.privilege !== undefined &&
+                      item.privilege.map((privilege) => {
+                        const privilegeInfo = PRIVILEGE_MAP.get(privilege.toString());
+                        const printPrivilege = privilegeInfo?.name ?? '';
+                        return (
+                          <WrapItem key={`${item.uid}-${privilege}`}>
+                            <Badge>{printPrivilege}</Badge>
+                          </WrapItem>
+                        );
+                      })}
+                  </Wrap>
+                </Box>
+                <Spacer />
+                <Box flexShrink={0}>{rightButtons}</Box>
+              </Flex>
+            );
+          })}
         </Box>
       </Box>
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
@@ -119,7 +168,7 @@ const IndexPage: NextPage = function () {
                       console.error(err);
                     })
                     .finally(() => {
-                      updateMemberListCallAction((prev) => !prev);
+                      refetch();
                       setDeleteTarget(null);
                       onClose();
                     });
@@ -132,6 +181,16 @@ const IndexPage: NextPage = function () {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+      <OwnerMemberRoleControl
+        isOpen={isOpenRole}
+        onClose={() => onCloseRole()}
+        targetUser={deleteTarget}
+        handleOnCompleteConfirm={() => {
+          refetch();
+          setDeleteTarget(null);
+          onCloseRole();
+        }}
+      />
     </ServiceLayout>
   );
 };

@@ -20,7 +20,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
@@ -29,6 +29,7 @@ import InstantMessageItemReplyInput from './reply_input.component';
 import InstantEventMessageReply from './reply.component';
 import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
+import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 
 interface Props {
   instantEventId: string;
@@ -38,7 +39,7 @@ interface Props {
 }
 
 const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
-  const { authUser, isOwner } = useAuth();
+  const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
@@ -140,6 +141,48 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     });
   }
 
+  const ownerMenuList = useMemo(() => {
+    const returnMenuList = [];
+    if (hasPrivilege(PRIVILEGE_NO.denyMessage)) {
+      returnMenuList.push(
+        <MenuItem
+          bgColor="red.300"
+          textColor="white"
+          _hover={{ bg: 'red.500' }}
+          _focus={{ bg: 'red.500' }}
+          onClick={() => {
+            denyMessage();
+          }}
+        >
+          {isDeny ? 'Accept' : 'Deny'}
+        </MenuItem>,
+      );
+    }
+    if (hasPrivilege(PRIVILEGE_NO.chageSortWeitghtForMessage)) {
+      returnMenuList.push(
+        <MenuItem
+          onClick={() => {
+            onOpen();
+          }}
+        >
+          정렬 가중치 설정
+        </MenuItem>,
+      );
+    }
+    if (hasPrivilege(PRIVILEGE_NO.updateMessage)) {
+      returnMenuList.push(
+        <MenuItem
+          onClick={() => {
+            turnOnEditer();
+          }}
+        >
+          본문 수정하기
+        </MenuItem>,
+      );
+    }
+    return returnMenuList;
+  }, [authUser, isOwner]);
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -159,33 +202,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 size="xs"
                 _focus={{ boxShadow: 'none' }}
               />
-              <MenuList>
-                <MenuItem
-                  bgColor="red.300"
-                  textColor="white"
-                  _hover={{ bg: 'red.500' }}
-                  _focus={{ bg: 'red.500' }}
-                  onClick={() => {
-                    denyMessage();
-                  }}
-                >
-                  {isDeny ? 'Accept' : 'Deny'}
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    onOpen();
-                  }}
-                >
-                  정렬 가중치 변경
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    turnOnEditer();
-                  }}
-                >
-                  본문 수정하기
-                </MenuItem>
-              </MenuList>
+              <MenuList>{ownerMenuList}</MenuList>
             </Menu>
           )}
         </Flex>
@@ -274,10 +291,9 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            {isEditMode === false && (
+            {isEditMode === false && locked === false && (
               <GridItem w="100%">
                 <Button
-                  disabled={locked === true}
                   fontSize="xs"
                   leftIcon={<ReplyIcon />}
                   width="full"

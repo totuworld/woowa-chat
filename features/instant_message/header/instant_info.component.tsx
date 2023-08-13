@@ -22,11 +22,11 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props
           {printDesc}
         </Text>
         {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
-        {eventState === 'locked' && (
+        {/* {eventState === 'locked' && (
           <Center width="full" fontSize="xs">
             🚨 더 이상 댓글을 달 수 없는 상태입니다 🚨
           </Center>
-        )}
+        )} */}
         {eventState === 'closed' && (
           <Center width="full" fontSize="xs">
             🚨 종료된 이벤트 입니다 🚨
