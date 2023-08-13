@@ -20,8 +20,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
-import { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { useState } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
