@@ -15,11 +15,14 @@ import {
   MenuList,
   Spacer,
   Text,
+  Textarea,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import ResizeTextarea from 'react-textarea-autosize';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
@@ -27,21 +30,6 @@ import InstantMessageItemReplyInput from './reply_input.component';
 import InstantEventMessageReply from './reply.component';
 import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
-
-import buildInStyles from './instant_message_temp.module.css';
-import ReactionEmojiSelector from './reaction_emoji_selector';
-import ReactionConst, { REACTION_TYPE } from './reaction_type';
-
-const ReactionEmoji = styled.div<{ image: string }>`
-  width: 16px;
-  height: 16px;
-  background-size: 100% 100%;
-  border-radius: 8px;
-  background-image: url(${({ image }) => image});
-  box-shadow: 0 0 0 2px #fff;
-  position: relative;
-  z-index: 5;
-`;
 
 interface Props {
   instantEventId: string;
@@ -56,38 +44,15 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isSendingVote, setSendingVote] = useState(false);
-  const [showEmotionSelector, setEmotionSelector] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [message, updateMessage] = useState(item.message);
 
-  function sendReaction(reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false }) {
-    if (authUser === null) {
-      toast({
-        title: '로그인이 필요합니다',
-        position: 'top-right',
-      });
-      return;
-    }
-    setSendingVote(true);
-    ChatClientService.reactionMessageInfo({
-      instantEventId,
-      messageId: item.id,
-      reaction,
-    })
-      .then((resp) => {
-        if (resp.status !== 200 && resp.error !== undefined) {
-          toast({
-            title: (resp.error.data as { message: string }).message,
-            status: 'warning',
-            position: 'top-right',
-          });
-          return;
-        }
-        onSendComplete();
-      })
-      .finally(() => {
-        setSendingVote(false);
-        setEmotionSelector(false);
-      });
+  function turnOnEditer() {
+    setIsEditMode(true);
+    updateMessage(item.message);
+  }
+  function turnOffEditer() {
+    setIsEditMode(false);
   }
 
   const isDeny = item.deny !== undefined && item.deny;
@@ -150,6 +115,32 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     });
   }
 
+  function updateMessageToServer(msg: string) {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    ChatClientService.updateMessage({
+      instantEventId,
+      messageId: item.id,
+      message: msg,
+    }).then((resp) => {
+      if (resp.status !== 200 && resp.error !== undefined) {
+        toast({
+          title: (resp.error.data as { message: string }).message,
+          status: 'warning',
+          position: 'top-right',
+        });
+        return;
+      }
+      onSendComplete();
+      turnOffEditer();
+    });
+  }
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -183,11 +174,17 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    console.info('click');
                     onOpen();
                   }}
                 >
                   정렬 가중치 변경
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    turnOnEditer();
+                  }}
+                >
+                  본문 수정하기
                 </MenuItem>
               </MenuList>
             </Menu>
@@ -227,30 +224,46 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       )}
       <Box p="2">
         <Box p="2">
-          <Text whiteSpace="pre-line" fontSize="sm">
-            {item.message}
-          </Text>
+          {isEditMode && (
+            <Textarea
+              bg="gray.100"
+              border="none"
+              boxShadow="none !important"
+              placeholder="무엇이 궁금한가요?"
+              borderRadius="md"
+              resize="none"
+              minH="unset"
+              minRows={1}
+              maxRows={7}
+              overflow="hidden"
+              fontSize="sm"
+              mr="2"
+              as={ResizeTextarea}
+              value={message}
+              onChange={(e) => {
+                // 최대 7줄만 스크린샷에 표현되니 10줄 넘게 입력하면 제한걸어야한다.
+                if (e.target.value) {
+                  const lineCount = (e.target.value.match(/[^\n]*\n[^\n]*/gi)?.length ?? 1) + 1;
+                  if (lineCount > 10) {
+                    toast({
+                      title: '최대 10줄까지만 입력가능합니다',
+                      position: 'top-right',
+                    });
+                    return;
+                  }
+                }
+                updateMessage(e.target.value);
+              }}
+            />
+          )}
+          {isEditMode === false && (
+            <Text whiteSpace="pre-line" fontSize="sm">
+              {item.message}
+            </Text>
+          )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
         <Divider />
-        {showEmotionSelector && (
-          <div
-            style={{ position: 'relative' }}
-            onMouseLeave={() => {
-              setEmotionSelector(false);
-            }}
-          >
-            <div style={{ position: 'absolute', left: '20%', bottom: '100%' }}>
-              <ReactionEmojiSelector
-                onClickReaction={(reactionType) => {
-                  sendReaction({ isAdd: true, type: reactionType });
-                }}
-                showCount={locked}
-                reaction={item.reaction}
-              />
-            </div>
-          </div>
-        )}
         {(item.deny === undefined || item.deny === false) && (
           <Grid
             templateColumns="repeat(2, 1fr)"
@@ -262,24 +275,67 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            <GridItem w="100%">
-              <Button
-                disabled={locked === true}
-                fontSize="xs"
-                leftIcon={<ReplyIcon />}
-                width="full"
-                variant="ghost"
-                height="4"
-                color="black"
-                _hover={{ bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                onClick={() => {
-                  setToggleReplyInput((prev) => !prev);
-                }}
-              >
-                댓글달기
-              </Button>
-            </GridItem>
+            {isEditMode === false && (
+              <GridItem w="100%">
+                <Button
+                  disabled={locked === true}
+                  fontSize="xs"
+                  leftIcon={<ReplyIcon />}
+                  width="full"
+                  variant="ghost"
+                  height="4"
+                  color="black"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    setToggleReplyInput((prev) => !prev);
+                  }}
+                >
+                  댓글달기
+                </Button>
+              </GridItem>
+            )}
+            {isEditMode === true && (
+              <GridItem w="100%">
+                <Button
+                  disabled={locked === true}
+                  fontSize="xs"
+                  leftIcon={<CloseIcon />}
+                  width="full"
+                  variant="ghost"
+                  height="4"
+                  color="black"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    turnOffEditer();
+                  }}
+                >
+                  닫기
+                </Button>
+              </GridItem>
+            )}
+            {isEditMode === true && (
+              <GridItem w="100%">
+                <Button
+                  disabled={locked === true}
+                  fontSize="xs"
+                  leftIcon={<CheckIcon />}
+                  width="full"
+                  variant="ghost"
+                  height="4"
+                  colorScheme="messenger"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    console.log(message);
+                    updateMessageToServer(message);
+                  }}
+                >
+                  수정 반영하기
+                </Button>
+              </GridItem>
+            )}
           </Grid>
         )}
         {locked === false && isOwner && toggleReplyInput && (

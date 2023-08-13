@@ -417,6 +417,36 @@ async function updateMessageSortWeight({
   }
 }
 
+async function updateMessage({
+  instantEventId,
+  messageId,
+  message,
+}: {
+  instantEventId: string;
+  messageId: string;
+  message: string;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.update_body';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, message },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function denyReply({
   instantEventId,
   messageId,
@@ -528,6 +558,7 @@ const ChatClientService = {
   updateMessageSortWeight,
   postReply,
   getMessageInfo,
+  updateMessage,
 };
 
 export default ChatClientService;

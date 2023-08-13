@@ -24,6 +24,7 @@ import JSCUpdateInstantEventReq from '@/controllers/instant_message/JSONSchema/J
 import FirebaseAdmin from '@/models/firebase_admin';
 import { REACTION_TYPE } from './message_item/reaction_type';
 import JSCReactionInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCReactionInstantEventMessageReq';
+import JSCUpdateBodyReq from '@/controllers/instant_message/JSONSchema/JSCUpdateBodyReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -390,6 +391,29 @@ async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function updateBody(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const senderUid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+      message: string;
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCUpdateBodyReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  // 운영자가 아니면 실패 처리하는 로직은 모델 안에 있음
+  await ChatModel.updateMessage({ ...validateResp.data.body, currentUserId: senderUid });
+  return res.status(200).end();
+}
+
 async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
   const senderUid = await verifyFirebaseIdToken(token);
@@ -463,6 +487,7 @@ const ChatCtrl = {
   voteMessage,
   reactionMessage,
   postReply,
+  updateBody,
 };
 
 export default ChatCtrl;

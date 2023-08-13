@@ -791,6 +791,38 @@ async function reactionMessage({
   });
 }
 
+/** 본문을 수정한다 */
+async function updateMessage({
+  instantEventId,
+  messageId,
+  currentUserId,
+  message,
+}: {
+  instantEventId: string;
+  messageId: string;
+  currentUserId: string;
+  message: string;
+}): Promise<void> {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    if (ownerMemberDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 401, message: '권한없음' });
+    }
+    await transaction.update(messageRef, { message });
+  });
+}
+
 async function postReply({
   instantEventId,
   messageId,
@@ -879,6 +911,7 @@ const ChatModel = {
   reactionMessage,
   postReply,
   denyReply,
+  updateMessage,
 };
 
 export default ChatModel;
