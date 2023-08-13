@@ -8,6 +8,7 @@ import BadReqError from '@/controllers/custom_error/bad_req_error';
 import JSCAddOwnerMemberReq from './JSONSchema/add.om.jsc';
 import JSCUpdateOwnerMemberReq from './JSONSchema/update.om.jsc';
 import JSCRemoveOwnerMemberReq from './JSONSchema/remove.om.jsc';
+import JSCUpdateOwnerMemberPrivilegeReq from './JSONSchema/update.privilege.om.jsc';
 
 async function list(req: NextApiRequest, res: NextApiResponse) {
   const token = req.headers.authorization;
@@ -92,10 +93,34 @@ async function isOwnerMember(req: NextApiRequest, res: NextApiResponse) {
     throw new CustomServerError({ statusCode: 401, message: '인증이 필요합니다' });
   }
   const senderUid: string = await verifyFirebaseIdToken(token);
-  await OwnerMemberModel.find({ uid: senderUid });
-  res.status(200).json({ result: true });
+  const info = await OwnerMemberModel.find({ uid: senderUid });
+  res.status(200).json({ result: true, info });
 }
 
-const OwnerMemberCtrl = { add, list, update, remove, isOwnerMember };
+async function updatePrivilege(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.headers.authorization;
+  if (token === undefined) {
+    throw new CustomServerError({ statusCode: 401, message: '인증이 필요합니다' });
+  }
+  const senderUid: string = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      uid: string;
+      privilege: number[];
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCUpdateOwnerMemberPrivilegeReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  await OwnerMemberModel.updatePrivilege({ ...validateResp.data.body, reqUid: senderUid });
+  res.status(200).end();
+}
+
+const OwnerMemberCtrl = { add, list, update, remove, isOwnerMember, updatePrivilege };
 
 export default OwnerMemberCtrl;

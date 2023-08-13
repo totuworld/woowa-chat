@@ -10,6 +10,7 @@ interface InAuthUserContext {
   signOut: () => void;
   isOwner: boolean;
   token: string | null;
+  hasPrivilege: (privilege: number) => boolean;
 }
 
 const AuthUserContext = createContext<InAuthUserContext>({
@@ -21,6 +22,7 @@ const AuthUserContext = createContext<InAuthUserContext>({
   signOut: () => {},
   isOwner: false,
   token: null,
+  hasPrivilege: () => false,
 });
 
 export const AuthUserProvider = function ({ children }: { children: React.ReactNode }) {

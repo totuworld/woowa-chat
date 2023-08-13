@@ -3,14 +3,53 @@ import getConfig from 'next/config';
 import Head from 'next/head';
 import { useQuery, useInfiniteQuery } from 'react-query';
 import axios from 'axios';
+import 'antd/dist/antd.css';
 import { useState } from 'react';
-import { Box, FormControl, FormLabel, Switch, useToast } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Switch, useDisclosure, useToast } from '@chakra-ui/react';
 import { ServiceLayout } from '@/components/containers/service_layout';
 import { useAuth } from '@/contexts/auth_user.context';
 import MainInfo from '@/features/home/MainInfo';
 import EventList from '@/features/home/EventList';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import EventListWithPage from '@/features/home/EventListWithPage';
+import CreateEvent from '@/features/instant_message/create_event.component';
+import ChatClientService from '@/features/instant_message/chat.client.service';
+
+async function createEvent({
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+}: {
+  title: string;
+  desc?: string;
+  startDate?: string;
+  endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
+}) {
+  if (title.length <= 0) {
+    return {
+      result: false,
+      message: '제목을 입력해주세요',
+    };
+  }
+  try {
+    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg });
+    return {
+      result: true,
+      instantEventId: resp.payload?.instantEventId,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '생성 실패',
+    };
+  }
+}
 
 /** 최초 진입 페이지
  *
@@ -19,13 +58,15 @@ import EventListWithPage from '@/features/home/EventListWithPage';
  */
 const IndexPage: NextPage = function () {
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { publicRuntimeConfig } = getConfig();
   const mainUrl = `https://${publicRuntimeConfig.mainDomain}`;
   const { authUser, isOwner } = useAuth();
   const [isAdminMode, setAdminMode] = useState(false);
+  const [listLoadTrigger, setListLoadTrigger] = useState(false);
 
   const { data: eventList } = useQuery(
-    ['chatEventList_for_main', isAdminMode],
+    ['chatEventList_for_main', isAdminMode, listLoadTrigger],
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
     {
@@ -42,6 +83,30 @@ const IndexPage: NextPage = function () {
       },
     },
   );
+
+  async function create(data: {
+    title: string;
+    desc?: string;
+    startDate?: string;
+    endDate?: string;
+    titleImg?: string;
+    bgImg?: string;
+  }) {
+    const resp = await createEvent(data);
+    if (resp.result === false) {
+      toast({
+        title: '이벤트 생성 실패',
+        position: 'top-right',
+      });
+    }
+    if (resp.result === true) {
+      toast({
+        title: '이벤트 생성 성공',
+        position: 'top-right',
+      });
+    }
+    setListLoadTrigger((prev) => !prev);
+  }
 
   // useQuery(
   //   ['chatEventList_withpage_for_main', isAdminMode, page],
@@ -113,6 +178,29 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
       <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타 공감톡톡">
+        <Box maxW="xl" mx="auto" pl="2">
+          {isOwner && !isOpen && (
+            <Button
+              mt="6"
+              width="full"
+              onClick={() => {
+                onOpen();
+              }}
+            >
+              우수타 이벤트 생성
+            </Button>
+          )}
+          <CreateEvent
+            isShow={isOpen}
+            mode="CREATE"
+            onClose={onClose}
+            onClickSave={(saveData) => {
+              create(saveData).then(() => {
+                onClose();
+              });
+            }}
+          />
+        </Box>
         {isOwner && (
           <Box maxW="xl" mx="auto" pl="2">
             <FormControl display="flex" alignItems="center" mt="1">

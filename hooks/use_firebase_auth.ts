@@ -1,5 +1,5 @@
 import { User, GoogleAuthProvider, TwitterAuthProvider, signInWithPopup } from 'firebase/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { InAuthUser } from './interface/in_auth_user';
 import { memberAddForClient } from '@/models/member/member.client.service';
@@ -17,8 +17,9 @@ function formatAuthUser(user: User): InAuthUser {
 export default function useFirebaseAuth() {
   const [authUser, setAuthUser] = useState<InAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOwner, setOwner] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [privileges, setPrivileges] = useState<number[]>([]);
+  const isOwner = useMemo(() => privileges.length > 0, [privileges]);
 
   const authStateChanged = async (authState: User | null) => {
     console.log({ authStateChanged: authState });
@@ -163,13 +164,18 @@ export default function useFirebaseAuth() {
     async function checkExist() {
       const resp = await fetch('/api/owner-member.exist', { headers: { authorization: token! } });
       if (resp.status !== 200) {
-        return setOwner(false);
+        return setPrivileges([]);
       }
       const respBody = await resp.json();
-      return setOwner(resp.status === 200 && respBody.result === true);
+      return setPrivileges(resp.status === 200 && respBody.result === true ? respBody.info.privilege : []);
     }
     checkExist();
   }, [authUser, token]);
+
+  const hasPrivilege = (privilege: number) => {
+    const index = privileges.findIndex((p) => p === privilege);
+    return index !== -1;
+  };
 
   return {
     authUser,
@@ -179,5 +185,6 @@ export default function useFirebaseAuth() {
     signOut,
     isOwner,
     token,
+    hasPrivilege,
   };
 }

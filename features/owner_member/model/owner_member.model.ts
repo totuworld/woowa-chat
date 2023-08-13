@@ -1,6 +1,7 @@
 import CustomServerError from '@/controllers/custom_error/custom_server_error';
 import FirebaseAdmin from '@/models/firebase_admin';
 import { InOwnerMember } from './in_owner_member';
+import { PRIVILEGE_NO } from './in_owner_privilege';
 
 const OWNER_MEMBER_COLLECTION = 'owner_members';
 
@@ -39,6 +40,14 @@ async function add({ newbie, reqUid }: { newbie: InOwnerMember; reqUid: string }
     if (requestOwnerDoc.exists === false) {
       throw new CustomServerError({ statusCode: 403, message: '멤버를 추가할 권한이 없습니다.' });
     }
+    const ownerInfo = requestOwnerDoc.data() as InOwnerMember;
+    if (ownerInfo.privilege === undefined || ownerInfo.privilege === null || ownerInfo.privilege.length === 0) {
+      throw new CustomServerError({ statusCode: 403, message: '멤버를 추가할 권한이 없습니다.' });
+    }
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.addOrRemoveAdmin);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '멤버를 추가할 권한이 없습니다.' });
+    }
     const newbieDoc = await transaction.get(newbieRef);
     if (newbieDoc.exists) {
       throw new CustomServerError({ statusCode: 400, message: '이미 추가된 멤버입니다.' });
@@ -54,6 +63,14 @@ async function remove({ uid, reqUid }: { uid: string; reqUid: string }) {
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const requestOwnerDoc = await transaction.get(requestOwnerRef);
     if (requestOwnerDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 403, message: '멤버를 제거할 권한이 없습니다.' });
+    }
+    const ownerInfo = requestOwnerDoc.data() as InOwnerMember;
+    if (ownerInfo.privilege === undefined || ownerInfo.privilege === null || ownerInfo.privilege.length === 0) {
+      throw new CustomServerError({ statusCode: 403, message: '멤버를 제거할 권한이 없습니다.' });
+    }
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.addOrRemoveAdmin);
+    if (hasPrivilege === false) {
       throw new CustomServerError({ statusCode: 403, message: '멤버를 제거할 권한이 없습니다.' });
     }
     const targetDoc = await transaction.get(targetRef);
@@ -98,12 +115,38 @@ async function update({
   });
 }
 
+async function updatePrivilege({ uid, privilege, reqUid }: { uid: string; privilege: number[]; reqUid: string }) {
+  const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION);
+  const targetRef = eventColRef.doc(uid);
+  const requestOwnerRef = eventColRef.doc(reqUid);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const requestOwnerDoc = await transaction.get(requestOwnerRef);
+    if (requestOwnerDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 403, message: '멤버를 수정할 권한이 없습니다.' });
+    }
+    const ownerInfo = requestOwnerDoc.data() as InOwnerMember;
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.addOrRemoveRole);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '권한을 수정할 권한이 없습니다.' });
+    }
+    const targetDoc = await transaction.get(targetRef);
+    if (targetDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 404, message: '목록에 존재하지 않는 멤버입니다.' });
+    }
+    const updateData: { privilege: number[] } = {
+      privilege,
+    };
+    await transaction.update(targetRef, updateData);
+  });
+}
+
 const OwnerMemberModel = {
   list,
   add,
   remove,
   update,
   find,
+  updatePrivilege,
 };
 
 export default OwnerMemberModel;

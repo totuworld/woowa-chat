@@ -3,4 +3,6 @@ export interface InOwnerMember {
   displayName: string;
   email: string;
   desc?: string;
+  /** 권한 목록 */
+  privilege: number[];
 }

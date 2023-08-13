@@ -20,6 +20,7 @@ import { memberFindByScreenNameForClient } from '@/models/member/member.client.s
 import { InMemberInfo } from '@/models/member/in_member_info';
 import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
+import CustomServerError from '@/controllers/custom_error/custom_server_error';
 
 interface Props {
   completeAdd: () => void;
@@ -68,7 +69,10 @@ export const OwnerMemberSearch = function ({ completeAdd }: Props) {
         },
         body: JSON.stringify({ ...searchedMemberInfo, desc: descText }),
       });
-      console.info(addMemberResp.status);
+      if (addMemberResp.status >= 400) {
+        const body = await addMemberResp.json();
+        throw new CustomServerError({ statusCode: addMemberResp.status, message: body.message });
+      }
       setEmailText('');
       setDescText('');
       setSearchMemberInfo(null);
@@ -76,6 +80,11 @@ export const OwnerMemberSearch = function ({ completeAdd }: Props) {
       onClose();
     } catch (e) {
       console.error(e);
+      toast({
+        title: e instanceof CustomServerError ? e.message : '멤버 추가 중 문제가 발생했습니다.',
+        position: 'top-right',
+        status: 'warning',
+      });
     }
   }
   return (
