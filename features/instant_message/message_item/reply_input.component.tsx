@@ -125,9 +125,20 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
             }
             ChatClientService.postReply(postData)
               .then((resp) => {
+                if (resp === undefined) {
+                  toast({
+                    title: '댓글 등록에 실패했습니다.',
+                    status: 'warning',
+                    position: 'top-right',
+                  });
+                  return;
+                }
                 if (resp.status !== 200) {
                   toast({
-                    title: (resp.error.data as { message: string }).message,
+                    title:
+                      resp.error === undefined
+                        ? '댓글 등록에 실패했습니다.'
+                        : (resp.error.data as { message: string }).message,
                     status: 'warning',
                     position: 'top-right',
                   });
