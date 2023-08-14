@@ -124,7 +124,15 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
               }
             }
             ChatClientService.postReply(postData)
-              .then(() => {
+              .then((resp) => {
+                if (resp.status !== 200) {
+                  toast({
+                    title: (resp.error.data as { message: string }).message,
+                    status: 'warning',
+                    position: 'top-right',
+                  });
+                  return;
+                }
                 updateMessage('');
                 toast({
                   title: '댓글 등록이 완료 되었습니다',

@@ -56,6 +56,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   }
 
   const isDeny = item.deny !== undefined && item.deny;
+  const havePostReplyPrivilege = hasPrivilege(PRIVILEGE_NO.postReply);
 
   function denyMessage() {
     if (authUser === null) {
@@ -279,7 +280,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
-        <Divider />
+        {havePostReplyPrivilege === true && <Divider />}
         {(item.deny === undefined || item.deny === false) && (
           <Grid
             templateColumns="repeat(2, 1fr)"
@@ -291,7 +292,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            {isEditMode === false && locked === false && (
+            {isEditMode === false && havePostReplyPrivilege === true && (
               <GridItem w="100%">
                 <Button
                   fontSize="xs"
@@ -353,14 +354,14 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             )}
           </Grid>
         )}
-        {locked === false && isOwner && toggleReplyInput && (
+        {isOwner && toggleReplyInput && havePostReplyPrivilege === true && (
           <Box pt="2">
             <Divider />
             {(item.deny === undefined || item.deny === false) && (
               <InstantMessageItemReplyInput
                 instantEventId={instantEventId}
                 messageId={item.id}
-                locked={locked}
+                locked={false}
                 onSendComplete={onSendComplete}
               />
             )}
