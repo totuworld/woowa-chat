@@ -13,6 +13,8 @@ import {
 } from '@/models/instant_message/interface/in_instant_event_message';
 import InstantEventUtil from './instant_event.util';
 import { REACTION_TYPE } from './message_item/reaction_type';
+import { InOwnerMember } from '../owner_member/model/in_owner_member';
+import { PRIVILEGE_NO } from '../owner_member/model/in_owner_privilege';
 
 const INSTANT_EVENT = 'instants';
 const INSTANT_EVENT_INFO = 'collection_info/instants';
@@ -677,6 +679,11 @@ async function denyReply({
     if (ownerMemberDoc.exists === false) {
       throw new CustomServerError({ statusCode: 401, message: '권한없음' });
     }
+    const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.denyReply);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '댓글을 deny할 권한이 없습니다.' });
+    }
     const info = messageDoc.data() as InInstantEventMessageServer;
     const prevReplyList = info.reply === undefined ? [] : [...info.reply];
     if (prevReplyList.length < 0) {
@@ -856,12 +863,13 @@ async function postReply({
     if (eventInfo.closed !== undefined && eventInfo.closed) {
       throw new CustomServerError({ statusCode: 400, message: '종료된 이벤트 ☠️' });
     }
-    // 잠긴 이벤트인가?
-    if (eventInfo.locked !== undefined && eventInfo.locked) {
-      throw new CustomServerError({ statusCode: 400, message: '잠긴 이벤트 ☠️' });
-    }
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지를 조회 중' });
+    }
+    const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.postReply);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '댓글을 등록할 권한이 없습니다.' });
     }
     const info = messageDoc.data() as InInstantEventMessageServer;
     const newId = nanoid(4);

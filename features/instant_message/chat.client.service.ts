@@ -320,6 +320,16 @@ async function postReply({
           : {},
       },
     });
+    if (resp.status >= 400) {
+      return {
+        status: resp.status,
+        error: {
+          data: {
+            message: '댓글 등록에 실패했습니다.',
+          },
+        },
+      };
+    }
     return resp;
   } catch (err) {
     return {
