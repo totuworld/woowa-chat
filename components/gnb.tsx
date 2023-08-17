@@ -80,7 +80,7 @@ const GNB: React.FC = function () {
         <Spacer flex={{ base: 1 }} />
         <Flex flex={{ base: 2 }} justify={{ base: 'center', md: 'start' }}>
           <Link href="/">
-            <img style={{ height: '40px', cursor: 'pointer' }} src="/talktalk_logo.png" alt="logo" />
+            <img style={{ height: '40px', cursor: 'pointer' }} src="/logo.png" alt="logo" />
           </Link>
         </Flex>
 

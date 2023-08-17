@@ -255,7 +255,7 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, '메시지'); //시트 이름설정
 
-                XLSX.writeFile(wb, `우수타공감톡톡_${instantEventInfo.title}_data.xlsx`);
+                XLSX.writeFile(wb, `우수타_${instantEventInfo.title}_data.xlsx`);
               } catch (e) {
                 console.error(e);
               }
