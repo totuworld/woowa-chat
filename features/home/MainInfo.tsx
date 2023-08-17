@@ -7,7 +7,7 @@ const MainInfo = function () {
         <Box>
           <img src="/intro.png" alt="hero" />
           <Flex justify="center" alignItems="center" flexDir="column">
-            <Heading>우수타 공감톡톡</Heading>
+            <Heading>우수타</Heading>
             <Text fontSize="sm">우아한형제들만의 수다 문화, 우아한 수다 타임</Text>
           </Flex>
         </Box>
