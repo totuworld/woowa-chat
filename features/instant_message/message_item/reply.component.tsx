@@ -5,6 +5,30 @@ import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
 import ColorPalette from '@/styles/color_palette';
 
+function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+  const parts = text.split(regex);
+
+  const jsxParts = parts.reduce((acc: (string | JSX.Element)[], part, index) => {
+    if (index % 3 === 1) {
+      // 홀수 인덱스는 링크 텍스트
+      const linkUrl = parts[index + 1];
+      acc.push(
+        <a href={linkUrl} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold' }}>
+          {part}
+        </a>,
+      );
+    }
+    if (index % 3 === 0) {
+      acc.push(part);
+    }
+    return acc;
+  }, []);
+
+  return jsxParts;
+}
+
 interface Props {
   instantEventId: string;
   messageId: string;
@@ -95,7 +119,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
           </Text>
         )}
         <Text whiteSpace="pre-line" fontSize="xs" color={replyItem.author ? 'white' : 'black'}>
-          {replyItem.reply}
+          {convertMarkdownLinksToJsx(replyItem.reply)}
         </Text>
       </Box>
     </Box>
