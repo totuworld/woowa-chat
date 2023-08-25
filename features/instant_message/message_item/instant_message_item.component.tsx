@@ -370,19 +370,23 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         <Box>
           {item.reply &&
             item.reply.length > 0 &&
-            item.reply.map((replyItem, idx) => (
-              <Box pt="2" key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
-                {idx === 0 && <Divider />}
-                <InstantEventMessageReply
-                  // eslint-disable-next-line react/no-array-index-key
-                  replyItem={replyItem}
-                  instantEventId={instantEventId}
-                  messageId={item.id}
-                  isOwner={isOwner}
-                  onSendComplete={onSendComplete}
-                />
-              </Box>
-            ))}
+            item.reply
+              .filter((replyItem) =>
+                isOwner === true ? true : replyItem.deny === undefined || replyItem.deny === false,
+              )
+              .map((replyItem, idx) => (
+                <Box pt="2" key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
+                  {idx === 0 && <Divider />}
+                  <InstantEventMessageReply
+                    // eslint-disable-next-line react/no-array-index-key
+                    replyItem={replyItem}
+                    instantEventId={instantEventId}
+                    messageId={item.id}
+                    isOwner={isOwner}
+                    onSendComplete={onSendComplete}
+                  />
+                </Box>
+              ))}
         </Box>
       </Box>
     </Box>
