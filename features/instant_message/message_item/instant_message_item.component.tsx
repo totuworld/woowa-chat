@@ -251,24 +251,13 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
               resize="none"
               minH="unset"
               minRows={1}
-              maxRows={7}
+              maxRows={14}
               overflow="hidden"
               fontSize="sm"
               mr="2"
               as={ResizeTextarea}
               value={message}
               onChange={(e) => {
-                // 최대 7줄만 스크린샷에 표현되니 10줄 넘게 입력하면 제한걸어야한다.
-                if (e.target.value) {
-                  const lineCount = (e.target.value.match(/[^\n]*\n[^\n]*/gi)?.length ?? 1) + 1;
-                  if (lineCount > 10) {
-                    toast({
-                      title: '최대 10줄까지만 입력가능합니다',
-                      position: 'top-right',
-                    });
-                    return;
-                  }
-                }
                 updateMessage(e.target.value);
               }}
             />
