@@ -76,7 +76,7 @@ const IndexPage: NextPage = function () {
       select: (data) => {
         if (data.status === 200 && data.data) {
           const filterData = data.data.filter(
-            (fv) => fv.closed === false && (fv.locked !== undefined ? fv.locked === false : true),
+            (fv) => fv.closed === false && (fv.showAllReply !== undefined ? fv.showAllReply === true : true),
           );
           return filterData;
         }
