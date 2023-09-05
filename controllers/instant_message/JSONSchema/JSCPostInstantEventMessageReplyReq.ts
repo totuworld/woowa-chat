@@ -21,7 +21,7 @@ const JSCPostInstantEventMessageReplyReq: JSONSchema6 = {
       properties: {
         reply: {
           type: 'string',
-          maxLength: 1000,
+          maxLength: 5000,
         },
         author: {
           additionalProperties: false,

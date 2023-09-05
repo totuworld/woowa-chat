@@ -333,9 +333,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                     });
                     return;
                   }
-                  if (message.trim().length > 1000) {
+                  if (message.trim().length > 5000) {
                     toast({
-                      title: '1000자 내로 입력해주세요',
+                      title: '5000자 내로 입력해주세요',
                       position: 'top-right',
                       status: 'warning',
                     });
