@@ -45,7 +45,7 @@ const MessageList = function ({
           </Box>
         )}
       {(eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) && (
-        <VStack spacing="12px" mt="6">
+        <VStack spacing="12px" mt="6" pb="10">
           {messageList.map((item) => (
             <InstantMessageItem
               key={`instant-message-${eventInfo.instantEventId}-${item.id}`}

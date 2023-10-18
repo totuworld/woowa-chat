@@ -199,20 +199,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgSize="100% auto"
       bgRepeat="no-repeat"
       title="우수타"
+      pt={16}
     >
-      <Box
-        maxW="xl"
-        mx="auto"
-        pt="6"
-        bgColor="gray.200"
-        minH="95vh"
-        overflow="scroll; height:200px;"
-        __css={{
-          '::-webkit-scrollbar': {
-            display: 'none',
-          },
-        }}
-      >
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh">
         {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">
