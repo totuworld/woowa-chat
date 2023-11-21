@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Badge,
   Box,
   Button,
@@ -57,7 +56,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
 
   const isDeny = item.deny !== undefined && item.deny;
   const havePostReplyPrivilege = hasPrivilege(PRIVILEGE_NO.postReply);
-  const hasSetPinPrivilege = hasPrivilege(PRIVILEGE_NO.setPin);
 
   function denyMessage() {
     if (authUser === null) {
