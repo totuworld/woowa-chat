@@ -34,16 +34,31 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   return jsxParts;
 }
 
+function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
+  return text
+    .map((part) => {
+      if (typeof part === 'string') {
+        const parts = part.split(/\*\*(.*?)\*\*/gm);
+        if (parts.length === 3) {
+          return [parts[0], <b>{parts[1]}</b>, parts[2]];
+        }
+      }
+      return part;
+    })
+    .flat();
+}
+
 const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
+  const bodyText = convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(printDesc));
   return (
     <>
       <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{instantEventInfo?.title}</Text>
         <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>
-          {convertMarkdownLinksToJsx(printDesc)}
+          {bodyText}
         </Text>
         {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
         {/* {eventState === 'locked' && (
