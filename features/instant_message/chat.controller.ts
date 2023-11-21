@@ -25,6 +25,7 @@ import FirebaseAdmin from '@/models/firebase_admin';
 import { REACTION_TYPE } from './message_item/reaction_type';
 import JSCReactionInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCReactionInstantEventMessageReq';
 import JSCUpdateBodyReq from '@/controllers/instant_message/JSONSchema/JSCUpdateBodyReq';
+import JSCPinInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCPinInstantEventMessageReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -369,6 +370,27 @@ async function denyReply(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(result);
 }
 
+async function pinMessage(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const uid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCPinInstantEventMessageReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const result = await ChatModel.pinMessage({ ...validateResp.data.body, currentUserId: uid });
+  return res.status(200).json(result);
+}
+
 async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
   const senderUid = await verifyFirebaseIdToken(token);
@@ -488,6 +510,7 @@ const ChatCtrl = {
   reactionMessage,
   postReply,
   updateBody,
+  pinMessage,
 };
 
 export default ChatCtrl;

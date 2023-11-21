@@ -57,6 +57,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
 
   const isDeny = item.deny !== undefined && item.deny;
   const havePostReplyPrivilege = hasPrivilege(PRIVILEGE_NO.postReply);
+  const hasSetPinPrivilege = hasPrivilege(PRIVILEGE_NO.setPin);
 
   function denyMessage() {
     if (authUser === null) {
@@ -181,6 +182,30 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         </MenuItem>,
       );
     }
+    if (hasPrivilege(PRIVILEGE_NO.setPin)) {
+      returnMenuList.push(
+        <MenuItem
+          onClick={() => {
+            ChatClientService.pinMessage({
+              instantEventId,
+              messageId: item.id,
+            }).then((resp) => {
+              if (resp.status !== 200 && resp.error !== undefined) {
+                toast({
+                  title: (resp.error.data as { message: string }).message,
+                  status: 'warning',
+                  position: 'top-right',
+                });
+                return;
+              }
+              onSendComplete();
+            });
+          }}
+        >
+          메시지 📌
+        </MenuItem>,
+      );
+    }
     return returnMenuList;
   }, [authUser, isOwner]);
 
@@ -188,7 +213,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
         <Flex px="2" pt="2" alignItems="center">
-          <Avatar size="xs" src="/profile_anonymous.png" />
+          {item.pin !== undefined && item.pin === true && <Text fontSize="2xl">📌</Text>}
           <Spacer />
           {isOwner && (
             <Menu>
