@@ -35,7 +35,6 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
 }
 
 function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
-  console.log(text);
   return text
     .map((part) => {
       if (typeof part === 'string') {

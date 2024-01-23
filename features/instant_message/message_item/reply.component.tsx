@@ -29,6 +29,20 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   return jsxParts;
 }
 
+function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
+  return text
+    .map((part) => {
+      if (typeof part === 'string') {
+        const parts = part.split(/\*\*(.*?)\*\*/gm);
+        if (parts.length === 3) {
+          return [parts[0], <b>{parts[1]}</b>, parts[2]];
+        }
+      }
+      return part;
+    })
+    .flat();
+}
+
 interface Props {
   instantEventId: string;
   messageId: string;
@@ -119,7 +133,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
           </Text>
         )}
         <Text whiteSpace="pre-line" fontSize="xs" color={replyItem.author ? 'white' : 'black'}>
-          {convertMarkdownLinksToJsx(replyItem.reply)}
+          {convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply))}
         </Text>
       </Box>
     </Box>

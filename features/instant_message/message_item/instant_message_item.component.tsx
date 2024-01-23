@@ -37,6 +37,20 @@ interface Props {
   onSendComplete: () => void;
 }
 
+function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
+  return text
+    .map((part) => {
+      if (typeof part === 'string') {
+        const parts = part.split(/\*\*(.*?)\*\*/gm);
+        if (parts.length === 3) {
+          return [parts[0], <b>{parts[1]}</b>, parts[2]];
+        }
+      }
+      return part;
+    })
+    .flat();
+}
+
 const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
@@ -287,7 +301,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           )}
           {isEditMode === false && (
             <Text whiteSpace="pre-line" fontSize="sm">
-              {item.message}
+              {convertMarkdownBoldToJsx([item.message])}
             </Text>
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
