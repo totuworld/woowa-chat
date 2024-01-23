@@ -38,17 +38,42 @@ interface Props {
 }
 
 function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
-  return text
+  // text를 순회하면서 \n 문자를 모두 <br />로 변경
+  const newLineArray = text
     .map((part) => {
       if (typeof part === 'string') {
-        const parts = part.split(/\*\*(.*?)\*\*/gm);
-        if (parts.length === 3) {
-          return [parts[0], <b>{parts[1]}</b>, parts[2]];
-        }
+        const parts = part.split(/\n/g);
+        const jsxParts = parts.reduce((acc: (string | JSX.Element)[], subPart, index) => {
+          if (index !== 0) {
+            acc.push(<br />);
+          }
+          acc.push(subPart);
+          return acc;
+        }, []);
+        return jsxParts;
       }
       return part;
     })
     .flat();
+  const boldArray = newLineArray
+    .map((part) => {
+      if (typeof part === 'string') {
+        const parts = part.split(/\*\*(.*?)\*\*/g);
+        const jsxParts = parts.reduce((acc: (string | JSX.Element)[], subPart, index) => {
+          if (index % 3 === 1) {
+            acc.push(<b>{parts[1]}</b>);
+          }
+          if (index % 3 === 0) {
+            acc.push(subPart);
+          }
+          return acc;
+        }, []);
+        return jsxParts;
+      }
+      return part;
+    })
+    .flat();
+  return boldArray;
 }
 
 const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
@@ -221,6 +246,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     return returnMenuList;
   }, [authUser, isOwner]);
 
+  const printMessage = convertMarkdownBoldToJsx([item.message]);
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -301,7 +328,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           )}
           {isEditMode === false && (
             <Text whiteSpace="pre-line" fontSize="sm">
-              {convertMarkdownBoldToJsx([item.message])}
+              {printMessage}
             </Text>
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
