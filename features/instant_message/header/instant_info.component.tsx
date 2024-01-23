@@ -35,6 +35,7 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
 }
 
 function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
+  console.log(text);
   return text
     .map((part) => {
       if (typeof part === 'string') {
@@ -51,12 +52,14 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
 const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
-  const bodyText = convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(printDesc));
+  const linkText = convertMarkdownLinksToJsx(printDesc);
+  const bodyText = convertMarkdownBoldToJsx(linkText);
+  const boldTitle = convertMarkdownBoldToJsx([instantEventInfo.title] ?? ['']);
   return (
     <>
       <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
-        <Text fontSize="md">{instantEventInfo?.title}</Text>
+        <Text fontSize="md">{boldTitle}</Text>
         <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>
           {bodyText}
         </Text>
