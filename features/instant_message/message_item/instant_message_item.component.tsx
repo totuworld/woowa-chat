@@ -37,6 +37,61 @@ interface Props {
   onSendComplete: () => void;
 }
 
+function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
+  // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
+  const newText = text
+    .map((element) => {
+      // 요소의 타입을 확인합니다.
+      if (typeof element === 'string') {
+        // 요소가 문자열인 경우, 정규식을 사용하여 **로 시작하고 끝나는 부분을 찾습니다.
+        const regex = /\*\*(.*?)\*\*/g;
+        // 위 졍규식을 이용해서 검출된 부분이 어디인지 특정하고, 해당 부분의 index를 확인해서 텍스트로 <b>,</b>태그로 변경시키다.
+        const convertedText = element.replace(regex, '<b>$1</b>');
+        return convertedText;
+      }
+      // 요소가 JSX.element인 경우, 그대로 반환합니다.
+      return element;
+    })
+    .map((element) => {
+      // 요소의 타입을 확인합니다.
+      if (typeof element === 'string') {
+        // element에서 <b>로 시작하고 </b>로 끝나는 부분을 찾아서 JSX.element로 변경합니다.
+        const regex = /<b>(.*?)<\/b>/i;
+        const matchText = element.match(regex);
+        if (matchText === null) {
+          return element;
+        }
+        // 만약 matchText.index가 존재한다면!
+        const matchIndex = matchText.index!;
+        const matchLength = matchText[0].length;
+        const matchTextContent = matchText[1];
+        // matchText.index를 이용해서 문자열을 잘라내고, 잘라낸 문자열을 <b>로 감싸줍니다.
+        const beforeText = element.substring(0, matchIndex);
+        const afterText = element.substring(matchIndex + matchLength);
+        if (afterText.length >= 0 && afterText.match(regex) !== null) {
+          return (
+            <>
+              {beforeText}
+              <b>{matchTextContent}</b>
+              {convertAsterisksToJSX([afterText])}
+            </>
+          );
+        }
+        return (
+          <>
+            {beforeText}
+            <b>{matchTextContent}</b>
+            {afterText}
+          </>
+        );
+      }
+      return element;
+    })
+    .flat();
+  // 새로운 배열을 반환합니다.
+  return newText;
+}
+
 function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // text를 순회하면서 \n 문자를 모두 <br />로 변경
   const newLineArray = text
@@ -55,24 +110,7 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
       return part;
     })
     .flat();
-  const boldArray = newLineArray
-    .map((part) => {
-      if (typeof part === 'string') {
-        const parts = part.split(/\*\*(.*?)\*\*/g);
-        const jsxParts = parts.reduce((acc: (string | JSX.Element)[], subPart, index) => {
-          if (index % 3 === 1) {
-            acc.push(<b>{parts[1]}</b>);
-          }
-          if (index % 3 === 0) {
-            acc.push(subPart);
-          }
-          return acc;
-        }, []);
-        return jsxParts;
-      }
-      return part;
-    })
-    .flat();
+  const boldArray = convertAsterisksToJSX(newLineArray);
   return boldArray;
 }
 
@@ -397,7 +435,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   _hover={{ bg: 'white' }}
                   _focus={{ bg: 'white' }}
                   onClick={() => {
-                    console.log(message);
                     updateMessageToServer(message);
                   }}
                 >
