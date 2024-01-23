@@ -114,6 +114,30 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
+function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+  const parts = text.split(regex);
+
+  const jsxParts = parts.reduce((acc: (string | JSX.Element)[], part, index) => {
+    if (index % 3 === 1) {
+      // 홀수 인덱스는 링크 텍스트
+      const linkUrl = parts[index + 1];
+      acc.push(
+        <a href={linkUrl} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold' }}>
+          {part}
+        </a>,
+      );
+    }
+    if (index % 3 === 0) {
+      acc.push(part);
+    }
+    return acc;
+  }, []);
+
+  return jsxParts;
+}
+
 const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
@@ -284,7 +308,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     return returnMenuList;
   }, [authUser, isOwner]);
 
-  const printMessage = convertMarkdownBoldToJsx([item.message]);
+  const linkText = convertMarkdownLinksToJsx(item.message);
+  const printMessage = convertMarkdownBoldToJsx(linkText);
 
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
