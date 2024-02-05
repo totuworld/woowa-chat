@@ -122,6 +122,12 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
   const [isSending, setSending] = useState(false);
 
+  // like 숫자를 모두 합한 결과
+  const sumOfLike = sortedMessageList.reduce((acc, cur) => {
+    if (cur.reaction === undefined) return acc;
+    return acc + cur.reaction.length;
+  }, 0);
+
   const isPreview = (() => {
     if (query.isPreview === undefined) return false;
     if (typeof query.isPreview === 'string') return query.isPreview === 'true';
@@ -267,7 +273,12 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               </Flex>
             </Box>
           )}
-          <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} isPreview={isPreview} />
+          <InstantInfo
+            instantEventInfo={instantEventInfo}
+            eventState={eventState}
+            isPreview={isPreview}
+            sumOfLike={eventState === 'showAll' || eventState === 'locked' ? sumOfLike : undefined}
+          />
         </Box>
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">

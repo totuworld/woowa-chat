@@ -63,7 +63,7 @@ const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessag
       <div className={buildInStyles.counter}>
         {memoReduceReaction.map((emojiItem) => (
           // eslint-disable-next-line react/jsx-props-no-spreading
-          <ReactionEmoji image={ReactionConst.TYPE_TO_IMAGE[emojiItem]} />
+          <ReactionEmoji key={emojiItem} image={ReactionConst.TYPE_TO_IMAGE[emojiItem]} />
         ))}
         {memoReduceReaction.length === 1 && (
           <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
@@ -79,6 +79,7 @@ const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessag
 interface Props {
   instantEventId: string;
   locked: boolean;
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   item: InInstantEventMessage;
   onSendComplete: () => void;
 }
@@ -184,7 +185,7 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   return jsxParts;
 }
 
-const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
+const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked, eventState }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
@@ -326,6 +327,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.denyMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-deny-message"
           bgColor="red.300"
           textColor="white"
           _hover={{ bg: 'red.500' }}
@@ -341,6 +343,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.chageSortWeitghtForMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-weight-setting"
           onClick={() => {
             onOpen();
           }}
@@ -352,6 +355,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.updateMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-upate-message"
           onClick={() => {
             turnOnEditer();
           }}
@@ -363,6 +367,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.setPin)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-pin-message"
           onClick={() => {
             ChatClientService.pinMessage({
               instantEventId,
@@ -505,7 +510,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            <GridItem w="100%">
+            <GridItem w="100%" key="grid-item-vote">
               <Button
                 isLoading={isSendingVote}
                 disabled={isSendingVote}
@@ -521,23 +526,18 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 color="black"
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
-                onMouseOver={() => {
-                  setEmotionSelector(true);
-                }}
                 onClick={() => {
-                  if (locked) {
+                  if (eventState === 'reply') {
                     setEmotionSelector((prev) => !prev);
-                    return;
                   }
-                  setEmotionSelector((prev) => !prev);
                 }}
               >
                 {(item.reaction === undefined || item.reaction.length === 0) && <Box>공감해요</Box>}
                 <ReactionCounter reaction={item.reaction} />
               </Button>
             </GridItem>
-            {isEditMode === false && (
-              <GridItem w="100%">
+            {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
+              <GridItem w="100%" key="grid-item-reply">
                 <Button
                   fontSize="xs"
                   leftIcon={<ReplyIcon />}
@@ -556,7 +556,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
               </GridItem>
             )}
             {isEditMode === true && (
-              <GridItem w="100%">
+              <GridItem w="100%" key="grid-item-close">
                 <Button
                   disabled={locked === true}
                   fontSize="xs"
@@ -576,7 +576,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
               </GridItem>
             )}
             {isEditMode === true && (
-              <GridItem w="100%">
+              <GridItem w="100%" key="grid-item-update-message">
                 <Button
                   disabled={locked === true}
                   fontSize="xs"

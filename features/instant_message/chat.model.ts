@@ -224,6 +224,18 @@ async function lock({ instantEventId }: { instantEventId: string }) {
   });
 }
 
+/** 우수타 이벤트 댓글 수집 처리 - 질문을 공개하고, 댓글 수집을 시작하는 상태 */
+async function showMsgAndCollectReply({ instantEventId }: { instantEventId: string }) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트 ☠️' });
+    }
+    await transaction.update(eventRef, { collectReply: true });
+  });
+}
+
 /** 우수타 이벤트 공개 처리 - 일반 사용자도 댓글까지 조회가능 */
 async function publish({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
@@ -941,6 +953,7 @@ const ChatModel = {
   close,
   reopen,
   lock,
+  showMsgAndCollectReply,
   publish,
   unpublish,
   post,

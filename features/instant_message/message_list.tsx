@@ -52,6 +52,7 @@ const MessageList = function ({
               instantEventId={eventInfo.instantEventId}
               item={item}
               locked={eventState === 'locked' || eventState === 'showAll'}
+              eventState={eventState}
               onSendComplete={() => {
                 ChatClientService.getMessageInfo({
                   instantEventId: eventInfo.instantEventId,

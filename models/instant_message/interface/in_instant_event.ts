@@ -14,4 +14,6 @@ export interface InInstantEvent {
   titleImg?: string;
   /** 배경 이미지 */
   bgImg?: string;
+  /** 댓글 수집 기간 여부 */
+  collectReply?: boolean;
 }

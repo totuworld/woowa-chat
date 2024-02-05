@@ -4,8 +4,10 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 
 interface Props {
   instantEventInfo: InInstantEvent;
-  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   isPreview: boolean;
+  // eslint-disable-next-line react/require-default-props
+  sumOfLike?: number;
 }
 
 const DEFAULT_IMG = '/default_title.png';
@@ -111,7 +113,7 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
-const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
+const InstantInfo = function ({ instantEventInfo, eventState, isPreview, sumOfLike }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   const linkText = convertMarkdownLinksToJsx(printDesc);
@@ -139,6 +141,11 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props
         {isPreview === true && (
           <Center width="full" fontSize="xs">
             🎨 프리뷰 모드 🎨
+          </Center>
+        )}
+        {sumOfLike !== undefined && (
+          <Center width="full" fontSize="xs">
+            궁금해요: 전체 {sumOfLike}개
           </Center>
         )}
       </Box>
