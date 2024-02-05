@@ -532,7 +532,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                {(item.reaction === undefined || item.reaction.length === 0) && <Box>공감해요</Box>}
+                {(item.reaction === undefined || item.reaction.length === 0) && <Box>궁금해요</Box>}
                 <ReactionCounter reaction={item.reaction} />
               </Button>
             </GridItem>

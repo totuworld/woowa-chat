@@ -22,7 +22,7 @@ const TYPE_TO_IMAGE: ReactionTypeToImage = {
 };
 
 const TYPE_TO_TITLE: ReactionTypeToImage = {
-  LIKE: '공감해요',
+  LIKE: '궁금해요',
   // CARE: '힘내요',
   // HAHA: '웃겨요',
   // WOW: '멋져요',
