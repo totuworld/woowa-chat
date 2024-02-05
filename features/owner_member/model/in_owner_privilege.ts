@@ -9,6 +9,8 @@ export const PRIVILEGE_NO = {
   denyReply: 201,
   /** 댓글 작성 권한 */
   postReply: 202,
+  /** pin 조작 권한 */
+  setPin: 203,
   /** 관리자 추가/삭제 권한 */
   addOrRemoveAdmin: 901,
   /** 관리자 역할 추가/삭제 권한 */
@@ -28,6 +30,7 @@ export const PRIVILEGE_NAME_AND_NO: { [key in PrivilegeKeys]: { name: string; no
   denyReply: { name: '댓글 deny 권한', no: PRIVILEGE_NO.denyReply },
   /** 댓글 작성 권한 */
   postReply: { name: '댓글 작성 권한', no: PRIVILEGE_NO.postReply },
+  setPin: { name: '메시지 pin 권한', no: PRIVILEGE_NO.setPin },
   /** 관리자 추가/삭제 권한 */
   addOrRemoveAdmin: { name: '관리자 추가/삭제 권한', no: PRIVILEGE_NO.addOrRemoveAdmin },
   /** 관리자 역할 추가/삭제 권한 */
@@ -46,6 +49,7 @@ PRIVILEGE_MAP.set(PRIVILEGE_NO.chageSortWeitghtForMessage.toString(), {
 PRIVILEGE_MAP.set(PRIVILEGE_NO.updateMessage.toString(), { name: '메시지 수정 권한', no: PRIVILEGE_NO.updateMessage });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.denyReply.toString(), { name: '댓글 deny 권한', no: PRIVILEGE_NO.denyReply });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.postReply.toString(), { name: '댓글 작성 권한', no: PRIVILEGE_NO.postReply });
+PRIVILEGE_MAP.set(PRIVILEGE_NO.setPin.toString(), { name: '메시지 pin 권한', no: PRIVILEGE_NO.setPin });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.addOrRemoveAdmin.toString(), {
   name: '관리자 추가/삭제 권한',
   no: PRIVILEGE_NO.addOrRemoveAdmin,

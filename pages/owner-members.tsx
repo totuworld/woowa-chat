@@ -96,7 +96,7 @@ const IndexPage: NextPage = function () {
   }
 
   return (
-    <ServiceLayout height="100vh" backgroundColor="gray.50">
+    <ServiceLayout height="100vh" backgroundColor="gray.50" pt={16}>
       <Box maxW="xl" mx="auto">
         <Box spacing="12px" mt="6">
           <Box px="2">

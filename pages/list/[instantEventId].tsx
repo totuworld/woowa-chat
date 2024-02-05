@@ -199,20 +199,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgSize="100% auto"
       bgRepeat="no-repeat"
       title="우수타"
+      pt={16}
     >
-      <Box
-        maxW="xl"
-        mx="auto"
-        pt="6"
-        bgColor="gray.200"
-        minH="95vh"
-        overflow="scroll; height:200px;"
-        __css={{
-          '::-webkit-scrollbar': {
-            display: 'none',
-          },
-        }}
-      >
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh">
         {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">
@@ -295,24 +284,13 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 resize="none"
                 minH="unset"
                 minRows={1}
-                maxRows={7}
+                maxRows={14}
                 overflow="hidden"
                 fontSize="xs"
                 mr="2"
                 as={ResizeTextarea}
                 value={message}
                 onChange={(e) => {
-                  // 최대 10줄만 스크린샷에 표현되니 10줄 넘게 입력하면 제한걸어야한다.
-                  if (e.target.value) {
-                    const lineCount = (e.target.value.match(/[^\n]*\n[^\n]*/gi)?.length ?? 1) + 1;
-                    if (lineCount > 10) {
-                      toast({
-                        title: '최대 10줄까지만 입력가능합니다',
-                        position: 'top-right',
-                      });
-                      return;
-                    }
-                  }
                   updateMessage(e.target.value);
                 }}
               />
@@ -333,9 +311,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                     });
                     return;
                   }
-                  if (message.trim().length > 1000) {
+                  if (message.trim().length > 5000) {
                     toast({
-                      title: '1000자 내로 입력해주세요',
+                      title: '5000자 내로 입력해주세요',
                       position: 'top-right',
                       status: 'warning',
                     });

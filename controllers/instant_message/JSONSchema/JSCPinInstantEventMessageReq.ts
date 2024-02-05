@@ -1,6 +1,6 @@
 import { JSONSchema6 } from 'json-schema';
 
-const JSCPostInstantEventMessageReq: JSONSchema6 = {
+const JSCPinInstantEventMessageReq: JSONSchema6 = {
   additionalProperties: false,
   properties: {
     body: {
@@ -9,12 +9,11 @@ const JSCPostInstantEventMessageReq: JSONSchema6 = {
         instantEventId: {
           type: 'string',
         },
-        message: {
+        messageId: {
           type: 'string',
-          maxLength: 5000,
         },
       },
-      required: ['instantEventId', 'message'],
+      required: ['instantEventId', 'messageId'],
       type: 'object',
     },
   },
@@ -22,4 +21,4 @@ const JSCPostInstantEventMessageReq: JSONSchema6 = {
   type: 'object',
 };
 
-export default JSCPostInstantEventMessageReq;
+export default JSCPinInstantEventMessageReq;

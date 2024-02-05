@@ -76,7 +76,7 @@ const IndexPage: NextPage = function () {
       select: (data) => {
         if (data.status === 200 && data.data) {
           const filterData = data.data.filter(
-            (fv) => fv.closed === false && (fv.locked !== undefined ? fv.locked === false : true),
+            (fv) => fv.closed === false && (fv.showAllReply !== undefined ? fv.showAllReply === true : true),
           );
           return filterData;
         }
@@ -177,7 +177,7 @@ const IndexPage: NextPage = function () {
         <meta name="twitter:url" content={mainUrl} />
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
-      <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타">
+      <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타" pt={16}>
         <Box maxW="xl" mx="auto" pl="2">
           {isOwner && !isOpen && (
             <Button

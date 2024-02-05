@@ -698,6 +698,42 @@ async function denyReply({
   });
 }
 
+async function pinMessage({
+  instantEventId,
+  messageId,
+  currentUserId,
+}: {
+  instantEventId: string;
+  messageId: string;
+  currentUserId: string;
+}): Promise<void> {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    if (ownerMemberDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 401, message: '권한없음' });
+    }
+    const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.setPin);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '메시지를 pin할 권한이 없습니다.' });
+    }
+    const info = messageDoc.data() as InInstantEventMessageServer;
+    const pin = info.pin === undefined ? true : !info.pin;
+    await transaction.update(messageRef, { pin });
+  });
+}
+
 async function voteMessage({
   instantEventId,
   messageId,
@@ -920,6 +956,7 @@ const ChatModel = {
   postReply,
   denyReply,
   updateMessage,
+  pinMessage,
 };
 
 export default ChatModel;

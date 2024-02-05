@@ -9,6 +9,7 @@ export interface InInstantEventMessageBase {
   reaction?: { type: REACTION_TYPE; voter: string }[];
   deny?: boolean;
   sortWeight: number;
+  pin?: boolean;
   reply: InInstantEventMessageReply[];
 }
 

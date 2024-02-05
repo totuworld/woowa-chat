@@ -67,6 +67,10 @@ const GNB: React.FC = function () {
       borderStyle="solid"
       borderColor={useColorModeValue('gray.200', 'gray.900')}
       bg={useColorModeValue('white', 'gray.800')}
+      position="fixed"
+      top={0}
+      width="full"
+      zIndex={10}
     >
       <Flex
         color={useColorModeValue('gray.600', 'white')}
