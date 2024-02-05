@@ -23,11 +23,11 @@ const TYPE_TO_IMAGE: ReactionTypeToImage = {
 
 const TYPE_TO_TITLE: ReactionTypeToImage = {
   LIKE: '공감해요',
-  CARE: '힘내요',
-  HAHA: '웃겨요',
-  WOW: '멋져요',
-  SAD: '슬퍼요',
-  ANGRY: '화나요',
+  // CARE: '힘내요',
+  // HAHA: '웃겨요',
+  // WOW: '멋져요',
+  // SAD: '슬퍼요',
+  // ANGRY: '화나요',
 };
 
 const REACTION: ReactionItem[] = [
@@ -38,41 +38,41 @@ const REACTION: ReactionItem[] = [
     title: TYPE_TO_TITLE.LIKE,
     type: 'LIKE',
   },
-  {
-    image: TYPE_TO_IMAGE.CARE,
-    bg: '#fff',
-    index: 5,
-    title: TYPE_TO_TITLE.CARE,
-    type: 'CARE',
-  },
-  {
-    image: TYPE_TO_IMAGE.HAHA,
-    bg: '#fff',
-    index: 5,
-    title: TYPE_TO_TITLE.HAHA,
-    type: 'HAHA',
-  },
-  {
-    image: TYPE_TO_IMAGE.WOW,
-    bg: '#fff',
-    index: 5,
-    title: TYPE_TO_TITLE.WOW,
-    type: 'WOW',
-  },
-  {
-    image: TYPE_TO_IMAGE.SAD,
-    bg: '#fff',
-    index: 5,
-    title: TYPE_TO_TITLE.SAD,
-    type: 'SAD',
-  },
-  {
-    image: TYPE_TO_IMAGE.ANGRY,
-    bg: '#fff',
-    index: 5,
-    title: TYPE_TO_TITLE.ANGRY,
-    type: 'ANGRY',
-  },
+  // {
+  //   image: TYPE_TO_IMAGE.CARE,
+  //   bg: '#fff',
+  //   index: 5,
+  //   title: TYPE_TO_TITLE.CARE,
+  //   type: 'CARE',
+  // },
+  // {
+  //   image: TYPE_TO_IMAGE.HAHA,
+  //   bg: '#fff',
+  //   index: 5,
+  //   title: TYPE_TO_TITLE.HAHA,
+  //   type: 'HAHA',
+  // },
+  // {
+  //   image: TYPE_TO_IMAGE.WOW,
+  //   bg: '#fff',
+  //   index: 5,
+  //   title: TYPE_TO_TITLE.WOW,
+  //   type: 'WOW',
+  // },
+  // {
+  //   image: TYPE_TO_IMAGE.SAD,
+  //   bg: '#fff',
+  //   index: 5,
+  //   title: TYPE_TO_TITLE.SAD,
+  //   type: 'SAD',
+  // },
+  // {
+  //   image: TYPE_TO_IMAGE.ANGRY,
+  //   bg: '#fff',
+  //   index: 5,
+  //   title: TYPE_TO_TITLE.ANGRY,
+  //   type: 'ANGRY',
+  // },
 ];
 
 const ReactionConst = {
