@@ -144,9 +144,9 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, sumOfLi
           </Center>
         )}
         {sumOfLike !== undefined && (
-          <Center width="full" fontSize="xs">
+          <Text fontSize="sm" style={{ marginTop: '10px' }}>
             궁금해요: 전체 {sumOfLike}개
-          </Center>
+          </Text>
         )}
       </Box>
     </>
