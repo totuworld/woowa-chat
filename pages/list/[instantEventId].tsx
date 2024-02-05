@@ -15,7 +15,7 @@ import {
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
@@ -35,6 +35,7 @@ import InstantEventUtil from '@/features/instant_message/instant_event.util';
 import CreateEvent from '@/features/instant_message/create_event.component';
 import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
+import Presentation from '@/features/instant_message/presentation';
 
 async function updateEvent({
   instantEventId,
@@ -121,6 +122,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
   const [isSending, setSending] = useState(false);
+  const [showPresentation, setShowPresentation] = useState(false);
 
   // like 숫자를 모두 합한 결과
   const sumOfLike = sortedMessageList.reduce((acc, cur) => {
@@ -280,6 +282,17 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             sumOfLike={eventState === 'showAll' || eventState === 'locked' ? sumOfLike : undefined}
           />
         </Box>
+        {authUser !== null && sortedMessageList.length > 0 && (
+          <Box>
+            <Button
+              onClick={() => {
+                setShowPresentation((prev) => !prev);
+              }}
+            >
+              프리젠테이션 모드
+            </Button>
+          </Box>
+        )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
@@ -378,7 +391,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             />
           </Box>
         )}
-        {authUser !== null && (
+        {authUser !== null && showPresentation === false && (
           <MessageList
             messageLoadingStatus={status}
             messageList={sortedMessageList}
@@ -396,6 +409,13 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             }}
           />
         )}
+        <Presentation
+          messageList={sortedMessageList}
+          show={showPresentation}
+          turnOff={() => {
+            setShowPresentation(false);
+          }}
+        />
       </Box>
     </ServiceLayout>
   );
