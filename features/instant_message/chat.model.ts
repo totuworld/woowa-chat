@@ -902,11 +902,11 @@ async function postReply({
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지를 조회 중' });
     }
-    const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
-    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.postReply);
-    if (hasPrivilege === false) {
-      throw new CustomServerError({ statusCode: 403, message: '댓글을 등록할 권한이 없습니다.' });
-    }
+    // const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+    // const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.postReply);
+    // if (hasPrivilege === false) {
+    //   throw new CustomServerError({ statusCode: 403, message: '댓글을 등록할 권한이 없습니다.' });
+    // }
     const info = messageDoc.data() as InInstantEventMessageServer;
     const newId = nanoid(4);
     const addReply: {

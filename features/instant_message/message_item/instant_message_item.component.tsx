@@ -408,7 +408,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            {isEditMode === false && havePostReplyPrivilege === true && (
+            {isEditMode === false && (
               <GridItem w="100%">
                 <Button
                   fontSize="xs"
@@ -469,7 +469,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             )}
           </Grid>
         )}
-        {isOwner && toggleReplyInput && havePostReplyPrivilege === true && (
+        {toggleReplyInput && (
           <Box pt="2">
             <Divider />
             {(item.deny === undefined || item.deny === false) && (
