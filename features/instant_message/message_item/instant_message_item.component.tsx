@@ -47,7 +47,14 @@ const ReactionEmoji = styled.div<{ image: string }>`
 
 const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
 
-const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessage['reaction'] }) {
+const ReactionCounter = function ({
+  reaction,
+  currentUid,
+}: {
+  reaction: InInstantEventMessage['reaction'];
+  // eslint-disable-next-line react/require-default-props
+  currentUid?: string;
+}) {
   const memoReduceReaction = useMemo(() => {
     if (reaction === undefined) return [];
     return reaction.reduce((acc: { type: REACTION_TYPE; count: number }[], cur) => {
@@ -59,6 +66,7 @@ const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessag
       return acc;
     }, []);
   }, [reaction]);
+  const currentUserVoted = reaction?.findIndex((v) => v.voter === currentUid) !== -1;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -71,7 +79,9 @@ const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessag
           <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
         )} */}
         {memoReduceReaction.length === 1 && (
-          <p style={{ paddingLeft: '4px', color: '#000' }}>{memoReduceReaction[0].count}</p>
+          <p style={{ paddingLeft: '4px', color: `${currentUserVoted ? '#1A7CFF' : '#000'}` }}>{`${
+            memoReduceReaction[0].count
+          } ${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]}`}</p>
         )}
         {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
           <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
@@ -537,8 +547,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                {(item.reaction === undefined || item.reaction.length === 0) && <Box>궁금해요</Box>}
-                <ReactionCounter reaction={item.reaction} />
+                {(item.reaction === undefined || item.reaction.length === 0) && <Box>우수타에서 다뤄주세요</Box>}
+                <ReactionCounter reaction={item.reaction} currentUid={authUser?.uid} />
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (

@@ -13,7 +13,7 @@ interface ReactionTypeToImage {
 }
 
 const TYPE_TO_IMAGE: ReactionTypeToImage = {
-  LIKE: '/reaction_heart.gif',
+  LIKE: '/reaction_question.gif',
   CARE: '/reaction_care.png',
   HAHA: '/reaction_haha.png',
   WOW: '/reaction_wow.png',
@@ -22,7 +22,7 @@ const TYPE_TO_IMAGE: ReactionTypeToImage = {
 };
 
 const TYPE_TO_TITLE: ReactionTypeToImage = {
-  LIKE: '궁금해요',
+  LIKE: '우수타에서 다뤄주세요',
   // CARE: '힘내요',
   // HAHA: '웃겨요',
   // WOW: '멋져요',
