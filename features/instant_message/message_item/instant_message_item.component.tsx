@@ -71,7 +71,7 @@ const ReactionCounter = function ({
   const voteTitle = (() => {
     if (memoReduceReaction.length === 0) return '';
     if (showCount === false) return ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type];
-    return `${memoReduceReaction[0].count} ${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]}`;
+    return `${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]} ${memoReduceReaction[0].count} `;
   })();
 
   return (
