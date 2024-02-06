@@ -50,23 +50,28 @@ const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
 const ReactionCounter = function ({ reaction }: { reaction: InInstantEventMessage['reaction'] }) {
   const memoReduceReaction = useMemo(() => {
     if (reaction === undefined) return [];
-    return reaction.reduce((acc: REACTION_TYPE[], cur) => {
-      const findIndex = acc.findIndex((fv) => fv === cur.type);
+    return reaction.reduce((acc: { type: REACTION_TYPE; count: number }[], cur) => {
+      const findIndex = acc.findIndex((fv) => fv.type === cur.type);
       if (findIndex === -1) {
-        return [...acc, cur.type];
+        return [...acc, { type: cur.type, count: 1 }];
       }
+      acc[findIndex].count += 1;
       return acc;
     }, []);
   }, [reaction]);
+
   return (
     <div style={{ position: 'relative' }}>
       <div className={buildInStyles.counter}>
         {memoReduceReaction.map((emojiItem) => (
           // eslint-disable-next-line react/jsx-props-no-spreading
-          <ReactionEmoji key={emojiItem} image={ReactionConst.TYPE_TO_IMAGE[emojiItem]} />
+          <ReactionEmoji key={emojiItem.type} image={ReactionConst.TYPE_TO_IMAGE[emojiItem.type]} />
         ))}
-        {memoReduceReaction.length === 1 && (
+        {/* {memoReduceReaction.length === 1 && (
           <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
+        )} */}
+        {memoReduceReaction.length === 1 && (
+          <p style={{ paddingLeft: '4px', color: '#000' }}>{memoReduceReaction[0].count}</p>
         )}
         {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
           <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
