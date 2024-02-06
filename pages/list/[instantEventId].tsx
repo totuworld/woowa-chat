@@ -282,7 +282,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             sumOfLike={eventState === 'showAll' || eventState === 'locked' ? sumOfLike : undefined}
           />
         </Box>
-        {authUser !== null && sortedMessageList.length > 0 && (
+        {authUser !== null && sortedMessageList.length > 0 && eventState === 'locked' && (
           <Box>
             <Button
               onClick={() => {

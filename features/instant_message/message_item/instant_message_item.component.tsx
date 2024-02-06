@@ -31,7 +31,6 @@ import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import buildInStyles from './instant_message_temp.module.css';
-import ReactionEmojiSelector from './reaction_emoji_selector';
 import ReactionConst, { REACTION_TYPE } from './reaction_type';
 
 const ReactionEmoji = styled.div<{ image: string }>`
@@ -50,8 +49,10 @@ const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
 const ReactionCounter = function ({
   reaction,
   currentUid,
+  showCount,
 }: {
   reaction: InInstantEventMessage['reaction'];
+  showCount: boolean;
   // eslint-disable-next-line react/require-default-props
   currentUid?: string;
 }) {
@@ -67,6 +68,11 @@ const ReactionCounter = function ({
     }, []);
   }, [reaction]);
   const currentUserVoted = reaction?.findIndex((v) => v.voter === currentUid) !== -1;
+  const voteTitle = (() => {
+    if (memoReduceReaction.length === 0) return '';
+    if (showCount === false) return ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type];
+    return `${memoReduceReaction[0].count} ${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]}`;
+  })();
 
   return (
     <div style={{ position: 'relative' }}>
@@ -79,9 +85,7 @@ const ReactionCounter = function ({
           <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
         )} */}
         {memoReduceReaction.length === 1 && (
-          <p style={{ paddingLeft: '4px', color: `${currentUserVoted ? '#1A7CFF' : '#000'}` }}>{`${
-            memoReduceReaction[0].count
-          } ${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]}`}</p>
+          <p style={{ paddingLeft: '4px', color: `${currentUserVoted ? '#1A7CFF' : '#000'}` }}>{voteTitle}</p>
         )}
         {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
           <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
@@ -209,9 +213,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const [isEditMode, setIsEditMode] = useState(false);
   const [message, updateMessage] = useState(item.message);
   const [isSendingVote, setSendingVote] = useState(false);
-  const [showEmotionSelector, setEmotionSelector] = useState(false);
 
-  function sendReaction(reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false }) {
+  function sendReaction(reaction: { isAdd: boolean; type: REACTION_TYPE }) {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
@@ -238,7 +241,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       })
       .finally(() => {
         setSendingVote(false);
-        setEmotionSelector(false);
       });
   }
 
@@ -410,6 +412,8 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
 
+  const voted = item.reaction?.findIndex((v) => v.voter === authUser?.uid) !== -1;
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -496,24 +500,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
         <Divider />
-        {showEmotionSelector && (
-          <div
-            style={{ position: 'relative' }}
-            onMouseLeave={() => {
-              setEmotionSelector(false);
-            }}
-          >
-            <div style={{ position: 'absolute', left: '20%', bottom: '100%' }}>
-              <ReactionEmojiSelector
-                onClickReaction={(reactionType) => {
-                  sendReaction({ isAdd: true, type: reactionType });
-                }}
-                showCount={locked}
-                reaction={item.reaction}
-              />
-            </div>
-          </div>
-        )}
         {(item.deny === undefined || item.deny === false) && (
           <Grid
             templateColumns="repeat(2, 1fr)"
@@ -542,13 +528,26 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  if (eventState === 'reply') {
-                    setEmotionSelector((prev) => !prev);
+                  if (eventState === 'reply' && voted === true) {
+                    sendReaction({
+                      isAdd: false,
+                      type: 'LIKE',
+                    });
+                  }
+                  if (eventState === 'reply' && voted === false) {
+                    sendReaction({
+                      isAdd: true,
+                      type: 'LIKE',
+                    });
                   }
                 }}
               >
                 {(item.reaction === undefined || item.reaction.length === 0) && <Box>우수타에서 다뤄주세요</Box>}
-                <ReactionCounter reaction={item.reaction} currentUid={authUser?.uid} />
+                <ReactionCounter
+                  reaction={item.reaction}
+                  currentUid={authUser?.uid}
+                  showCount={isOwner || eventState === 'showAll'}
+                />
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
