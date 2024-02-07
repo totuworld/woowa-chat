@@ -15,7 +15,7 @@ import {
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
