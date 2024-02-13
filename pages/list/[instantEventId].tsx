@@ -226,7 +226,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       title="우수타"
       pt={16}
     >
-      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh">
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
         {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">

@@ -459,6 +459,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           <Flex
             minWidth="max-content"
             alignItems="center"
+            // justifyContent="center"
             gap={2}
             width="full"
             bg="white"
@@ -473,6 +474,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 disabled={isSendingVote.LIKE}
                 fontSize="xs"
                 width="full"
+                leftIcon={<IconUp size={16} active={memoReaction.has('LIKE') === true} />}
                 variant="ghost"
                 height="4"
                 _hover={{ bg: 'white' }}
@@ -492,7 +494,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                <IconUp size={16} active={memoReaction.has('LIKE') === true} />
                 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
               </Button>
             </GridItem>
@@ -502,6 +503,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 disabled={isSendingVote.DOWN}
                 fontSize="xs"
                 width="full"
+                leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
                 variant="ghost"
                 height="4"
                 color="black"
@@ -522,16 +524,14 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                <IconDown size={16} active={memoReaction.has('DOWN') === true} />
                 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
-              <GridItem w="100%" key="grid-item-reply">
+              <GridItem key="grid-item-reply">
                 <Button
                   fontSize="xs"
                   leftIcon={<ReplyIcon />}
-                  width="full"
                   variant="ghost"
                   height="4"
                   color="black"
