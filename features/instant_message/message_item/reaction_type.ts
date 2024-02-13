@@ -1,4 +1,4 @@
-export type REACTION_TYPE = 'LIKE' | 'CARE' | 'HAHA' | 'WOW' | 'SAD' | 'ANGRY';
+export type REACTION_TYPE = 'LIKE' | 'CARE' | 'HAHA' | 'WOW' | 'SAD' | 'ANGRY' | 'DOWN';
 
 interface ReactionItem {
   image: string;
@@ -19,6 +19,7 @@ const TYPE_TO_IMAGE: ReactionTypeToImage = {
   WOW: '/reaction_wow.png',
   SAD: '/reaction_sad.png',
   ANGRY: '/reaction_angry.png',
+  DOWN: '/reaction_haha.png',
 };
 
 const TYPE_TO_TITLE: ReactionTypeToImage = {
@@ -28,6 +29,7 @@ const TYPE_TO_TITLE: ReactionTypeToImage = {
   // WOW: '멋져요',
   // SAD: '슬퍼요',
   // ANGRY: '화나요',
+  DOWN: '꼭 다루지 않아도 될 것 같아요',
 };
 
 const REACTION: ReactionItem[] = [

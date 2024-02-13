@@ -1,6 +1,8 @@
 import { Box, Button, Spacer, Stack } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
+import IconChevronUp from './message_item/icon_chevron_up';
+import IconChevronDown from './message_item/icon_chevron_down';
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
@@ -172,6 +174,25 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
     };
   }, [handleKeyPress]);
 
+  const memoReaction = useMemo(() => {
+    // 현재 메시지
+    const targetMessage = messageList[currentIndex];
+    // 현재 메시지의 reaction
+    const reaction = targetMessage?.reaction;
+    // reaction이 없으면 빈 배열을 반환
+    if (reaction === undefined) {
+      return { LIKE: 0, HAHA: 0, WOW: 0, SAD: 0, ANGRY: 0, DOWN: 0, CARE: 0 };
+    }
+    // reaction이 존재하면 각각의 reaction의 개수를 세어 반환
+    return reaction.reduce(
+      (acc, cur) => {
+        acc[cur.type] += 1;
+        return acc;
+      },
+      { LIKE: 0, HAHA: 0, WOW: 0, SAD: 0, ANGRY: 0, DOWN: 0, CARE: 0 },
+    );
+  }, [currentIndex]);
+
   return (
     <Box
       display={show ? 'flex' : 'none'}
@@ -187,7 +208,9 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
       <Box
         backgroundColor="white"
         borderRadius="md"
-        padding="10"
+        paddingX="10"
+        paddingTop="1"
+        paddingBottom="10"
         marginX="auto"
         marginY="auto"
         fontSize={fontSize}
@@ -196,10 +219,22 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
         display="flex"
         flexDirection="column"
       >
-        <Stack direction="row" align="center">
+        <Stack direction="row" align="center" marginBottom="9">
+          <Box fontSize="xs" key="message-count">
+            {currentIndex + 1} / {messageList.length}
+          </Box>
+          <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
+            <IconChevronUp size={16} color={memoReaction.LIKE > 0 ? '#FF403E' : 'black'} />
+            {memoReaction.LIKE}
+          </Box>
+          <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
+            <IconChevronDown size={16} color={memoReaction.LIKE > 0 ? '#1A7CFF' : 'black'} />
+            {memoReaction.DOWN}
+          </Box>
           <Spacer />
           <Button
             size="xs"
+            key="btn-md"
             variant={fontSize === 'md' ? 'outline' : 'ghost'}
             onClick={() => {
               setFontSize('md');
@@ -208,7 +243,8 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
             작은
           </Button>
           <Button
-            size="md"
+            key="btn-lg"
+            size="xs"
             variant={fontSize === 'lg' ? 'outline' : 'ghost'}
             onClick={() => {
               setFontSize('lg');
@@ -217,7 +253,8 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
             보통
           </Button>
           <Button
-            size="lg"
+            key="btn-xl"
+            size="xs"
             variant={fontSize === 'xl' ? 'outline' : 'ghost'}
             onClick={() => {
               setFontSize('xl');
@@ -225,9 +262,6 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
           >
             큰
           </Button>
-          <Box>
-            {currentIndex + 1} / {messageList.length}
-          </Box>
         </Stack>
         <Box
           overflowY="scroll"

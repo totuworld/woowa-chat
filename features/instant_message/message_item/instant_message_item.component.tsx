@@ -4,7 +4,6 @@ import {
   Button,
   Divider,
   Flex,
-  Grid,
   GridItem,
   IconButton,
   Input,
@@ -18,7 +17,6 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import styled from 'styled-components';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import { useState, useMemo } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
@@ -30,70 +28,9 @@ import InstantEventMessageReply from './reply.component';
 import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
-import buildInStyles from './instant_message_temp.module.css';
-import ReactionConst, { REACTION_TYPE } from './reaction_type';
-
-const ReactionEmoji = styled.div<{ image: string }>`
-  width: 16px;
-  height: 16px;
-  background-size: 100% 100%;
-  border-radius: 8px;
-  background-image: url(${({ image }) => image});
-  box-shadow: 0 0 0 2px #fff;
-  position: relative;
-  z-index: 5;
-`;
-
-const REACTION_TYPE_COUNT = Object.values(ReactionConst.TYPE_TO_IMAGE).length;
-
-const ReactionCounter = function ({
-  reaction,
-  currentUid,
-  showCount,
-}: {
-  reaction: InInstantEventMessage['reaction'];
-  showCount: boolean;
-  // eslint-disable-next-line react/require-default-props
-  currentUid?: string;
-}) {
-  const memoReduceReaction = useMemo(() => {
-    if (reaction === undefined) return [];
-    return reaction.reduce((acc: { type: REACTION_TYPE; count: number }[], cur) => {
-      const findIndex = acc.findIndex((fv) => fv.type === cur.type);
-      if (findIndex === -1) {
-        return [...acc, { type: cur.type, count: 1 }];
-      }
-      acc[findIndex].count += 1;
-      return acc;
-    }, []);
-  }, [reaction]);
-  const currentUserVoted = reaction?.findIndex((v) => v.voter === currentUid) !== -1;
-  const voteTitle = (() => {
-    if (memoReduceReaction.length === 0) return '';
-    if (showCount === false) return ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type];
-    return `${ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0].type]} ${memoReduceReaction[0].count} `;
-  })();
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <div className={buildInStyles.counter}>
-        {memoReduceReaction.map((emojiItem) => (
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          <ReactionEmoji key={emojiItem.type} image={ReactionConst.TYPE_TO_IMAGE[emojiItem.type]} />
-        ))}
-        {/* {memoReduceReaction.length === 1 && (
-          <p style={{ paddingLeft: '4px', color: '#000' }}>{ReactionConst.TYPE_TO_TITLE[memoReduceReaction[0]]}</p>
-        )} */}
-        {memoReduceReaction.length === 1 && (
-          <p style={{ paddingLeft: '4px', color: `${currentUserVoted ? '#1A7CFF' : '#000'}` }}>{voteTitle}</p>
-        )}
-        {reaction !== undefined && reaction.length > REACTION_TYPE_COUNT && (
-          <div style={{ paddingLeft: '4px' }}>외 {reaction.length - REACTION_TYPE_COUNT}</div>
-        )}
-      </div>
-    </div>
-  );
-};
+import { REACTION_TYPE } from './reaction_type';
+import IconChevronDown from './icon_chevron_down';
+import IconChevronUp from './icon_chevron_up';
 
 interface Props {
   instantEventId: string;
@@ -212,7 +149,27 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [message, updateMessage] = useState(item.message);
-  const [isSendingVote, setSendingVote] = useState(false);
+  const [isSendingVote, setSendingVote] = useState({
+    LIKE: false,
+    DOWN: false,
+    CARE: false,
+    HAHA: false,
+    WOW: false,
+    SAD: false,
+    ANGRY: false,
+  });
+
+  const memoReaction = useMemo(() => {
+    if (item.reaction === undefined) return new Map<REACTION_TYPE, number>();
+    return item.reaction.reduce((acc: Map<REACTION_TYPE, number>, cur) => {
+      if (acc.has(cur.type) === false) {
+        acc.set(cur.type, 1);
+        return acc;
+      }
+      acc.set(cur.type, acc.get(cur.type)! + 1);
+      return acc;
+    }, new Map<REACTION_TYPE, number>());
+  }, [item.reaction]);
 
   function sendReaction(reaction: { isAdd: boolean; type: REACTION_TYPE }) {
     if (authUser === null) {
@@ -222,7 +179,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
       });
       return;
     }
-    setSendingVote(true);
+    setSendingVote((prev) => ({ ...prev, [reaction.type]: true }));
     ChatClientService.reactionMessageInfo({
       instantEventId,
       messageId: item.id,
@@ -240,7 +197,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         onSendComplete();
       })
       .finally(() => {
-        setSendingVote(false);
+        setSendingVote((prev) => ({ ...prev, [reaction.type]: false }));
       });
   }
 
@@ -412,8 +369,6 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
 
-  const voted = item.reaction?.findIndex((v) => v.voter === authUser?.uid) !== -1;
-
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -501,8 +456,9 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
         </Box>
         <Divider />
         {(item.deny === undefined || item.deny === false) && (
-          <Grid
-            templateColumns="repeat(2, 1fr)"
+          <Flex
+            minWidth="max-content"
+            alignItems="center"
             gap={2}
             width="full"
             bg="white"
@@ -511,30 +467,24 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            <GridItem w="100%" key="grid-item-vote">
+            <GridItem key="grid-item-vote-up">
               <Button
-                isLoading={isSendingVote}
-                disabled={isSendingVote}
+                isLoading={isSendingVote.LIKE}
+                disabled={isSendingVote.LIKE}
                 fontSize="xs"
-                leftIcon={
-                  item.reaction === undefined || item.reaction.length === 0 ? (
-                    <ReactionEmoji image="/reaction_empty_thumb.png" />
-                  ) : undefined
-                }
                 width="full"
                 variant="ghost"
                 height="4"
-                color="black"
                 _hover={{ bg: 'white' }}
                 _focus={{ bg: 'white' }}
                 onClick={() => {
-                  if (eventState === 'reply' && voted === true) {
+                  if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
                     sendReaction({
                       isAdd: false,
                       type: 'LIKE',
                     });
                   }
-                  if (eventState === 'reply' && voted === false) {
+                  if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
                     sendReaction({
                       isAdd: true,
                       type: 'LIKE',
@@ -542,12 +492,38 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                {(item.reaction === undefined || item.reaction.length === 0) && <Box>우수타에서 다뤄주세요</Box>}
-                <ReactionCounter
-                  reaction={item.reaction}
-                  currentUid={authUser?.uid}
-                  showCount={isOwner || eventState === 'showAll'}
-                />
+                <IconChevronUp color={memoReaction.has('LIKE') === true ? '#FF403E' : undefined} size={16} />
+                {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+              </Button>
+            </GridItem>
+            <GridItem key="grid-item-vote-down">
+              <Button
+                isLoading={isSendingVote.DOWN}
+                disabled={isSendingVote.DOWN}
+                fontSize="xs"
+                width="full"
+                variant="ghost"
+                height="4"
+                color="black"
+                _hover={{ bg: 'white' }}
+                _focus={{ bg: 'white' }}
+                onClick={() => {
+                  if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
+                    sendReaction({
+                      isAdd: false,
+                      type: 'DOWN',
+                    });
+                  }
+                  if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
+                    sendReaction({
+                      isAdd: true,
+                      type: 'DOWN',
+                    });
+                  }
+                }}
+              >
+                <IconChevronDown color={memoReaction.has('DOWN') === true ? '#1A7CFF' : undefined} size={16} />
+                {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
@@ -609,7 +585,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 </Button>
               </GridItem>
             )}
-          </Grid>
+          </Flex>
         )}
         {toggleReplyInput && (
           <Box pt="2">
