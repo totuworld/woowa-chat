@@ -191,7 +191,7 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
       },
       { LIKE: 0, HAHA: 0, WOW: 0, SAD: 0, ANGRY: 0, DOWN: 0, CARE: 0 },
     );
-  }, [currentIndex]);
+  }, [currentIndex, messageList]);
 
   return (
     <Box
