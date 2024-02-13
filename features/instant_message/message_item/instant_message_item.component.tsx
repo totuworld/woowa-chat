@@ -29,8 +29,8 @@ import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import { REACTION_TYPE } from './reaction_type';
-import IconChevronDown from './icon_chevron_down';
-import IconChevronUp from './icon_chevron_up';
+import IconDown from './icon_down';
+import IconUp from './icon_up';
 
 interface Props {
   instantEventId: string;
@@ -492,7 +492,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                <IconChevronUp color={memoReaction.has('LIKE') === true ? '#FF403E' : undefined} size={16} />
+                <IconUp size={16} active={memoReaction.has('LIKE') === true} />
                 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
               </Button>
             </GridItem>
@@ -522,7 +522,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                   }
                 }}
               >
-                <IconChevronDown color={memoReaction.has('DOWN') === true ? '#1A7CFF' : undefined} size={16} />
+                <IconDown size={16} active={memoReaction.has('DOWN') === true} />
                 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
               </Button>
             </GridItem>

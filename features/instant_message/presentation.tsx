@@ -1,8 +1,8 @@
 import { Box, Button, Spacer, Stack } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
-import IconChevronUp from './message_item/icon_chevron_up';
-import IconChevronDown from './message_item/icon_chevron_down';
+import IconDown from './message_item/icon_down';
+import IconUp from './message_item/icon_up';
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
@@ -224,11 +224,11 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
             {currentIndex + 1} / {messageList.length}
           </Box>
           <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
-            <IconChevronUp size={16} color={memoReaction.LIKE > 0 ? '#FF403E' : 'black'} />
+            <IconUp size={16} active={memoReaction.LIKE > 0} />
             {memoReaction.LIKE}
           </Box>
           <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
-            <IconChevronDown size={16} color={memoReaction.LIKE > 0 ? '#1A7CFF' : 'black'} />
+            <IconDown size={16} active={memoReaction.DOWN > 0} />
             {memoReaction.DOWN}
           </Box>
           <Spacer />
