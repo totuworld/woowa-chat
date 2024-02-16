@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import IconDown from './message_item/icon_down';
 import IconUp from './message_item/icon_up';
+import InstantEventMessageReply from './message_item/reply.component';
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
@@ -109,12 +110,106 @@ interface Props {
   messageList: InInstantEventMessage[];
   show: boolean;
   turnOff: () => void;
+  turnOn: () => void;
+  instantEventId: string;
 }
 
-const Presentation = function ({ messageList, show, turnOff }: Props) {
+const PresentationView = function ({
+  fontSize,
+  currentIndex,
+  messageList,
+  memoReaction,
+  currentMessage,
+  printMessage,
+  setFontSize,
+}: {
+  fontSize: string;
+  currentIndex: number;
+  messageList: InInstantEventMessage[];
+  memoReaction: { LIKE: number; HAHA: number; WOW: number; SAD: number; ANGRY: number; DOWN: number; CARE: number };
+  currentMessage: InInstantEventMessage | undefined;
+  printMessage: (string | JSX.Element)[] | string;
+  setFontSize: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  return (
+    <Box
+      backgroundColor="white"
+      borderRadius="md"
+      paddingX="10"
+      paddingTop="1"
+      paddingBottom="10"
+      marginX="auto"
+      marginY="auto"
+      fontSize={fontSize}
+      maxW="1600px"
+      maxH="800px"
+      display="flex"
+      flexDirection="column"
+    >
+      <Stack direction="row" align="center" marginBottom="9">
+        <Box fontSize="xs" key="message-count">
+          {currentIndex + 1} / {messageList.length}
+        </Box>
+        <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
+          <IconUp size={16} active={memoReaction.LIKE > 0} />
+          {memoReaction.LIKE}
+        </Box>
+        <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
+          <IconDown size={16} active={memoReaction.DOWN > 0} />
+          {memoReaction.DOWN}
+        </Box>
+        <Box display="flex" alignItems="center" fontSize="xs" key="reply">
+          댓글 {currentMessage !== undefined ? currentMessage.reply.length : 0} 개
+        </Box>
+        <Spacer />
+        <Button
+          size="xs"
+          key="btn-md"
+          variant={fontSize === 'md' ? 'outline' : 'ghost'}
+          onClick={() => {
+            setFontSize('md');
+          }}
+        >
+          작은
+        </Button>
+        <Button
+          key="btn-lg"
+          size="xs"
+          variant={fontSize === 'lg' ? 'outline' : 'ghost'}
+          onClick={() => {
+            setFontSize('lg');
+          }}
+        >
+          보통
+        </Button>
+        <Button
+          key="btn-xl"
+          size="xs"
+          variant={fontSize === 'xl' ? 'outline' : 'ghost'}
+          onClick={() => {
+            setFontSize('xl');
+          }}
+        >
+          큰
+        </Button>
+      </Stack>
+      <Box
+        overflowY="scroll"
+        style={{
+          scrollbarWidth: 'none',
+        }}
+      >
+        {printMessage}
+      </Box>
+    </Box>
+  );
+};
+
+const Presentation = function ({ messageList, show, turnOff, turnOn, instantEventId }: Props) {
   const [currentIndex, setIndex] = useState(0);
   const currentMessage = messageList[currentIndex];
   const [fontSize, setFontSize] = useState('lg');
+  const [mode, setMode] = useState<'PT' | 'REPLY'>('PT');
   const printMessage = (() => {
     if (currentMessage === undefined) {
       return '';
@@ -131,6 +226,14 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
       }
       if (event.key === 'ArrowLeft') {
         setIndex((prev) => (prev - 1 + messageList.length) % messageList.length);
+      }
+      if (event.key === 'ArrowDown') {
+        // 댓글 표시로 변경
+        setMode('REPLY');
+      }
+      if (event.key === 'ArrowUp') {
+        // 프리젠테이션으로 변경
+        setMode('PT');
       }
       // +와 - 키를 누르면 폰트 사이즈를 변경합니다.
       if (event.key === '=' && fontSize === 'md') {
@@ -159,6 +262,10 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
       // esc 키를 누르면 turnOff 함수를 실행합니다.
       if (event.key === 'Escape') {
         turnOff();
+      }
+      // 1 키를 누르면 turnOn 함수를 실행합니다.
+      if (event.key === '1') {
+        turnOn();
       }
     },
     [fontSize, setIndex, messageList, turnOff],
@@ -193,6 +300,15 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
     );
   }, [currentIndex, messageList]);
 
+  // prsentation mode 일 때 뒷 배경 길이에 의해서 스크롤이 발생하지 않도록 하는 코드 작성 부탁해.
+  useEffect(() => {
+    if (show === true) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [show]);
+
   return (
     <Box
       display={show ? 'flex' : 'none'}
@@ -205,73 +321,69 @@ const Presentation = function ({ messageList, show, turnOff }: Props) {
       left="50%"
       transform="translate(-50%, -50%)"
     >
-      <Box
-        backgroundColor="white"
-        borderRadius="md"
-        paddingX="10"
-        paddingTop="1"
-        paddingBottom="10"
-        marginX="auto"
-        marginY="auto"
-        fontSize={fontSize}
-        maxW="1600px"
-        maxH="800px"
-        display="flex"
-        flexDirection="column"
-      >
-        <Stack direction="row" align="center" marginBottom="9">
-          <Box fontSize="xs" key="message-count">
-            {currentIndex + 1} / {messageList.length}
-          </Box>
-          <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
-            <IconUp size={16} active={memoReaction.LIKE > 0} />
-            {memoReaction.LIKE}
-          </Box>
-          <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
-            <IconDown size={16} active={memoReaction.DOWN > 0} />
-            {memoReaction.DOWN}
-          </Box>
-          <Spacer />
-          <Button
-            size="xs"
-            key="btn-md"
-            variant={fontSize === 'md' ? 'outline' : 'ghost'}
-            onClick={() => {
-              setFontSize('md');
-            }}
-          >
-            작은
-          </Button>
-          <Button
-            key="btn-lg"
-            size="xs"
-            variant={fontSize === 'lg' ? 'outline' : 'ghost'}
-            onClick={() => {
-              setFontSize('lg');
-            }}
-          >
-            보통
-          </Button>
-          <Button
-            key="btn-xl"
-            size="xs"
-            variant={fontSize === 'xl' ? 'outline' : 'ghost'}
-            onClick={() => {
-              setFontSize('xl');
-            }}
-          >
-            큰
-          </Button>
-        </Stack>
+      {mode === 'PT' && (
+        <PresentationView
+          fontSize={fontSize}
+          currentIndex={currentIndex}
+          messageList={messageList}
+          memoReaction={memoReaction}
+          currentMessage={currentMessage}
+          printMessage={printMessage}
+          setFontSize={setFontSize}
+        />
+      )}
+      {mode === 'REPLY' && (
         <Box
-          overflowY="scroll"
-          style={{
-            scrollbarWidth: 'none',
-          }}
+          backgroundColor="white"
+          borderRadius="md"
+          paddingX="10"
+          paddingTop="1"
+          paddingBottom="10"
+          marginX="auto"
+          marginY="auto"
+          fontSize={fontSize}
+          maxW="1600px"
+          maxH="800px"
+          display="flex"
+          flexDirection="column"
         >
-          {printMessage}
+          <Stack direction="row" align="center" marginBottom="9">
+            <Box fontSize="xs" key="message-count">
+              {currentIndex + 1} / {messageList.length}
+            </Box>
+            <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
+              <IconUp size={16} active={memoReaction.LIKE > 0} />
+              {memoReaction.LIKE}
+            </Box>
+            <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
+              <IconDown size={16} active={memoReaction.DOWN > 0} />
+              {memoReaction.DOWN}
+            </Box>
+            <Box display="flex" alignItems="center" fontSize="xs" key="reply">
+              댓글 {currentMessage !== undefined ? currentMessage.reply.length : 0} 개
+            </Box>
+          </Stack>
+          <Box
+            overflowY="scroll"
+            style={{
+              scrollbarWidth: 'none',
+            }}
+          >
+            {currentMessage?.reply.map((reply) => (
+              <InstantEventMessageReply
+                key={reply.id}
+                replyItem={reply}
+                instantEventId={instantEventId}
+                messageId={currentMessage.id}
+                isOwner={false}
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                onSendComplete={() => {}}
+                fontSize={fontSize}
+              />
+            ))}
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };

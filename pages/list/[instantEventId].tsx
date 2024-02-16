@@ -428,6 +428,10 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           turnOff={() => {
             setShowPresentation(false);
           }}
+          turnOn={() => {
+            setShowPresentation(true);
+          }}
+          instantEventId={instantEventInfo.instantEventId}
         />
       </Box>
     </ServiceLayout>

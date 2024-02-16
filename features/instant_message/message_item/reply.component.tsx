@@ -112,9 +112,18 @@ interface Props {
   isOwner: boolean;
   replyItem: InInstantEventMessageReply;
   onSendComplete: () => void;
+  // eslint-disable-next-line react/require-default-props
+  fontSize?: string;
 }
 
-const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId, messageId, onSendComplete }: Props) {
+const InstantEventMessageReply = function ({
+  replyItem,
+  isOwner,
+  instantEventId,
+  messageId,
+  onSendComplete,
+  fontSize = 'xs',
+}: Props) {
   const { authUser } = useAuth();
   const toast = useToast();
   const isDeny = replyItem.deny !== undefined && replyItem.deny;
@@ -195,7 +204,7 @@ const InstantEventMessageReply = function ({ replyItem, isOwner, instantEventId,
             {replyItem.author.displayName}
           </Text>
         )}
-        <Text whiteSpace="pre-line" fontSize="xs" color={replyItem.author ? 'white' : 'black'}>
+        <Text whiteSpace="pre-line" fontSize={fontSize} color={replyItem.author ? 'white' : 'black'}>
           {convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply))}
         </Text>
       </Box>
