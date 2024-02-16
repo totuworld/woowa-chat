@@ -7,7 +7,7 @@ interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   isPreview: boolean;
   // eslint-disable-next-line react/require-default-props
-  sumOfLike?: number;
+  uniqueVoterCount?: number;
 }
 
 const DEFAULT_IMG = '/default_title.png';
@@ -113,7 +113,7 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
-const InstantInfo = function ({ instantEventInfo, eventState, isPreview, sumOfLike }: Props) {
+const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueVoterCount }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   const linkText = convertMarkdownLinksToJsx(printDesc);
@@ -143,9 +143,9 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, sumOfLi
             🎨 프리뷰 모드 🎨
           </Center>
         )}
-        {sumOfLike !== undefined && (
+        {uniqueVoterCount !== undefined && (
           <Text fontSize="sm" style={{ marginTop: '10px' }}>
-            궁금해요: 전체 {sumOfLike}개
+            전체 투표 참여자수: {uniqueVoterCount}명
           </Text>
         )}
       </Box>

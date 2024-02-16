@@ -120,6 +120,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
+  const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   const sortedMessageList = useMemo(
     () =>
@@ -142,12 +143,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [isSending, setSending] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
 
-  // like 숫자를 모두 합한 결과
-  const sumOfLike = sortedMessageList.reduce((acc, cur) => {
-    if (cur.reaction === undefined) return acc;
-    return acc + cur.reaction.length;
-  }, 0);
-
   const isPreview = (() => {
     if (query.isPreview === undefined) return false;
     if (typeof query.isPreview === 'string') return query.isPreview === 'true';
@@ -163,8 +158,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     messageListQueryKey,
     async () => {
       const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
-      const resp = await axios.get<InInstantEventMessage[]>(
-        `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}?isPreview=${isPreview}`,
+      const resp = await axios.get<{ list: InInstantEventMessage[]; uniqueVoterCount: number }>(
+        `/api/instant-event.messages.list_with_voter_count/${instantEventInfo?.instantEventId}?isPreview=${isPreview}`,
         {
           headers: extractToken
             ? {
@@ -182,7 +177,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
         if (data.status === 200 && data.data) {
-          setMessageList(data.data);
+          setMessageList(data.data.list);
+          setUniqueVoterCount(data.data.uniqueVoterCount);
         }
       },
     },
@@ -296,7 +292,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             instantEventInfo={instantEventInfo}
             eventState={eventState}
             isPreview={isPreview}
-            sumOfLike={eventState === 'showAll' || eventState === 'locked' ? sumOfLike : undefined}
+            uniqueVoterCount={eventState === 'showAll' || eventState === 'locked' ? uniqueVoterCount : undefined}
           />
         </Box>
         {authUser !== null && sortedMessageList.length > 0 && eventState === 'locked' && (

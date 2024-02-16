@@ -449,6 +449,110 @@ async function messageList({
   return result;
 }
 
+async function messageListWithUniqueVoter({
+  instantEventId,
+  currentUserUid,
+  isPreview = false,
+}: {
+  instantEventId: string;
+  currentUserUid: string;
+  isPreview?: boolean;
+}) {
+  const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const ownerMemberRef = FirebaseAdmin.getInstance()
+      .Firestore.collection(OWNER_MEMBER_COLLECTION)
+      .doc(currentUserUid);
+    const eventDocRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+    const colRef = eventDocRef.collection(INSTANT_MESSAGE).orderBy('sortWeight', 'desc').orderBy('createAt', 'desc');
+    const eventDoc = await transaction.get(eventDocRef);
+    const colDocs = await transaction.get(colRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const eventInfo = eventDoc.data() as InInstantEvent;
+    const eventState = InstantEventUtil.calEventState(eventInfo);
+    const isShowAll = eventState === 'showAll';
+    const isOwnerMember = ownerMemberDoc.exists;
+    const voterSet = new Set<string>();
+    const originData = colDocs.docs.map((mv) => {
+      const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
+      const voted = (() => {
+        if (docData.reaction === undefined) {
+          return false;
+        }
+        if (currentUserUid === undefined) {
+          return false;
+        }
+        return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
+      })();
+      if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
+        return null;
+      }
+      const returnData = {
+        ...docData,
+        id: mv.id,
+        voter: [],
+        voted,
+        reaction: extractReaction({ reaction: docData.reaction, isOwnerMember, isShowAll, voted, UID: currentUserUid }),
+        message: docData.message,
+        reply:
+          docData.reply !== undefined && (isOwnerMember || isShowAll)
+            ? docData.reply
+                .map((replyMv) => {
+                  if (replyMv.deny !== undefined && replyMv.deny) {
+                    return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
+                  }
+                  return { ...replyMv };
+                })
+                .sort((a, b) => {
+                  const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
+                  const isBOwnerCreate = b.createByOwner !== undefined && b.createByOwner === true;
+                  if (isAOwnerCreate === true && isBOwnerCreate === false) {
+                    return 1;
+                  }
+                  if (isAOwnerCreate === false && isBOwnerCreate === true) {
+                    return -1;
+                  }
+                  return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
+                })
+            : [],
+        createAt: docData.createAt.toDate().toISOString(),
+        updateAt: docData.updateAt ? docData.updateAt.toDate().toISOString() : undefined,
+      } as InInstantEventMessage;
+      if (docData.reaction !== undefined) {
+        docData.reaction.forEach((fv) => {
+          voterSet.add(fv.voter);
+        });
+      }
+      return returnData;
+    });
+    const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
+    // T상태가 전체 공개 혹은 preview flag가 있을 때 sort 룰 적용.
+    // 공감해요 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
+    if (isShowAll || (isPreview && isOwnerMember)) {
+      const sortedData = filteredData.sort((a, b) => {
+        const aReaction =
+          a.reaction === undefined || a.reaction.length === 0
+            ? 0
+            : a.reaction.filter((fv) => fv.type === 'LIKE').length;
+        const bReaction =
+          b.reaction === undefined || b.reaction.length === 0
+            ? 0
+            : b.reaction.filter((fv) => fv.type === 'LIKE').length;
+        return bReaction - aReaction;
+      });
+      const mapData = sortedData.map((mv) => ({
+        ...mv,
+        sortWeight: 0,
+      }));
+      return mapData;
+    }
+    return {
+      list: filteredData,
+      uniqueVoterCount: voterSet.size,
+    };
+  });
+  return result;
+}
+
 interface ReactionReduce {
   [key: string]: number;
 }
@@ -961,6 +1065,7 @@ const ChatModel = {
   get,
   messageList,
   messageListForDownload,
+  messageListWithUniqueVoter,
   messageInfo,
   closeSendMessage,
   denyMessage,
