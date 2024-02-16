@@ -423,7 +423,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           />
         )}
         <Presentation
-          messageList={sortedMessageList}
+          messageList={sortedMessageList.filter((fv) => fv.deny === undefined || fv.deny === false)}
           show={showPresentation}
           turnOff={() => {
             setShowPresentation(false);
