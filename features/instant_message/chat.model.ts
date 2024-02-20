@@ -530,27 +530,27 @@ async function messageListWithUniqueVoter({
     const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
     // T상태가 전체 공개 혹은 preview flag가 있을 때 sort 룰 적용.
     // 공감해요 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
-    if (isShowAll || (isPreview && isOwnerMember)) {
-      const sortedData = filteredData.sort((a, b) => {
-        const aReaction =
-          a.reaction === undefined || a.reaction.length === 0
-            ? 0
-            : a.reaction.filter((fv) => fv.type === 'LIKE').length;
-        const bReaction =
-          b.reaction === undefined || b.reaction.length === 0
-            ? 0
-            : b.reaction.filter((fv) => fv.type === 'LIKE').length;
-        return bReaction - aReaction;
-      });
-      const mapData = sortedData.map((mv) => ({
-        ...mv,
-        sortWeight: 0,
-      }));
-      return {
-        list: mapData,
-        uniqueVoterCount: voterSet.size,
-      };
-    }
+    // if (isShowAll || (isPreview && isOwnerMember)) {
+    //   const sortedData = filteredData.sort((a, b) => {
+    //     const aReaction =
+    //       a.reaction === undefined || a.reaction.length === 0
+    //         ? 0
+    //         : a.reaction.filter((fv) => fv.type === 'LIKE').length;
+    //     const bReaction =
+    //       b.reaction === undefined || b.reaction.length === 0
+    //         ? 0
+    //         : b.reaction.filter((fv) => fv.type === 'LIKE').length;
+    //     return bReaction - aReaction;
+    //   });
+    //   const mapData = sortedData.map((mv) => ({
+    //     ...mv,
+    //     sortWeight: 0,
+    //   }));
+    //   return {
+    //     list: mapData,
+    //     uniqueVoterCount: voterSet.size,
+    //   };
+    // }
     return {
       list: filteredData,
       uniqueVoterCount: voterSet.size,
