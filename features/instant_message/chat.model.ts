@@ -457,7 +457,10 @@ async function messageListWithUniqueVoter({
   instantEventId: string;
   currentUserUid: string;
   isPreview?: boolean;
-}) {
+}): Promise<{
+  list: InInstantEventMessage[];
+  uniqueVoterCount: number;
+}> {
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const ownerMemberRef = FirebaseAdmin.getInstance()
       .Firestore.collection(OWNER_MEMBER_COLLECTION)
@@ -484,7 +487,7 @@ async function messageListWithUniqueVoter({
         return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
-        return null;
+        return [];
       }
       const returnData = {
         ...docData,
@@ -543,7 +546,10 @@ async function messageListWithUniqueVoter({
         ...mv,
         sortWeight: 0,
       }));
-      return mapData;
+      return {
+        list: mapData,
+        uniqueVoterCount: voterSet.size,
+      };
     }
     return {
       list: filteredData,
