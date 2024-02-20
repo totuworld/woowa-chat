@@ -487,7 +487,7 @@ async function messageListWithUniqueVoter({
         return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
-        return [];
+        return null;
       }
       const returnData = {
         ...docData,
