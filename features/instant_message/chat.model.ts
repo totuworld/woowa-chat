@@ -452,7 +452,6 @@ async function messageList({
 async function messageListWithUniqueVoter({
   instantEventId,
   currentUserUid,
-  isPreview = false,
 }: {
   instantEventId: string;
   currentUserUid: string;

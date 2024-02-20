@@ -369,18 +369,20 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
               scrollbarWidth: 'none',
             }}
           >
-            {currentMessage?.reply.map((reply) => (
-              <InstantEventMessageReply
-                key={reply.id}
-                replyItem={reply}
-                instantEventId={instantEventId}
-                messageId={currentMessage.id}
-                isOwner={false}
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                onSendComplete={() => {}}
-                fontSize={fontSize}
-              />
-            ))}
+            {currentMessage?.reply
+              .filter((fv) => !(fv.deny !== undefined && fv.deny === true))
+              .map((reply) => (
+                <InstantEventMessageReply
+                  key={reply.id}
+                  replyItem={reply}
+                  instantEventId={instantEventId}
+                  messageId={currentMessage.id}
+                  isOwner={false}
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  onSendComplete={() => {}}
+                  fontSize={fontSize}
+                />
+              ))}
           </Box>
         </Box>
       )}
