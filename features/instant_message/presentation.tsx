@@ -263,8 +263,8 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
       if (event.key === 'Escape') {
         turnOff();
       }
-      // 1 키를 누르면 turnOn 함수를 실행합니다.
-      if (event.key === '1') {
+      // ctrl + 1 키를 누르면 turnOn 함수를 실행합니다.
+      if (event.key === '1' && event.ctrlKey) {
         turnOn();
       }
     },
