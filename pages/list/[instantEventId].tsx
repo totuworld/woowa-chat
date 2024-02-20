@@ -124,20 +124,21 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   const sortedMessageList = useMemo(
     () =>
-      [...messageList].sort((a, b) => {
-        // 정렬 기준
-        // eventState === 'showAll' 일때는 reaction의 길이가 많은게 먼저다.
-        // 그 뒤로 sortWeight를 비교한다.
-        // 그러나 다른때는 sortWeight만 가지고 비교한다.
-        if (eventState === 'showAll') {
-          if (a.reaction === undefined && b.reaction === undefined) return 0;
-          if (a.reaction === undefined) return 1;
-          if (b.reaction === undefined) return -1;
-          if (a.reaction.length > b.reaction.length) return -1;
-          if (a.reaction.length < b.reaction.length) return 1;
-        }
-        return b.sortWeight - a.sortWeight;
-      }),
+      [...messageList].sort(
+        (a, b) =>
+          // 정렬 기준
+          // eventState === 'showAll' 일때는 reaction의 길이가 많은게 먼저다.
+          // 그 뒤로 sortWeight를 비교한다.
+          // 그러나 다른때는 sortWeight만 가지고 비교한다.
+          // if (eventState === 'showAll') {
+          //   if (a.reaction === undefined && b.reaction === undefined) return 0;
+          //   if (a.reaction === undefined) return 1;
+          //   if (b.reaction === undefined) return -1;
+          //   if (a.reaction.length > b.reaction.length) return -1;
+          //   if (a.reaction.length < b.reaction.length) return 1;
+          // }
+          b.sortWeight - a.sortWeight,
+      ),
     [messageList, eventState],
   );
   const [isSending, setSending] = useState(false);
