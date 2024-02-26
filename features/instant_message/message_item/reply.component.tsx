@@ -161,7 +161,13 @@ const InstantEventMessageReply = function ({
           mr="2"
         />
       </Box>
-      <Box borderRadius="md" p="2" width="full" bg={replyItem.author ? ColorPalette.mint : 'gray.100'}>
+      <Box
+        borderRadius="md"
+        p="2"
+        width="full"
+        bg="gray.100"
+        border={replyItem.author ? `2px solid ${ColorPalette.mint}` : ''}
+      >
         {isOwner && (
           <div style={{ float: 'right' }}>
             <Menu>
@@ -195,8 +201,8 @@ const InstantEventMessageReply = function ({
         {replyItem.author && (
           <Text
             fontSize="xs"
-            color={ColorPalette.mint}
-            bgColor="white"
+            color="white"
+            bgColor={ColorPalette.mint}
             display="inline-block"
             paddingX="2"
             borderRadius="base"
@@ -204,7 +210,7 @@ const InstantEventMessageReply = function ({
             {replyItem.author.displayName}
           </Text>
         )}
-        <Text whiteSpace="pre-line" fontSize={fontSize} color={replyItem.author ? 'white' : 'black'}>
+        <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
           {convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply))}
         </Text>
       </Box>

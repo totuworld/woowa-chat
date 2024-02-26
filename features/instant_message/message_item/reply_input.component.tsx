@@ -63,9 +63,9 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
         <Button
           isLoading={isSending}
           disabled={isSending || locked === true}
+          bgColor={`${ColorPalette.mint}`}
           textColor="white"
-          bgColor={`${ColorPalette.red}`}
-          _hover={{ bg: ColorPalette.red_disabled }}
+          _hover={{ bg: ColorPalette.mint_disabled }}
           variant="solid"
           size="sm"
           // borderRadius="full"
