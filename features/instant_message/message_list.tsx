@@ -11,11 +11,14 @@ const MessageList = function ({
   messageList,
   messageLoadingStatus,
   onSendComplete,
+  onDeleteComplete,
 }: {
   eventInfo: InInstantEvent;
   messageList: InInstantEventMessage[];
   messageLoadingStatus: 'idle' | 'loading' | 'success' | 'error';
   onSendComplete: (data: InInstantEventMessage) => void;
+  // eslint-disable-next-line react/require-default-props
+  onDeleteComplete?: () => void;
 }) {
   const { isOwner } = useAuth();
   const eventState = InstantEventUtil.calEventState(eventInfo);
@@ -64,6 +67,7 @@ const MessageList = function ({
                   onSendComplete(info.payload!);
                 });
               }}
+              onDeleteComplete={onDeleteComplete}
             />
           ))}
         </VStack>

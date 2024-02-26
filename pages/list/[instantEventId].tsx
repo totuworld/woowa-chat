@@ -155,7 +155,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   console.info({ eventState });
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
-  const { status } = useQuery(
+  const { status, refetch } = useQuery(
     messageListQueryKey,
     async () => {
       const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -420,6 +420,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 updateArr[findPrevIndex] = info!;
                 return updateArr;
               });
+            }}
+            onDeleteComplete={() => {
+              refetch();
             }}
           />
         )}

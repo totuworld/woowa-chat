@@ -417,6 +417,34 @@ async function denyMessage({
   }
 }
 
+async function deleteMessage({
+  instantEventId,
+  messageId,
+}: {
+  instantEventId: string;
+  messageId: string;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.delete';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function updateMessageSortWeight({
   instantEventId,
   messageId,
@@ -634,6 +662,7 @@ const ChatClientService = {
   getDownloadData,
   immediateClosSendMessagePeriod,
   denyMessage,
+  deleteMessage,
   denyReply,
   deleteReply,
   publish,

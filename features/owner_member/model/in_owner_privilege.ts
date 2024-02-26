@@ -5,6 +5,8 @@ export const PRIVILEGE_NO = {
   chageSortWeitghtForMessage: 102,
   /** 메시지 수정 권한 */
   updateMessage: 103,
+  /** 메시지 delete 권한 */
+  deleteMessage: 104,
   /** 댓글 deny 권한 */
   denyReply: 201,
   /** 댓글 작성 권한 */
@@ -28,6 +30,7 @@ export const PRIVILEGE_NAME_AND_NO: { [key in PrivilegeKeys]: { name: string; no
   chageSortWeitghtForMessage: { name: '메시지 정렬 변경 권한', no: PRIVILEGE_NO.chageSortWeitghtForMessage },
   /** 메시지 수정 권한 */
   updateMessage: { name: '메시지 수정 권한', no: PRIVILEGE_NO.updateMessage },
+  deleteMessage: { name: '메시지 삭제 권한', no: PRIVILEGE_NO.deleteMessage },
   /** 댓글 deny 권한 */
   denyReply: { name: '댓글 deny 권한', no: PRIVILEGE_NO.denyReply },
   /** 댓글 작성 권한 */
@@ -50,6 +53,7 @@ PRIVILEGE_MAP.set(PRIVILEGE_NO.chageSortWeitghtForMessage.toString(), {
   no: PRIVILEGE_NO.chageSortWeitghtForMessage,
 });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.updateMessage.toString(), { name: '메시지 수정 권한', no: PRIVILEGE_NO.updateMessage });
+PRIVILEGE_MAP.set(PRIVILEGE_NO.deleteMessage.toString(), { name: '메시지 삭제 권한', no: PRIVILEGE_NO.deleteMessage });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.denyReply.toString(), { name: '댓글 deny 권한', no: PRIVILEGE_NO.denyReply });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.postReply.toString(), { name: '댓글 작성 권한', no: PRIVILEGE_NO.postReply });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.setPin.toString(), { name: '메시지 pin 권한', no: PRIVILEGE_NO.setPin });

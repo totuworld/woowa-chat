@@ -38,6 +38,8 @@ interface Props {
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   item: InInstantEventMessage;
   onSendComplete: () => void;
+  // eslint-disable-next-line react/require-default-props
+  onDeleteComplete?: () => void;
 }
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
@@ -141,7 +143,14 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   return jsxParts;
 }
 
-const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked, eventState }: Props) {
+const InstantMessageItem = function ({
+  instantEventId,
+  item,
+  onSendComplete,
+  locked,
+  eventState,
+  onDeleteComplete,
+}: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
@@ -237,6 +246,30 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     });
   }
 
+  function deleteMessage() {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    ChatClientService.deleteMessage({
+      instantEventId,
+      messageId: item.id,
+    }).then((resp) => {
+      if (resp.status !== 200 && resp.error !== undefined) {
+        toast({
+          title: (resp.error.data as { message: string }).message,
+          status: 'warning',
+          position: 'top-right',
+        });
+        return;
+      }
+      onDeleteComplete && onDeleteComplete();
+    });
+  }
+
   function updateSortWeight() {
     if (authUser === null) {
       toast({
@@ -311,6 +344,22 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           }}
         >
           {isDeny ? 'Accept' : 'Deny'}
+        </MenuItem>,
+      );
+    }
+    if (hasPrivilege(PRIVILEGE_NO.deleteMessage)) {
+      returnMenuList.push(
+        <MenuItem
+          key="menu-item-deny-message"
+          bgColor="red.300"
+          textColor="white"
+          _hover={{ bg: 'red.500' }}
+          _focus={{ bg: 'red.500' }}
+          onClick={() => {
+            deleteMessage();
+          }}
+        >
+          삭제
         </MenuItem>,
       );
     }

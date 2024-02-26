@@ -27,6 +27,7 @@ import JSCReactionInstantEventMessageReq from '@/controllers/instant_message/JSO
 import JSCUpdateBodyReq from '@/controllers/instant_message/JSONSchema/JSCUpdateBodyReq';
 import JSCPinInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCPinInstantEventMessageReq';
 import JSCDeleteInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReplyReq';
+import JSCDeleteInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -371,6 +372,27 @@ async function denyMessage(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(result);
 }
 
+async function deleteMessage(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const uid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCDeleteInstantEventMessageReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const result = await ChatModel.deleteMessage({ ...validateResp.data.body, currentUserId: uid });
+  return res.status(200).json(result);
+}
+
 async function updateMessageSortWeight(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
   const uid = await verifyFirebaseIdToken(token);
@@ -577,6 +599,7 @@ const ChatCtrl = {
   messageListWithUniqueVoter,
   getMessageInfo,
   denyMessage,
+  deleteMessage,
   denyReply,
   deleteReply,
   voteMessage,
