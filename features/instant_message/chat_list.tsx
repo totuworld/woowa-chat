@@ -65,7 +65,7 @@ const ChatList = function () {
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
     {
-      enabled: isOwner,
+      enabled: true,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
