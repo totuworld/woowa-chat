@@ -819,6 +819,53 @@ async function denyReply({
   });
 }
 
+/** 특정 메시지의 특정 댓글을 delete 한다. */
+async function deleteReply({
+  instantEventId,
+  messageId,
+  replyId,
+  currentUserId,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+  currentUserId: string;
+}): Promise<void> {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
+  const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    if (ownerMemberDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 401, message: '권한없음' });
+    }
+    const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+    const hasPrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.deleteReply);
+    if (hasPrivilege === false) {
+      throw new CustomServerError({ statusCode: 403, message: '댓글을 삭제할 권한이 없습니다.' });
+    }
+    const info = messageDoc.data() as InInstantEventMessageServer;
+    const prevReplyList = info.reply === undefined ? [] : [...info.reply];
+    if (prevReplyList.length < 0) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
+    }
+    const replyIdx = prevReplyList.findIndex((fv) => fv.id === replyId);
+    if (replyIdx < 0) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 댓글' });
+    }
+    const updateReplyList = [...prevReplyList].filter((fv) => fv.id !== replyId);
+    await transaction.update(messageRef, { reply: updateReplyList });
+  });
+}
+
 async function pinMessage({
   instantEventId,
   messageId,
@@ -1078,6 +1125,7 @@ const ChatModel = {
   reactionMessage,
   postReply,
   denyReply,
+  deleteReply,
   updateMessage,
   pinMessage,
 };

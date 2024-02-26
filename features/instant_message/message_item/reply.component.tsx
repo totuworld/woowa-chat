@@ -4,6 +4,7 @@ import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { useAuth } from '@/contexts/auth_user.context';
 import ChatClientService from '../chat.client.service';
 import ColorPalette from '@/styles/color_palette';
+import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
@@ -124,7 +125,7 @@ const InstantEventMessageReply = function ({
   onSendComplete,
   fontSize = 'xs',
 }: Props) {
-  const { authUser } = useAuth();
+  const { authUser, hasPrivilege } = useAuth();
   const toast = useToast();
   const isDeny = replyItem.deny !== undefined && replyItem.deny;
   function denyReply() {
@@ -140,6 +141,30 @@ const InstantEventMessageReply = function ({
       messageId,
       replyId: replyItem.id,
       deny: replyItem.deny === undefined ? true : !replyItem.deny,
+    }).then((resp) => {
+      if (resp.status !== 200 && resp.error !== undefined) {
+        toast({
+          title: (resp.error.data as { message: string }).message,
+          status: 'warning',
+          position: 'top-right',
+        });
+        return;
+      }
+      onSendComplete();
+    });
+  }
+  function deleteReply() {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    ChatClientService.deleteReply({
+      instantEventId,
+      messageId,
+      replyId: replyItem.id,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
@@ -183,17 +208,32 @@ const InstantEventMessageReply = function ({
                 _focus={{ boxShadow: 'none' }}
               />
               <MenuList>
-                <MenuItem
-                  bgColor="red.300"
-                  textColor="white"
-                  _hover={{ bg: 'red.500' }}
-                  _focus={{ bg: 'red.500' }}
-                  onClick={() => {
-                    denyReply();
-                  }}
-                >
-                  {isDeny ? 'Accept' : 'Deny'}
-                </MenuItem>
+                {hasPrivilege(PRIVILEGE_NO.denyReply) && (
+                  <MenuItem
+                    bgColor="red.300"
+                    textColor="white"
+                    _hover={{ bg: 'red.500' }}
+                    _focus={{ bg: 'red.500' }}
+                    onClick={() => {
+                      denyReply();
+                    }}
+                  >
+                    {isDeny ? 'Accept' : 'Deny'}
+                  </MenuItem>
+                )}
+                {hasPrivilege(PRIVILEGE_NO.deleteReply) && (
+                  <MenuItem
+                    bgColor="red.300"
+                    textColor="white"
+                    _hover={{ bg: 'red.500' }}
+                    _focus={{ bg: 'red.500' }}
+                    onClick={() => {
+                      deleteReply();
+                    }}
+                  >
+                    댓글 삭제
+                  </MenuItem>
+                )}
               </MenuList>
             </Menu>
           </div>

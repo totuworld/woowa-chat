@@ -509,6 +509,36 @@ async function denyReply({
   }
 }
 
+async function deleteReply({
+  instantEventId,
+  messageId,
+  replyId,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.delete_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyId },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function pinMessage({
   instantEventId,
   messageId,
@@ -605,6 +635,7 @@ const ChatClientService = {
   immediateClosSendMessagePeriod,
   denyMessage,
   denyReply,
+  deleteReply,
   publish,
   unpublish,
   lock,
