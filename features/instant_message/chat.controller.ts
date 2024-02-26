@@ -127,6 +127,21 @@ async function lock(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function showMsgAndCollectReply(req: NextApiRequest, res: NextApiResponse) {
+  const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
+    {
+      body: req.body,
+    },
+    JSCCloseInstantEventReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const { instantEventId } = validateResp.data.body;
+  await ChatModel.showMsgAndCollectReply({ instantEventId });
+  return res.status(200).end();
+}
+
 async function publish(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<{ body: { instantEventId: string } }>(
     {
@@ -245,6 +260,38 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
     throw new BadReqError(validateResp.errorMessage);
   }
   const result = await ChatModel.messageList({ ...validateResp.data.query, currentUserUid: senderUid });
+  return res.status(200).json(result);
+}
+
+async function messageListWithUniqueVoter(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.headers.authorization;
+  let senderUid: string | undefined;
+  if (token !== undefined) {
+    senderUid = await verifyFirebaseIdToken(token);
+  }
+  if (senderUid === undefined) {
+    throw new BadReqError('authorization 누락');
+  }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  // 우아한형제들 email이 아닌 경우!
+  if (userInfoByAuth.email !== undefined && /@woowahan\.com$/.test(userInfoByAuth.email) === false) {
+    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
+  }
+  const validateResp = validateParamWithData<{
+    query: {
+      instantEventId: string;
+      isPreview: boolean;
+    };
+  }>(
+    {
+      query: req.query,
+    },
+    JSCInstantEventMessageListReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const result = await ChatModel.messageListWithUniqueVoter({ ...validateResp.data.query, currentUserUid: senderUid });
   return res.status(200).json(result);
 }
 
@@ -494,6 +541,7 @@ const ChatCtrl = {
   update,
   get,
   lock,
+  showMsgAndCollectReply,
   publish,
   unpublish,
   close,
@@ -503,6 +551,7 @@ const ChatCtrl = {
   closeSendMessage,
   messageList,
   messageListForDownload,
+  messageListWithUniqueVoter,
   getMessageInfo,
   denyMessage,
   denyReply,

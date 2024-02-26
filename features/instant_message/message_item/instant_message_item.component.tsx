@@ -4,7 +4,6 @@ import {
   Button,
   Divider,
   Flex,
-  Grid,
   GridItem,
   IconButton,
   Input,
@@ -29,10 +28,14 @@ import InstantEventMessageReply from './reply.component';
 import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
+import { REACTION_TYPE } from './reaction_type';
+import IconDown from './icon_down';
+import IconUp from './icon_up';
 
 interface Props {
   instantEventId: string;
   locked: boolean;
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   item: InInstantEventMessage;
   onSendComplete: () => void;
 }
@@ -138,7 +141,7 @@ function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   return jsxParts;
 }
 
-const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked }: Props) {
+const InstantMessageItem = function ({ instantEventId, item, onSendComplete, locked, eventState }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
   const [toggleReplyInput, setToggleReplyInput] = useState(false);
@@ -146,6 +149,57 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [message, updateMessage] = useState(item.message);
+  const [isSendingVote, setSendingVote] = useState({
+    LIKE: false,
+    DOWN: false,
+    CARE: false,
+    HAHA: false,
+    WOW: false,
+    SAD: false,
+    ANGRY: false,
+  });
+
+  const memoReaction = useMemo(() => {
+    if (item.reaction === undefined) return new Map<REACTION_TYPE, number>();
+    return item.reaction.reduce((acc: Map<REACTION_TYPE, number>, cur) => {
+      if (acc.has(cur.type) === false) {
+        acc.set(cur.type, 1);
+        return acc;
+      }
+      acc.set(cur.type, acc.get(cur.type)! + 1);
+      return acc;
+    }, new Map<REACTION_TYPE, number>());
+  }, [item.reaction]);
+
+  function sendReaction(reaction: { isAdd: boolean; type: REACTION_TYPE }) {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    setSendingVote((prev) => ({ ...prev, [reaction.type]: true }));
+    ChatClientService.reactionMessageInfo({
+      instantEventId,
+      messageId: item.id,
+      reaction,
+    })
+      .then((resp) => {
+        if (resp.status !== 200 && resp.error !== undefined) {
+          toast({
+            title: (resp.error.data as { message: string }).message,
+            status: 'warning',
+            position: 'top-right',
+          });
+          return;
+        }
+        onSendComplete();
+      })
+      .finally(() => {
+        setSendingVote((prev) => ({ ...prev, [reaction.type]: false }));
+      });
+  }
 
   function turnOnEditer() {
     setIsEditMode(true);
@@ -247,6 +301,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.denyMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-deny-message"
           bgColor="red.300"
           textColor="white"
           _hover={{ bg: 'red.500' }}
@@ -262,6 +317,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.chageSortWeitghtForMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-weight-setting"
           onClick={() => {
             onOpen();
           }}
@@ -273,6 +329,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.updateMessage)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-upate-message"
           onClick={() => {
             turnOnEditer();
           }}
@@ -284,6 +341,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
     if (hasPrivilege(PRIVILEGE_NO.setPin)) {
       returnMenuList.push(
         <MenuItem
+          key="menu-item-pin-message"
           onClick={() => {
             ChatClientService.pinMessage({
               instantEventId,
@@ -396,10 +454,12 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
-        {havePostReplyPrivilege === true && <Divider />}
+        <Divider />
         {(item.deny === undefined || item.deny === false) && (
-          <Grid
-            templateColumns="repeat(2, 1fr)"
+          <Flex
+            minWidth="max-content"
+            alignItems="center"
+            // justifyContent="center"
             gap={2}
             width="full"
             bg="white"
@@ -408,12 +468,70 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
             padding="2"
             borderColor="gray.300"
           >
-            {isEditMode === false && havePostReplyPrivilege === true && (
-              <GridItem w="100%">
+            <GridItem key="grid-item-vote-up">
+              <Button
+                isLoading={isSendingVote.LIKE}
+                disabled={isSendingVote.LIKE}
+                fontSize="xs"
+                width="full"
+                leftIcon={<IconUp size={16} active={memoReaction.has('LIKE') === true} />}
+                variant="ghost"
+                height="4"
+                _hover={{ bg: 'white' }}
+                _focus={{ bg: 'white' }}
+                onClick={() => {
+                  if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
+                    sendReaction({
+                      isAdd: false,
+                      type: 'LIKE',
+                    });
+                  }
+                  if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
+                    sendReaction({
+                      isAdd: true,
+                      type: 'LIKE',
+                    });
+                  }
+                }}
+              >
+                {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+              </Button>
+            </GridItem>
+            <GridItem key="grid-item-vote-down">
+              <Button
+                isLoading={isSendingVote.DOWN}
+                disabled={isSendingVote.DOWN}
+                fontSize="xs"
+                width="full"
+                leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
+                variant="ghost"
+                height="4"
+                color="black"
+                _hover={{ bg: 'white' }}
+                _focus={{ bg: 'white' }}
+                onClick={() => {
+                  if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
+                    sendReaction({
+                      isAdd: false,
+                      type: 'DOWN',
+                    });
+                  }
+                  if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
+                    sendReaction({
+                      isAdd: true,
+                      type: 'DOWN',
+                    });
+                  }
+                }}
+              >
+                {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
+              </Button>
+            </GridItem>
+            {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
+              <GridItem key="grid-item-reply">
                 <Button
                   fontSize="xs"
                   leftIcon={<ReplyIcon />}
-                  width="full"
                   variant="ghost"
                   height="4"
                   color="black"
@@ -428,7 +546,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
               </GridItem>
             )}
             {isEditMode === true && (
-              <GridItem w="100%">
+              <GridItem w="100%" key="grid-item-close">
                 <Button
                   disabled={locked === true}
                   fontSize="xs"
@@ -448,7 +566,7 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
               </GridItem>
             )}
             {isEditMode === true && (
-              <GridItem w="100%">
+              <GridItem w="100%" key="grid-item-update-message">
                 <Button
                   disabled={locked === true}
                   fontSize="xs"
@@ -467,9 +585,9 @@ const InstantMessageItem = function ({ instantEventId, item, onSendComplete, loc
                 </Button>
               </GridItem>
             )}
-          </Grid>
+          </Flex>
         )}
-        {isOwner && toggleReplyInput && havePostReplyPrivilege === true && (
+        {toggleReplyInput && (
           <Box pt="2">
             <Divider />
             {(item.deny === undefined || item.deny === false) && (

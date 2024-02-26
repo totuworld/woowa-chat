@@ -21,7 +21,7 @@ import ChatClientService from '../chat.client.service';
 import { InInstantEventDownloadItem } from '@/models/instant_message/interface/in_instant_event_message';
 
 interface Props {
-  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   instantEventInfo: InInstantEvent;
   onCompleteLockOrClose: () => void;
 }
@@ -56,6 +56,23 @@ async function lockEvent({ instantEventId }: { instantEventId: string }) {
     return {
       result: false,
       message: '이벤트 잠금 실패',
+    };
+  }
+}
+
+async function showMsgAndCollectReply({ instantEventId }: { instantEventId: string }) {
+  try {
+    await ChatClientService.showMsgAndCollectReply({
+      instantEventId,
+    });
+    return {
+      result: true,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      result: false,
+      message: '댓글 및 공감 수집 설정 실패',
     };
   }
 }
@@ -187,6 +204,21 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
               }}
             >
               질문기간 종료
+            </MenuItem>
+          )}
+          {eventState === 'adminCheck' && (
+            <MenuItem
+              onClick={() => {
+                showMsgAndCollectReply({ instantEventId: instantEventInfo.instantEventId })
+                  .then(() => {
+                    onCompleteLockOrClose();
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }}
+            >
+              질문 공개 및 댓글 수집 시작
             </MenuItem>
           )}
           {eventState === 'reply' && (

@@ -16,7 +16,7 @@ const JSCReactionInstantEventMessageReq: JSONSchema6 = {
           properties: {
             type: {
               type: 'string',
-              enum: ['LIKE', 'CARE', 'HAHA', 'WOW', 'SAD', 'ANGRY'],
+              enum: ['LIKE', 'CARE', 'HAHA', 'WOW', 'SAD', 'ANGRY', 'DOWN'],
             },
           },
           required: ['type'],

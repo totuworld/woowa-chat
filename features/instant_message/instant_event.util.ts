@@ -33,8 +33,11 @@ function calEventState(instantEventInfo: InInstantEvent | null) {
     return 'question';
   }
   // 질문 가능한 기간이 넘었나?
-  if (now.isAfter(endDate)) {
-    return 'reply';
+  if (now.isAfter(endDate) && instantEventInfo.collectReply === undefined) {
+    return 'adminCheck'; // 관리자 정비 기간
+  }
+  if (now.isAfter(endDate) && instantEventInfo.collectReply === true) {
+    return 'reply'; // 댓글 등록 기간
   }
   return 'pre';
 }
@@ -46,6 +49,7 @@ const EventStateTOKorText = {
   closed: '종료',
   locked: '댓글 등록 잠금',
   showAll: '결과 공개',
+  adminCheck: '댓글 수집 준비중',
   none: '-',
 };
 

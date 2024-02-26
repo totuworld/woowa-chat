@@ -102,6 +102,7 @@ const ReactionEmojiSelector = function ({ onClickReaction, showCount = false, re
         WOW: 0,
         SAD: 0,
         ANGRY: 0,
+        DOWN: 0,
       };
     return reaction.reduce(
       (acc, cur) => {
@@ -115,6 +116,7 @@ const ReactionEmojiSelector = function ({ onClickReaction, showCount = false, re
         WOW: 0,
         SAD: 0,
         ANGRY: 0,
+        DOWN: 0,
       },
     );
   }, [reaction]);

@@ -35,6 +35,7 @@ import InstantEventUtil from '@/features/instant_message/instant_event.util';
 import CreateEvent from '@/features/instant_message/create_event.component';
 import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
+import Presentation from '@/features/instant_message/presentation';
 
 async function updateEvent({
   instantEventId,
@@ -119,8 +120,29 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
-  const sortedMessageList = useMemo(() => [...messageList].sort((a, b) => b.sortWeight - a.sortWeight), [messageList]);
+  const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
+  const eventState = InstantEventUtil.calEventState(instantEventInfo);
+  const sortedMessageList = useMemo(
+    () =>
+      [...messageList].sort(
+        (a, b) =>
+          // 정렬 기준
+          // eventState === 'showAll' 일때는 reaction의 길이가 많은게 먼저다.
+          // 그 뒤로 sortWeight를 비교한다.
+          // 그러나 다른때는 sortWeight만 가지고 비교한다.
+          // if (eventState === 'showAll') {
+          //   if (a.reaction === undefined && b.reaction === undefined) return 0;
+          //   if (a.reaction === undefined) return 1;
+          //   if (b.reaction === undefined) return -1;
+          //   if (a.reaction.length > b.reaction.length) return -1;
+          //   if (a.reaction.length < b.reaction.length) return 1;
+          // }
+          b.sortWeight - a.sortWeight,
+      ),
+    [messageList, eventState],
+  );
   const [isSending, setSending] = useState(false);
+  const [showPresentation, setShowPresentation] = useState(false);
 
   const isPreview = (() => {
     if (query.isPreview === undefined) return false;
@@ -130,7 +152,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const eventState = InstantEventUtil.calEventState(instantEventInfo);
   console.info({ eventState });
 
   const messageListQueryKey = ['chatMessageList', instantEventInfo?.instantEventId, authUser, listLoadTrigger];
@@ -138,8 +159,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     messageListQueryKey,
     async () => {
       const extractToken = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
-      const resp = await axios.get<InInstantEventMessage[]>(
-        `/api/instant-event.messages.list/${instantEventInfo?.instantEventId}?isPreview=${isPreview}`,
+      const resp = await axios.get<{ list: InInstantEventMessage[]; uniqueVoterCount: number }>(
+        `/api/instant-event.messages.list_with_voter_count/${instantEventInfo?.instantEventId}?isPreview=${isPreview}`,
         {
           headers: extractToken
             ? {
@@ -157,7 +178,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
         if (data.status === 200 && data.data) {
-          setMessageList(data.data);
+          setMessageList(data.data.list);
+          setUniqueVoterCount(data.data.uniqueVoterCount);
         }
       },
     },
@@ -201,7 +223,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       title="우수타"
       pt={16}
     >
-      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200" minH="95vh">
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
         {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">
@@ -267,8 +289,24 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               </Flex>
             </Box>
           )}
-          <InstantInfo instantEventInfo={instantEventInfo} eventState={eventState} isPreview={isPreview} />
+          <InstantInfo
+            instantEventInfo={instantEventInfo}
+            eventState={eventState}
+            isPreview={isPreview}
+            uniqueVoterCount={eventState === 'showAll' || eventState === 'locked' ? uniqueVoterCount : undefined}
+          />
         </Box>
+        {authUser !== null && sortedMessageList.length > 0 && eventState === 'locked' && (
+          <Box>
+            <Button
+              onClick={() => {
+                setShowPresentation((prev) => !prev);
+              }}
+            >
+              프리젠테이션 모드
+            </Button>
+          </Box>
+        )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
@@ -367,7 +405,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             />
           </Box>
         )}
-        {authUser !== null && (
+        {authUser !== null && showPresentation === false && (
           <MessageList
             messageLoadingStatus={status}
             messageList={sortedMessageList}
@@ -385,6 +423,17 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             }}
           />
         )}
+        <Presentation
+          messageList={sortedMessageList.filter((fv) => fv.deny === undefined || fv.deny === false)}
+          show={showPresentation}
+          turnOff={() => {
+            setShowPresentation(false);
+          }}
+          turnOn={() => {
+            setShowPresentation(true);
+          }}
+          instantEventId={instantEventInfo.instantEventId}
+        />
       </Box>
     </ServiceLayout>
   );

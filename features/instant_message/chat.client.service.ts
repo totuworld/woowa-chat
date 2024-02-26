@@ -160,6 +160,26 @@ async function lock({ instantEventId }: { instantEventId: string }): Promise<Res
   }
 }
 
+async function showMsgAndCollectReply({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/instant-event.show-msg-collect-reply';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function publish({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
   const url = '/api/instant-event.publish';
   try {
@@ -588,6 +608,7 @@ const ChatClientService = {
   publish,
   unpublish,
   lock,
+  showMsgAndCollectReply,
   voteMessageInfo,
   reactionMessageInfo,
   close,

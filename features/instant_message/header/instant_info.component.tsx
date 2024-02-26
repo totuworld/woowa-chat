@@ -4,8 +4,10 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 
 interface Props {
   instantEventInfo: InInstantEvent;
-  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll';
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
   isPreview: boolean;
+  // eslint-disable-next-line react/require-default-props
+  uniqueVoterCount?: number;
 }
 
 const DEFAULT_IMG = '/default_title.png';
@@ -111,7 +113,7 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
-const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
+const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueVoterCount }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   const linkText = convertMarkdownLinksToJsx(printDesc);
@@ -140,6 +142,11 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview }: Props
           <Center width="full" fontSize="xs">
             🎨 프리뷰 모드 🎨
           </Center>
+        )}
+        {uniqueVoterCount !== undefined && (
+          <Text fontSize="sm" style={{ marginTop: '10px' }}>
+            전체 투표 참여자수: {uniqueVoterCount}명
+          </Text>
         )}
       </Box>
     </>
