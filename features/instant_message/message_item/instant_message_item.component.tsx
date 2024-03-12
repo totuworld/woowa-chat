@@ -543,7 +543,7 @@ const InstantMessageItem = function ({
                   }
                 }}
               >
-                {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+                궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
               </Button>
             </GridItem>
             <GridItem key="grid-item-vote-down">
@@ -573,7 +573,7 @@ const InstantMessageItem = function ({
                   }
                 }}
               >
-                {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
+                다음에요 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (

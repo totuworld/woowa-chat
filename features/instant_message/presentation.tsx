@@ -208,7 +208,7 @@ const PresentationView = function ({
 const Presentation = function ({ messageList, show, turnOff, turnOn, instantEventId }: Props) {
   const [currentIndex, setIndex] = useState(0);
   const currentMessage = messageList[currentIndex];
-  const [fontSize, setFontSize] = useState('lg');
+  const [fontSize, setFontSize] = useState('xl');
   const [mode, setMode] = useState<'PT' | 'REPLY'>('PT');
   const printMessage = (() => {
     if (currentMessage === undefined) {
