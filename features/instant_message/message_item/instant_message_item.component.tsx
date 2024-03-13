@@ -508,7 +508,7 @@ const InstantMessageItem = function ({
           <Flex
             minWidth="max-content"
             alignItems="center"
-            // justifyContent="center"
+            justifyContent="center"
             gap={2}
             width="full"
             bg="white"
