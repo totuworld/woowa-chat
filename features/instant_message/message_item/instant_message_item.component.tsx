@@ -514,10 +514,11 @@ const InstantMessageItem = function ({
             bg="white"
             bottom="0"
             zIndex="overlay"
-            padding="2"
+            paddingX="2"
+            paddingTop={2}
             borderColor="gray.300"
           >
-            <GridItem key="grid-item-vote-up">
+            <GridItem key="grid-item-vote-up" flex={1}>
               <Button
                 isLoading={isSendingVote.LIKE}
                 disabled={isSendingVote.LIKE}
@@ -546,7 +547,7 @@ const InstantMessageItem = function ({
                 궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
               </Button>
             </GridItem>
-            <GridItem key="grid-item-vote-down">
+            <GridItem key="grid-item-vote-down" flex={1}>
               <Button
                 isLoading={isSendingVote.DOWN}
                 disabled={isSendingVote.DOWN}
@@ -577,13 +578,14 @@ const InstantMessageItem = function ({
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
-              <GridItem key="grid-item-reply">
+              <GridItem key="grid-item-reply" flex={1}>
                 <Button
                   fontSize="xs"
                   leftIcon={<ReplyIcon />}
                   variant="ghost"
                   height="4"
                   color="black"
+                  width="full"
                   _hover={{ bg: 'white' }}
                   _focus={{ bg: 'white' }}
                   onClick={() => {
