@@ -619,7 +619,7 @@ const InstantMessageItem = function ({
             {isEditMode === true && (
               <GridItem w="100%" key="grid-item-update-message">
                 <Button
-                  disabled={locked === true}
+                  disabled={eventState === 'closed'}
                   fontSize="xs"
                   leftIcon={<CheckIcon />}
                   width="full"
