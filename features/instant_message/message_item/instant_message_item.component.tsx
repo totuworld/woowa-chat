@@ -19,7 +19,6 @@ import {
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import { useState, useMemo } from 'react';
-import ResizeTextarea from 'react-textarea-autosize';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
@@ -482,14 +481,9 @@ const InstantMessageItem = function ({
               boxShadow="none !important"
               placeholder="무엇이 궁금한가요?"
               borderRadius="md"
-              resize="none"
-              minH="unset"
-              minRows={1}
-              maxRows={14}
-              overflow="hidden"
               fontSize="sm"
               mr="2"
-              as={ResizeTextarea}
+              minHeight="400px"
               value={message}
               onChange={(e) => {
                 updateMessage(e.target.value);
