@@ -14,6 +14,7 @@ import {
   Spacer,
   Text,
   Textarea,
+  Tooltip,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -524,63 +525,79 @@ const InstantMessageItem = function ({
             borderColor="gray.300"
           >
             <GridItem key="grid-item-vote-up" flex={1}>
-              <Button
-                isLoading={isSendingVote.LIKE}
-                disabled={isSendingVote.LIKE}
+              <Tooltip
+                isDisabled={memoReaction.has('LIKE') === false}
                 fontSize="xs"
-                width="full"
-                leftIcon={<IconUp size={16} active={memoReaction.has('LIKE') === true} />}
-                variant="ghost"
-                height="4"
-                _hover={{ bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                onClick={() => {
-                  if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
-                    sendReaction({
-                      isAdd: false,
-                      type: 'LIKE',
-                    });
-                  }
-                  if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
-                    sendReaction({
-                      isAdd: true,
-                      type: 'LIKE',
-                    });
-                  }
-                }}
+                label={item
+                  .reaction!.filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
+                  .map((reaction) => `${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`)}
               >
-                궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
-              </Button>
+                <Button
+                  isLoading={isSendingVote.LIKE}
+                  disabled={isSendingVote.LIKE}
+                  fontSize="xs"
+                  width="full"
+                  leftIcon={<IconUp size={16} active={memoReaction.has('LIKE') === true} />}
+                  variant="ghost"
+                  height="4"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
+                      sendReaction({
+                        isAdd: false,
+                        type: 'LIKE',
+                      });
+                    }
+                    if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
+                      sendReaction({
+                        isAdd: true,
+                        type: 'LIKE',
+                      });
+                    }
+                  }}
+                >
+                  궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+                </Button>
+              </Tooltip>
             </GridItem>
             <GridItem key="grid-item-vote-down" flex={1}>
-              <Button
-                isLoading={isSendingVote.DOWN}
-                disabled={isSendingVote.DOWN}
+              <Tooltip
+                isDisabled={memoReaction.has('DOWN') === false}
                 fontSize="xs"
-                width="full"
-                leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
-                variant="ghost"
-                height="4"
-                color="black"
-                _hover={{ bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                onClick={() => {
-                  if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
-                    sendReaction({
-                      isAdd: false,
-                      type: 'DOWN',
-                    });
-                  }
-                  if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
-                    sendReaction({
-                      isAdd: true,
-                      type: 'DOWN',
-                    });
-                  }
-                }}
+                label={item
+                  .reaction!.filter((reaction) => reaction.type === 'DOWN' && reaction.userName && reaction.email)
+                  .map((reaction) => `${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`)}
               >
-                다음에요 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
-              </Button>
+                <Button
+                  isLoading={isSendingVote.DOWN}
+                  disabled={isSendingVote.DOWN}
+                  fontSize="xs"
+                  width="full"
+                  leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
+                  variant="ghost"
+                  height="4"
+                  color="black"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
+                      sendReaction({
+                        isAdd: false,
+                        type: 'DOWN',
+                      });
+                    }
+                    if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
+                      sendReaction({
+                        isAdd: true,
+                        type: 'DOWN',
+                      });
+                    }
+                  }}
+                >
+                  다음에요 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
+                </Button>
+              </Tooltip>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (
               <GridItem key="grid-item-reply" flex={1}>

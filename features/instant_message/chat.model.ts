@@ -363,7 +363,7 @@ function extractReaction({
     return [];
   }
   if (reaction !== undefined && (isOwnerMember || isShowAll)) {
-    return reaction.map((reactionMv) => ({ type: reactionMv.type, voter: '' }));
+    return reaction;
   }
   if (voted) {
     return reaction.filter((fv) => fv.voter === UID);
@@ -1003,11 +1003,15 @@ async function reactionMessage({
   messageId,
   voter,
   reaction,
+  userName,
+  email,
 }: {
   instantEventId: string;
   messageId: string;
   voter: string;
   reaction: { type: REACTION_TYPE };
+  userName: string;
+  email: string;
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -1033,7 +1037,7 @@ async function reactionMessage({
     const reactionList = (() => {
       // 리액션 정보 없으면 무조건 추가
       if (messageData.reaction === undefined) {
-        return [{ voter, type: reaction.type }];
+        return [{ voter, type: reaction.type, userName, email }];
       }
       const findVoterIndex = messageData.reaction.findIndex((fv) => fv.voter === voter && fv.type === reaction.type);
       // 특정 리액션 제거
@@ -1041,7 +1045,7 @@ async function reactionMessage({
         return [...messageData.reaction].filter((_, idx) => idx !== findVoterIndex);
       }
       // 리액션 추가
-      return [...messageData.reaction, { type: reaction.type, voter }];
+      return [...messageData.reaction, { type: reaction.type, voter, userName, email }];
     })();
     await transaction.update(messageRef, {
       reaction: reactionList,

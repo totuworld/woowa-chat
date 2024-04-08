@@ -558,7 +558,13 @@ async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await ChatModel.reactionMessage({ ...validateResp.data.body, voter: senderUid });
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  await ChatModel.reactionMessage({
+    ...validateResp.data.body,
+    voter: senderUid,
+    userName: userInfoByAuth.displayName!,
+    email: userInfoByAuth.email!,
+  });
   return res.status(200).end();
 }
 

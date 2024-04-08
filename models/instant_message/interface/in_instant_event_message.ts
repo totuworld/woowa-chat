@@ -6,7 +6,7 @@ export interface InInstantEventMessageBase {
   message: string;
   vote: number;
   voter?: string[];
-  reaction?: { type: REACTION_TYPE; voter: string }[];
+  reaction?: { type: REACTION_TYPE; voter: string; userName?: string; email?: string }[];
   deny?: boolean;
   sortWeight: number;
   pin?: boolean;
