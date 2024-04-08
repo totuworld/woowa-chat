@@ -1087,6 +1087,8 @@ async function postReply({
   reply,
   currentUserId,
   author,
+  userName,
+  email,
 }: {
   instantEventId: string;
   messageId: string;
@@ -1096,6 +1098,8 @@ async function postReply({
     displayName: string;
     photoURL?: string;
   };
+  userName?: string;
+  email?: string;
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -1133,6 +1137,8 @@ async function postReply({
         photoURL?: string;
       };
       createByOwner?: boolean;
+      userName?: string;
+      email?: string;
     } = { reply, createAt: moment().toISOString(), id: newId };
     if (author !== undefined) {
       addReply.author = author;
@@ -1140,6 +1146,12 @@ async function postReply({
     // 관리자멤버가 author을 지정해서 올린경우
     if (isOwnerMember && author !== undefined) {
       addReply.createByOwner = true;
+    }
+    if (userName !== undefined) {
+      addReply.userName = userName;
+    }
+    if (email !== undefined) {
+      addReply.email = email;
     }
     await transaction.update(messageRef, {
       reply: info.reply !== undefined ? [addReply, ...info.reply] : [addReply],

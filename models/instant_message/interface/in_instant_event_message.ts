@@ -39,6 +39,8 @@ export interface InInstantEventMessageReply {
     photoURL?: string;
   };
   createByOwner?: boolean;
+  userName?: string;
+  email?: string;
 }
 
 export interface InInstantEventDownloadItem {

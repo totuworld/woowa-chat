@@ -177,14 +177,43 @@ const InstantEventMessageReply = function ({
       onSendComplete();
     });
   }
+
+  const printReply = convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply));
+  const hasUserInfo = replyItem.userName !== undefined && replyItem.email !== undefined;
+  if (hasUserInfo) {
+    // email의 @ 뒤에 글자를 모두 삭제한다
+    const emailId = replyItem.email!.replace(/@.*/, '');
+    printReply.push(
+      <Text fontSize="xs" color="gray.500" key="reply-author">
+        {replyItem.userName} (@{emailId})
+      </Text>,
+    );
+  }
+
+  const avatarPhotoUrl = (() => {
+    if (replyItem.author) {
+      return replyItem.author.photoURL ?? '/profile_anonymous.png';
+    }
+    if (hasUserInfo) {
+      // replyItem.userName의 마지막 글자를 16진수로 변환한 뒤, 나머지 연산을 통해 0~4 사이의 숫자만 나오도록 한다.
+      const userName = replyItem.userName!;
+      const userNameLastCharCode = parseInt(userName.charCodeAt(userName.length - 1).toString(16), 16) % 5;
+      const imgList = [
+        '/profile_dokgo.png',
+        '/profile_girl.png',
+        '/profile_owner.png',
+        '/profile_rider.png',
+        '/profile_cs.png',
+      ];
+      return imgList[userNameLastCharCode];
+    }
+    return '/profile_anonymous.png';
+  })();
+
   return (
     <Box display="flex" mt="2">
       <Box pt="2">
-        <Avatar
-          size="xs"
-          src={replyItem.author ? replyItem.author.photoURL ?? '/profile_anonymous.png' : '/profile_anonymous.png'}
-          mr="2"
-        />
+        <Avatar size="xs" src={avatarPhotoUrl} mr="2" />
       </Box>
       <Box
         borderRadius="md"
@@ -251,7 +280,7 @@ const InstantEventMessageReply = function ({
           </Text>
         )}
         <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
-          {convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply))}
+          {printReply}
         </Text>
       </Box>
     </Box>

@@ -575,6 +575,7 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
       author?: {
         displayName: string;
         photoURL?: string;
+        email?: string;
       };
     };
   }>(
@@ -587,7 +588,14 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await ChatModel.postReply({ ...validateResp.data.query, ...validateResp.data.body, currentUserId: senderUid });
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  await ChatModel.postReply({
+    ...validateResp.data.query,
+    ...validateResp.data.body,
+    currentUserId: senderUid,
+    userName: validateResp.data.body.author === undefined ? userInfoByAuth.displayName! : undefined,
+    email: validateResp.data.body.author === undefined ? userInfoByAuth.email! : undefined,
+  });
   return res.status(200).end();
 }
 
