@@ -229,7 +229,19 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  await ChatModel.post({ ...validateResp.data.body });
+  // authorization 체크
+  const token = validateResp.data.body.authorization;
+  const senderUid = await verifyFirebaseIdToken(token);
+  if (senderUid === undefined) {
+    throw new BadReqError('authorization 누락');
+  }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+
+  await ChatModel.post({
+    ...validateResp.data.body,
+    userName: userInfoByAuth.displayName!,
+    email: userInfoByAuth.email!,
+  });
   return res.status(201).end();
 }
 

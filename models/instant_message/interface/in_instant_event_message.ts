@@ -11,6 +11,10 @@ export interface InInstantEventMessageBase {
   sortWeight: number;
   pin?: boolean;
   reply: InInstantEventMessageReply[];
+  /** 등록한 사용자명 */
+  userName?: string;
+  /** 등록한 사용자 이메일 */
+  email?: string;
 }
 
 export interface InInstantEventMessage extends InInstantEventMessageBase {

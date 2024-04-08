@@ -416,6 +416,16 @@ const InstantMessageItem = function ({
 
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
+  const { userName, email } = item;
+  if (userName !== undefined && email !== undefined) {
+    // email의 @ 뒤에 글자를 모두 삭제한다
+    const emailId = email.replace(/@.*/, '');
+    printMessage.push(
+      <Text key="text-email" color="gray.500" fontSize="xs">
+        {userName}(@{emailId})
+      </Text>,
+    );
+  }
 
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
@@ -493,6 +503,7 @@ const InstantMessageItem = function ({
           {isEditMode === false && (
             <Text whiteSpace="pre-line" fontSize="sm">
               {printMessage}
+              {}
             </Text>
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}

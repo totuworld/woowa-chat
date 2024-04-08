@@ -298,7 +298,17 @@ async function closeSendMessage({ instantEventId }: { instantEventId: string }) 
 }
 
 /** 질문 등록 */
-async function post({ instantEventId, message }: { instantEventId: string; message: string }) {
+async function post({
+  instantEventId,
+  message,
+  userName,
+  email,
+}: {
+  instantEventId: string;
+  message: string;
+  userName: string;
+  email: string;
+}) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
@@ -325,7 +335,14 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
       }
     }
     const newPostRef = eventRef.collection(INSTANT_MESSAGE).doc();
-    await transaction.create(newPostRef, { message, vote: 0, sortWeight: 0, createAt: FieldValue.serverTimestamp() });
+    await transaction.create(newPostRef, {
+      message,
+      userName,
+      email,
+      vote: 0,
+      sortWeight: 0,
+      createAt: FieldValue.serverTimestamp(),
+    });
   });
 }
 
