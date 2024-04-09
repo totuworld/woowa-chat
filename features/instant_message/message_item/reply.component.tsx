@@ -274,6 +274,7 @@ const InstantEventMessageReply = function ({
             bgColor={ColorPalette.mint}
             display="inline-block"
             paddingX="2"
+            marginBottom="2"
             borderRadius="base"
           >
             {replyItem.author.displayName}
