@@ -422,7 +422,7 @@ const InstantMessageItem = function ({
     // email의 @ 뒤에 글자를 모두 삭제한다
     const emailId = email.replace(/@.*/, '');
     printMessage.push(
-      <Text key="text-email" color="gray.500" fontSize="xs">
+      <Text key="text-email" color="gray.500" fontSize="xs" marginTop={2}>
         {userName}(@{emailId})
       </Text>,
     );

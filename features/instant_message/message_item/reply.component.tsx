@@ -184,7 +184,7 @@ const InstantEventMessageReply = function ({
     // email의 @ 뒤에 글자를 모두 삭제한다
     const emailId = replyItem.email!.replace(/@.*/, '');
     printReply.push(
-      <Text fontSize="xs" color="gray.500" key="reply-author">
+      <Text fontSize="xs" color="gray.500" key="reply-author" marginTop={2}>
         {replyItem.userName} (@{emailId})
       </Text>,
     );
