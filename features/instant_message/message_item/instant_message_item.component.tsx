@@ -530,7 +530,10 @@ const InstantMessageItem = function ({
                 fontSize="xs"
                 label={item
                   .reaction!.filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
-                  .map((reaction) => `${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`)}
+                  .map(
+                    (reaction, idx) =>
+                      `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
+                  )}
               >
                 <Button
                   isLoading={isSendingVote.LIKE}
@@ -567,7 +570,10 @@ const InstantMessageItem = function ({
                 fontSize="xs"
                 label={item
                   .reaction!.filter((reaction) => reaction.type === 'DOWN' && reaction.userName && reaction.email)
-                  .map((reaction) => `${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`)}
+                  .map(
+                    (reaction, idx) =>
+                      `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
+                  )}
               >
                 <Button
                   isLoading={isSendingVote.DOWN}
