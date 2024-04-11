@@ -336,6 +336,15 @@ const InstantEventMessageReply = function ({
                     댓글 삭제
                   </MenuItem>
                 )}
+                {hasPrivilege(PRIVILEGE_NO.updateMessage) && (
+                  <MenuItem
+                    onClick={() => {
+                      turnOnEditer();
+                    }}
+                  >
+                    댓글 수정하기
+                  </MenuItem>
+                )}
               </MenuList>
             </Menu>
           </div>
