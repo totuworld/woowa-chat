@@ -415,6 +415,23 @@ const InstantMessageItem = function ({
     return returnMenuList;
   }, [authUser, isOwner]);
 
+  const memberMenuList = useMemo(() => {
+    const returnMenuList = [];
+    if (authUser?.email === item.email) {
+      returnMenuList.push(
+        <MenuItem
+          key="menu-item-upate-message"
+          onClick={() => {
+            turnOnEditer();
+          }}
+        >
+          본문 수정하기
+        </MenuItem>,
+      );
+    }
+    return returnMenuList;
+  }, [authUser, item]);
+
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
   const { userName, email } = item;
@@ -448,6 +465,22 @@ const InstantMessageItem = function ({
                 _focus={{ boxShadow: 'none' }}
               />
               <MenuList>{ownerMenuList}</MenuList>
+            </Menu>
+          )}
+          {isOwner === false && memberMenuList.length > 0 && (
+            <Menu>
+              <MenuButton
+                width="24px"
+                height="24px"
+                as={IconButton}
+                aria-label="Options"
+                icon={<ExtraMenuIcon />}
+                borderRadius="full"
+                variant="link"
+                size="xs"
+                _focus={{ boxShadow: 'none' }}
+              />
+              <MenuList>{memberMenuList}</MenuList>
             </Menu>
           )}
         </Flex>

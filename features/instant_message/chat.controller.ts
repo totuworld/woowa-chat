@@ -10,7 +10,7 @@ import JSCGetInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCG
 import JSCCloseInstantEventReq from '@/controllers/instant_message/JSONSchema/JSCCloseInstantEventReq';
 import { PostInstantEventMessageReq } from '@/controllers/instant_message/interface/PostInstantEventMessageReq';
 import JSCPostInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCPostInstantEventMessageReq';
-import verifyFirebaseIdToken from '@/controllers/verify_firebase_id_token';
+import verifyFirebaseIdToken, { verifyFirebaseIdTokenWithEmail } from '@/controllers/verify_firebase_id_token';
 import JSCInstantEventMessageListReq from '@/controllers/instant_message/JSONSchema/JSCInstantEventMessageListReq';
 import JSCInstantEventMessageInfoReq from '@/controllers/instant_message/JSONSchema/JSCInstantEventMessageInfoReq';
 import checkEmptyToken from '@/controllers/check_empty_token';
@@ -519,7 +519,7 @@ async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
 
 async function updateBody(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
-  const senderUid = await verifyFirebaseIdToken(token);
+  const { uid: senderUid, email } = await verifyFirebaseIdTokenWithEmail(token);
   const validateResp = validateParamWithData<{
     body: {
       instantEventId: string;
@@ -536,7 +536,7 @@ async function updateBody(req: NextApiRequest, res: NextApiResponse) {
     throw new BadReqError(validateResp.errorMessage);
   }
   // 운영자가 아니면 실패 처리하는 로직은 모델 안에 있음
-  await ChatModel.updateMessage({ ...validateResp.data.body, currentUserId: senderUid });
+  await ChatModel.updateMessage({ ...validateResp.data.body, currentUserId: senderUid, email });
   return res.status(200).end();
 }
 

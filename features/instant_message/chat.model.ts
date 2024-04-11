@@ -1059,11 +1059,13 @@ async function updateMessage({
   messageId,
   currentUserId,
   message,
+  email,
 }: {
   instantEventId: string;
   messageId: string;
   currentUserId: string;
   message: string;
+  email?: string;
 }): Promise<void> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -1078,7 +1080,10 @@ async function updateMessage({
     if (messageDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
     }
-    if (ownerMemberDoc.exists === false) {
+    const data = messageDoc.data() as InInstantEventMessageServer;
+    const isMessageAuthor = data.email !== undefined && email !== undefined && data.email === email;
+    const possibleEdit = ownerMemberDoc.exists || isMessageAuthor;
+    if (possibleEdit === false) {
       throw new CustomServerError({ statusCode: 401, message: '권한없음' });
     }
     await transaction.update(messageRef, { message });
