@@ -513,7 +513,7 @@ async function messageListWithUniqueVoter({
         reaction: extractReaction({ reaction: docData.reaction, isOwnerMember, isShowAll, voted, UID: currentUserUid }),
         message: docData.message,
         reply:
-          docData.reply !== undefined && (isOwnerMember || isShowAll)
+          docData.reply !== undefined
             ? docData.reply
                 .map((replyMv) => {
                   if (replyMv.deny !== undefined && replyMv.deny) {
@@ -704,7 +704,7 @@ async function messageInfo({
         ? '비공개 처리된 메시지입니다.'
         : resp.docData.message,
     reply:
-      resp.docData.reply !== undefined && resp.isOwnerMember
+      resp.docData.reply !== undefined
         ? resp.docData.reply
             .map((mv) => {
               if (mv.deny !== undefined && mv.deny) {
