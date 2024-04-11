@@ -417,6 +417,7 @@ const InstantMessageItem = function ({
 
   const memberMenuList = useMemo(() => {
     const returnMenuList = [];
+    if (eventState === 'locked' || eventState === 'showAll' || eventState === 'closed') return [];
     if (authUser?.email === item.email) {
       returnMenuList.push(
         <MenuItem
@@ -729,6 +730,7 @@ const InstantMessageItem = function ({
                     messageId={item.id}
                     isOwner={isOwner}
                     onSendComplete={onSendComplete}
+                    eventState={eventState}
                   />
                 </Box>
               ))}

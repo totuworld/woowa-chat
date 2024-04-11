@@ -507,6 +507,38 @@ async function updateMessage({
   }
 }
 
+async function updateReply({
+  instantEventId,
+  messageId,
+  replyId,
+  message,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+  message: string;
+}): Promise<Resp<void>> {
+  const url = '/api/instant-event.messages.update_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyId, message },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 async function denyReply({
   instantEventId,
   messageId,
@@ -678,6 +710,7 @@ const ChatClientService = {
   post,
   updateMessageSortWeight,
   postReply,
+  updateReply,
   getMessageInfo,
   updateMessage,
   pinMessage,

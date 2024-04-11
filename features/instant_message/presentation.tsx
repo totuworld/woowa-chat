@@ -381,6 +381,7 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
                   // eslint-disable-next-line @typescript-eslint/no-empty-function
                   onSendComplete={() => {}}
                   fontSize={fontSize}
+                  eventState="showAll"
                 />
               ))}
           </Box>

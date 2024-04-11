@@ -11,3 +11,16 @@ export default async function verifyFirebaseIdToken(token: string) {
     throw new BadReqError('authorization token에 문제가 있습니다');
   }
 }
+
+export async function verifyFirebaseIdTokenWithEmail(token: string) {
+  try {
+    const id = await FirebaseAdmin.getInstance().Auth.verifyIdToken(token);
+    return {
+      uid: id.uid,
+      email: id.email,
+    };
+  } catch (err) {
+    console.error(err);
+    throw new BadReqError('authorization token에 문제가 있습니다');
+  }
+}

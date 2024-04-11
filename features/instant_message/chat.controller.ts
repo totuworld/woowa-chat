@@ -28,6 +28,7 @@ import JSCUpdateBodyReq from '@/controllers/instant_message/JSONSchema/JSCUpdate
 import JSCPinInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCPinInstantEventMessageReq';
 import JSCDeleteInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReplyReq';
 import JSCDeleteInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReq';
+import JSCUpdateReplyReq from '@/controllers/instant_message/JSONSchema/JSCUpdateReplyReq';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -605,6 +606,40 @@ async function postReply(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).end();
 }
 
+async function updateReply(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const senderUid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    query: {
+      instantEventId: string;
+      messageId: string;
+    };
+    body: {
+      message: string;
+      instantEventId: string;
+      messageId: string;
+      replyId: string;
+    };
+  }>(
+    {
+      query: req.query,
+      body: req.body,
+    },
+    JSCUpdateReplyReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  await ChatModel.updateReply({
+    ...validateResp.data.query,
+    ...validateResp.data.body,
+    currentUserId: senderUid,
+    email: userInfoByAuth.email,
+  });
+  return res.status(200).end();
+}
+
 const ChatCtrl = {
   findAllEvent,
   findAllEventWithPage,
@@ -632,6 +667,7 @@ const ChatCtrl = {
   reactionMessage,
   postReply,
   updateBody,
+  updateReply,
   pinMessage,
 };
 

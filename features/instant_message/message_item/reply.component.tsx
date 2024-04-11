@@ -1,4 +1,20 @@
-import { Avatar, Box, IconButton, Menu, MenuButton, MenuItem, MenuList, Text, useToast } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  GridItem,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  Textarea,
+  useToast,
+} from '@chakra-ui/react';
+import { useMemo, useState } from 'react';
+import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { InInstantEventMessageReply } from '@/models/instant_message/interface/in_instant_event_message';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { useAuth } from '@/contexts/auth_user.context';
@@ -115,6 +131,7 @@ interface Props {
   onSendComplete: () => void;
   // eslint-disable-next-line react/require-default-props
   fontSize?: string;
+  eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
 }
 
 const InstantEventMessageReply = function ({
@@ -124,8 +141,11 @@ const InstantEventMessageReply = function ({
   messageId,
   onSendComplete,
   fontSize = 'xs',
+  eventState,
 }: Props) {
   const { authUser, hasPrivilege } = useAuth();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [message, updateMessage] = useState(replyItem.reply);
   const toast = useToast();
   const isDeny = replyItem.deny !== undefined && replyItem.deny;
   function denyReply() {
@@ -178,6 +198,14 @@ const InstantEventMessageReply = function ({
     });
   }
 
+  function turnOnEditer() {
+    setIsEditMode(true);
+    // updateMessage(item.message);
+  }
+  function turnOffEditer() {
+    setIsEditMode(false);
+  }
+
   const printReply = convertMarkdownBoldToJsx(convertMarkdownLinksToJsx(replyItem.reply));
   const hasUserInfo = replyItem.userName !== undefined && replyItem.email !== undefined;
   if (hasUserInfo) {
@@ -209,6 +237,51 @@ const InstantEventMessageReply = function ({
     }
     return '/profile_anonymous.png';
   })();
+
+  const memberMenuList = useMemo(() => {
+    const returnMenuList = [];
+    if (eventState === 'showAll' || eventState === 'locked' || eventState === 'closed') return [];
+    if (authUser?.email === replyItem.email) {
+      returnMenuList.push(
+        <MenuItem
+          key="menu-item-upate-message"
+          onClick={() => {
+            turnOnEditer();
+          }}
+        >
+          댓글 수정하기
+        </MenuItem>,
+      );
+    }
+    return returnMenuList;
+  }, [authUser, replyItem]);
+
+  function updateReplyToServer(msg: string) {
+    if (authUser === null) {
+      toast({
+        title: '로그인이 필요합니다',
+        position: 'top-right',
+      });
+      return;
+    }
+    ChatClientService.updateReply({
+      instantEventId,
+      messageId,
+      replyId: replyItem.id,
+      message: msg,
+    }).then((resp) => {
+      if (resp.status !== 200 && resp.error !== undefined) {
+        toast({
+          title: (resp.error.data as { message: string }).message,
+          status: 'warning',
+          position: 'top-right',
+        });
+        return;
+      }
+      onSendComplete();
+      turnOffEditer();
+    });
+  }
 
   return (
     <Box display="flex" mt="2">
@@ -267,6 +340,24 @@ const InstantEventMessageReply = function ({
             </Menu>
           </div>
         )}
+        {isOwner === false && memberMenuList.length > 0 && (
+          <div style={{ float: 'right' }}>
+            <Menu>
+              <MenuButton
+                width="24px"
+                height="24px"
+                as={IconButton}
+                aria-label="Options"
+                icon={<ExtraMenuIcon />}
+                borderRadius="full"
+                variant="link"
+                size="xs"
+                _focus={{ boxShadow: 'none' }}
+              />
+              <MenuList>{memberMenuList}</MenuList>
+            </Menu>
+          </div>
+        )}
         {replyItem.author && (
           <Text
             fontSize="xs"
@@ -280,9 +371,68 @@ const InstantEventMessageReply = function ({
             {replyItem.author.displayName}
           </Text>
         )}
-        <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
-          {printReply}
-        </Text>
+        <Box>
+          {isEditMode === true && (
+            <>
+              <Textarea
+                bg="gray.100"
+                border="none"
+                boxShadow="none !important"
+                placeholder="댓글을 입력하세요..."
+                borderRadius="md"
+                fontSize="sm"
+                mr="2"
+                minHeight="400px"
+                value={message}
+                onChange={(e) => {
+                  updateMessage(e.target.value);
+                }}
+              />
+              <Flex>
+                <GridItem w="100%" key="grid-item-close">
+                  <Button
+                    fontSize="xs"
+                    leftIcon={<CloseIcon />}
+                    width="full"
+                    variant="ghost"
+                    height="4"
+                    color="black"
+                    _hover={{ bg: 'white' }}
+                    _focus={{ bg: 'white' }}
+                    onClick={() => {
+                      turnOffEditer();
+                    }}
+                  >
+                    닫기
+                  </Button>
+                </GridItem>
+                <GridItem w="100%" key="grid-item-update-message">
+                  <Button
+                    disabled={eventState === 'closed'}
+                    fontSize="xs"
+                    leftIcon={<CheckIcon />}
+                    width="full"
+                    variant="ghost"
+                    height="4"
+                    colorScheme="messenger"
+                    _hover={{ bg: 'white' }}
+                    _focus={{ bg: 'white' }}
+                    onClick={() => {
+                      updateReplyToServer(message);
+                    }}
+                  >
+                    수정 반영하기
+                  </Button>
+                </GridItem>
+              </Flex>
+            </>
+          )}
+          {isEditMode === false && (
+            <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
+              {printReply}
+            </Text>
+          )}
+        </Box>
       </Box>
     </Box>
   );
