@@ -172,8 +172,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       return resp;
     },
     {
-      enabled:
-        (eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) && token !== null,
+      enabled: token !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -374,9 +373,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                       position: 'top-right',
                     });
                   }
-                  if (isOwner) {
-                    setListLoadTrigger((prev) => !prev);
-                  }
+                  setListLoadTrigger((prev) => !prev);
                   updateMessage('');
                   setSending(false);
                 }}

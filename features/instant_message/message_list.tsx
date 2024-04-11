@@ -36,42 +36,39 @@ const MessageList = function ({
   }
   return (
     <>
-      {(eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) &&
-        messageList.length === 0 && (
-          <Box mt="6">
-            <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
-            <Flex justify="center">
-              <Box mb="6" height="100vh" fontSize="sm">
-                등록된 메시지가 없어요
-              </Box>
-            </Flex>
-          </Box>
-        )}
-      {(eventState === 'reply' || eventState === 'locked' || eventState === 'showAll' || isOwner) && (
-        <VStack spacing="12px" mt="6" pb="10">
-          {messageList.map((item) => (
-            <InstantMessageItem
-              key={`instant-message-${eventInfo.instantEventId}-${item.id}`}
-              instantEventId={eventInfo.instantEventId}
-              item={item}
-              locked={eventState === 'locked' || eventState === 'showAll'}
-              eventState={eventState}
-              onSendComplete={() => {
-                ChatClientService.getMessageInfo({
-                  instantEventId: eventInfo.instantEventId,
-                  messageId: item.id,
-                }).then((info) => {
-                  if (info.payload === undefined) {
-                    return;
-                  }
-                  onSendComplete(info.payload!);
-                });
-              }}
-              onDeleteComplete={onDeleteComplete}
-            />
-          ))}
-        </VStack>
+      {messageList.length === 0 && (
+        <Box mt="6">
+          <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
+          <Flex justify="center">
+            <Box mb="6" height="100vh" fontSize="sm">
+              등록된 메시지가 없어요
+            </Box>
+          </Flex>
+        </Box>
       )}
+      <VStack spacing="12px" mt="6" pb="10">
+        {messageList.map((item) => (
+          <InstantMessageItem
+            key={`instant-message-${eventInfo.instantEventId}-${item.id}`}
+            instantEventId={eventInfo.instantEventId}
+            item={item}
+            locked={eventState === 'locked' || eventState === 'showAll'}
+            eventState={eventState}
+            onSendComplete={() => {
+              ChatClientService.getMessageInfo({
+                instantEventId: eventInfo.instantEventId,
+                messageId: item.id,
+              }).then((info) => {
+                if (info.payload === undefined) {
+                  return;
+                }
+                onSendComplete(info.payload!);
+              });
+            }}
+            onDeleteComplete={onDeleteComplete}
+          />
+        ))}
+      </VStack>
     </>
   );
 };
