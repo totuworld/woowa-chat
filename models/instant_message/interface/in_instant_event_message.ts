@@ -18,12 +18,14 @@ export interface InInstantEventMessageBase {
 }
 
 export interface InInstantEventMessage extends InInstantEventMessageBase {
+  showOnlyAdmin?: boolean;
   voted: boolean;
   createAt: string;
   updateAt?: string;
 }
 
 export interface InInstantEventMessageServer extends InInstantEventMessageBase {
+  showOnlyAdmin?: boolean;
   createAt: firestore.Timestamp;
   updateAt?: firestore.Timestamp;
 }

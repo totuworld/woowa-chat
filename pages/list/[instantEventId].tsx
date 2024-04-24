@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Center,
+  Checkbox,
   Flex,
   Heading,
   Spacer,
@@ -88,7 +89,15 @@ interface Props {
   instantEventInfo: InInstantEvent | null;
 }
 
-async function postMessage({ message, instantEventId }: { message: string; instantEventId: string }) {
+async function postMessage({
+  message,
+  instantEventId,
+  showOnlyAdmin,
+}: {
+  message: string;
+  instantEventId: string;
+  showOnlyAdmin: boolean;
+}) {
   if (message.length <= 0) {
     return {
       result: false,
@@ -99,6 +108,7 @@ async function postMessage({ message, instantEventId }: { message: string; insta
     await ChatClientService.post({
       instantEventId,
       message,
+      showOnlyAdmin,
     });
     return {
       result: true,
@@ -117,6 +127,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [message, updateMessage] = useState('');
+  const [showOnlyAdmin, setShowOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
@@ -360,6 +371,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                   const resp = await postMessage({
                     message: message.trim(),
                     instantEventId: instantEventInfo.instantEventId,
+                    showOnlyAdmin,
                   });
                   if (resp.result === false) {
                     toast({
@@ -381,6 +393,17 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 등록
               </Button>
             </Flex>
+            <Checkbox
+              isChecked={showOnlyAdmin}
+              size="sm"
+              pt="2"
+              pl="8"
+              onChange={() => {
+                setShowOnlyAdmin((prev) => !prev);
+              }}
+            >
+              국환님만 보세요
+            </Checkbox>
           </Box>
         )}
         {authUser === null && (

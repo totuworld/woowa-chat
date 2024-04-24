@@ -280,7 +280,15 @@ async function immediateClosSendMessagePeriod({ instantEventId }: { instantEvent
   }
 }
 
-async function post({ instantEventId, message }: { instantEventId: string; message: string }): Promise<Resp<unknown>> {
+async function post({
+  instantEventId,
+  message,
+  showOnlyAdmin,
+}: {
+  instantEventId: string;
+  message: string;
+  showOnlyAdmin: boolean;
+}): Promise<Resp<unknown>> {
   const url = '/api/instant-event.messages.add';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
   try {
@@ -291,6 +299,7 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
         data: {
           instantEventId,
           message,
+          showOnlyAdmin,
           authorization: token,
         },
       },

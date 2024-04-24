@@ -16,8 +16,11 @@ const JSCPostInstantEventMessageReq: JSONSchema6 = {
         authorization: {
           type: 'string',
         },
+        showOnlyAdmin: {
+          type: 'boolean',
+        },
       },
-      required: ['instantEventId', 'message', 'authorization'],
+      required: ['instantEventId', 'message', 'authorization', 'showOnlyAdmin'],
       type: 'object',
     },
   },

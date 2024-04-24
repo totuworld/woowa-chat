@@ -303,11 +303,13 @@ async function post({
   message,
   userName,
   email,
+  showOnlyAdmin,
 }: {
   instantEventId: string;
   message: string;
   userName: string;
   email: string;
+  showOnlyAdmin: boolean;
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -342,6 +344,7 @@ async function post({
       vote: 0,
       sortWeight: 0,
       createAt: FieldValue.serverTimestamp(),
+      showOnlyAdmin,
     });
   });
 }
@@ -469,9 +472,11 @@ async function messageList({
 async function messageListWithUniqueVoter({
   instantEventId,
   currentUserUid,
+  currentUserEmail,
 }: {
   instantEventId: string;
   currentUserUid: string;
+  currentUserEmail: string;
   isPreview?: boolean;
 }): Promise<{
   list: InInstantEventMessage[];
@@ -503,6 +508,15 @@ async function messageListWithUniqueVoter({
         return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
+        return null;
+      }
+      if (
+        isOwnerMember === false &&
+        docData.showOnlyAdmin !== undefined &&
+        docData.showOnlyAdmin === true &&
+        docData.email !== undefined &&
+        docData.email !== currentUserEmail
+      ) {
         return null;
       }
       const returnData = {

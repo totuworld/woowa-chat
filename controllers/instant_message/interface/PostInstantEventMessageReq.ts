@@ -3,5 +3,6 @@ export interface PostInstantEventMessageReq {
     instantEventId: string;
     message: string;
     authorization: string;
+    showOnlyAdmin: boolean;
   };
 }

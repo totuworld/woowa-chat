@@ -306,7 +306,11 @@ async function messageListWithUniqueVoter(req: NextApiRequest, res: NextApiRespo
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const result = await ChatModel.messageListWithUniqueVoter({ ...validateResp.data.query, currentUserUid: senderUid });
+  const result = await ChatModel.messageListWithUniqueVoter({
+    ...validateResp.data.query,
+    currentUserUid: senderUid,
+    currentUserEmail: userInfoByAuth.email!,
+  });
   return res.status(200).json(result);
 }
 
