@@ -1,6 +1,5 @@
 import { GetServerSideProps, NextPage } from 'next';
 import {
-  Avatar,
   Box,
   Button,
   Center,
@@ -133,6 +132,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
+  console.log('eventState', eventState);
   const sortedMessageList = useMemo(
     () =>
       [...messageList].sort(
@@ -319,10 +319,17 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
+            <Checkbox
+              isChecked={showOnlyAdmin}
+              size="sm"
+              pt="2"
+              onChange={() => {
+                setShowOnlyAdmin((prev) => !prev);
+              }}
+            >
+              국환님만 보세요
+            </Checkbox>
             <Flex>
-              <Box pt="1" pr="2">
-                <Avatar size="xs" src="/profile_anonymous.png" />
-              </Box>
               <Textarea
                 bg="gray.100"
                 border="none"
@@ -393,17 +400,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 등록
               </Button>
             </Flex>
-            <Checkbox
-              isChecked={showOnlyAdmin}
-              size="sm"
-              pt="2"
-              pl="8"
-              onChange={() => {
-                setShowOnlyAdmin((prev) => !prev);
-              }}
-            >
-              국환님만 보세요
-            </Checkbox>
           </Box>
         )}
         {authUser === null && (

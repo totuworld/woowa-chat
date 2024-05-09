@@ -546,8 +546,8 @@ const InstantMessageItem = function ({
             <Badge colorScheme="red">국환님만 보세요</Badge>
           )}
         </Box>
-        <Divider />
-        {(item.deny === undefined || item.deny === false) && (
+        {!(eventState === 'pre' || eventState === 'question') && <Divider />}
+        {(item.deny === undefined || item.deny === false) && !(eventState === 'pre' || eventState === 'question') && (
           <Flex
             minWidth="max-content"
             alignItems="center"
@@ -716,28 +716,30 @@ const InstantMessageItem = function ({
             )}
           </Box>
         )}
-        <Box>
-          {item.reply &&
-            item.reply.length > 0 &&
-            item.reply
-              .filter((replyItem) =>
-                isOwner === true ? true : replyItem.deny === undefined || replyItem.deny === false,
-              )
-              .map((replyItem, idx) => (
-                <Box pt="2" key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
-                  {idx === 0 && <Divider />}
-                  <InstantEventMessageReply
-                    // eslint-disable-next-line react/no-array-index-key
-                    replyItem={replyItem}
-                    instantEventId={instantEventId}
-                    messageId={item.id}
-                    isOwner={isOwner}
-                    onSendComplete={onSendComplete}
-                    eventState={eventState}
-                  />
-                </Box>
-              ))}
-        </Box>
+        {!(eventState === 'pre' || eventState === 'question') && (
+          <Box>
+            {item.reply &&
+              item.reply.length > 0 &&
+              item.reply
+                .filter((replyItem) =>
+                  isOwner === true ? true : replyItem.deny === undefined || replyItem.deny === false,
+                )
+                .map((replyItem, idx) => (
+                  <Box pt="2" key={`instant-event-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
+                    {idx === 0 && <Divider />}
+                    <InstantEventMessageReply
+                      // eslint-disable-next-line react/no-array-index-key
+                      replyItem={replyItem}
+                      instantEventId={instantEventId}
+                      messageId={item.id}
+                      isOwner={isOwner}
+                      onSendComplete={onSendComplete}
+                      eventState={eventState}
+                    />
+                  </Box>
+                ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );
