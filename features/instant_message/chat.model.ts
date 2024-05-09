@@ -507,15 +507,27 @@ async function messageListWithUniqueVoter({
         }
         return docData.reaction.findIndex((fv) => fv.voter === currentUserUid) >= 0;
       })();
+      const isMyMessage = docData.email === currentUserEmail;
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
         return null;
+      }
+      if (isOwnerMember === true) {
+        const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
+        const hasReadAdminOnlyMessagePrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.readAdminOnlyMessage);
+        if (
+          hasReadAdminOnlyMessagePrivilege === false &&
+          docData.showOnlyAdmin !== undefined &&
+          docData.showOnlyAdmin === true &&
+          isMyMessage === false
+        ) {
+          return null;
+        }
       }
       if (
         isOwnerMember === false &&
         docData.showOnlyAdmin !== undefined &&
         docData.showOnlyAdmin === true &&
-        docData.email !== undefined &&
-        docData.email !== currentUserEmail
+        isMyMessage === false
       ) {
         return null;
       }

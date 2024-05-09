@@ -323,6 +323,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               isChecked={showOnlyAdmin}
               size="sm"
               pt="2"
+              pb="4"
               onChange={() => {
                 setShowOnlyAdmin((prev) => !prev);
               }}
