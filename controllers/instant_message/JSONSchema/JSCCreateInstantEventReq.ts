@@ -28,6 +28,9 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
         bgImg: {
           type: 'string',
         },
+        isQnA: {
+          type: 'boolean',
+        },
       },
       required: ['title', 'startDate', 'endDate'],
       type: 'object',

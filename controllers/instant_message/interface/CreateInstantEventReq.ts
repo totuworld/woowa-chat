@@ -6,5 +6,6 @@ export interface CreateInstantEventReq {
     endDate: string;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   };
 }

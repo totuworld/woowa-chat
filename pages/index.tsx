@@ -22,6 +22,7 @@ async function createEvent({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   title: string;
   desc?: string;
@@ -29,6 +30,7 @@ async function createEvent({
   endDate?: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -37,7 +39,7 @@ async function createEvent({
     };
   }
   try {
-    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg });
+    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
     return {
       result: true,
       instantEventId: resp.payload?.instantEventId,
@@ -91,6 +93,7 @@ const IndexPage: NextPage = function () {
     endDate?: string;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   }) {
     const resp = await createEvent(data);
     if (resp.result === false) {

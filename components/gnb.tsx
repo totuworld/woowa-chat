@@ -15,9 +15,11 @@ import {
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
+import { useGNB } from '@/contexts/gnb.context';
 
 const GNB: React.FC = function () {
   const { loading, authUser, signOut, isOwner, signInWithGoogle } = useAuth();
+  const { logo } = useGNB();
 
   const loginBtn = (
     <Button
@@ -84,7 +86,7 @@ const GNB: React.FC = function () {
         <Spacer flex={{ base: 1 }} />
         <Flex flex={{ base: 2 }} justify={{ base: 'center', md: 'start' }}>
           <Link href="/">
-            <img style={{ height: '40px', cursor: 'pointer' }} src="/logo.png" alt="logo" />
+            <img style={{ height: '40px', cursor: 'pointer' }} src={logo} alt="logo" />
           </Link>
         </Flex>
 

@@ -1,4 +1,15 @@
-import { Box, Button, ButtonGroup, Flex, FormControl, FormLabel, Input, Spacer, Textarea } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Spacer,
+  Textarea,
+} from '@chakra-ui/react';
 import { DatePicker } from 'antd';
 import { useRef, useState } from 'react';
 import moment, { Moment } from 'moment';
@@ -21,6 +32,7 @@ const CreateEvent = function ({
     endDate?: string;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   }) => void;
   onClose: () => void;
   mode: 'CREATE' | 'MODIFY';
@@ -40,6 +52,7 @@ const CreateEvent = function ({
     titleImg?: string;
     /** 배경 이미지 */
     bgImg?: string;
+    isQnA?: boolean;
   };
 }) {
   const initialRef = useRef<any>();
@@ -50,6 +63,7 @@ const CreateEvent = function ({
   const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
+  const [isQnA, setIsQnA] = useState(false);
 
   async function extractData() {
     let titleImgUrl: string | null = null;
@@ -107,7 +121,9 @@ const CreateEvent = function ({
       endDate: dateRange[1] !== null ? dateRange[1].toISOString() : undefined,
       titleImg,
       bgImg,
+      isQnA,
     };
+    console.log(saveData);
     return saveData;
   }
 
@@ -153,6 +169,19 @@ const CreateEvent = function ({
           format="YYYY-MM-DD HH:mm"
           style={{ width: '100%' }}
         />
+      </FormControl>
+      <FormControl mt={4}>
+        {/* Q&A로 동작할지 여부를 묻는 체크 박스. 기본값을 false */}
+        <FormLabel>Q&A로 동작 여부</FormLabel>
+        <Checkbox
+          size="md"
+          isChecked={isQnA}
+          onChange={() => {
+            setIsQnA((prev) => !prev);
+          }}
+        >
+          Q&A로 전환(OO님만 보세요 미노출)
+        </Checkbox>
       </FormControl>
       <FormControl mt={4}>
         <FormLabel>타이틀 이미지</FormLabel>

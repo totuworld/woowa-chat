@@ -15,6 +15,7 @@ async function create({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   title: string;
   desc?: string;
@@ -22,6 +23,7 @@ async function create({
   endDate?: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.create';
   try {
@@ -32,6 +34,7 @@ async function create({
       endDate,
       titleImg,
       bgImg,
+      isQnA,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {

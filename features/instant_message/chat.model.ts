@@ -93,6 +93,7 @@ async function create({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   title: string;
   desc?: string;
@@ -100,6 +101,7 @@ async function create({
   endDate: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }) {
   const newInstantEventBody: {
     title: string;
@@ -109,11 +111,13 @@ async function create({
     closed: boolean;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   } = {
     title,
     startDate,
     endDate,
     closed: false,
+    isQnA: isQnA ?? false,
   };
   if (desc !== undefined) {
     newInstantEventBody.desc = desc.replace(/\n/g, '\\n');

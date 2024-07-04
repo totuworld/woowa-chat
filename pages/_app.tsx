@@ -5,6 +5,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import React from 'react';
 import { AuthUserProvider } from '@/contexts/auth_user.context';
+import { GNBProvider } from '@/contexts/gnb.context';
 
 const MyApp = function ({ Component, pageProps }: AppProps) {
   const queryClientRef = React.useRef<QueryClient>();
@@ -15,7 +16,9 @@ const MyApp = function ({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClientRef.current}>
       <ChakraProvider>
         <AuthUserProvider>
-          <Component {...pageProps} />
+          <GNBProvider>
+            <Component {...pageProps} />
+          </GNBProvider>
         </AuthUserProvider>
       </ChakraProvider>
     </QueryClientProvider>
