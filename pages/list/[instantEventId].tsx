@@ -15,7 +15,7 @@ import {
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
@@ -36,6 +36,7 @@ import CreateEvent from '@/features/instant_message/create_event.component';
 import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
 import Presentation from '@/features/instant_message/presentation';
+import { useGNB } from '@/contexts/gnb.context';
 
 async function updateEvent({
   instantEventId,
@@ -136,6 +137,17 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
+
+  const { setLogo } = useGNB();
+  useLayoutEffect(() => {
+    if (instantEventInfo?.isQnA === true) {
+      setLogo('/logo_qna.png');
+    }
+    return () => {
+      setLogo('/logo.png');
+    };
+  }, [instantEventInfo]);
+
   const sortedMessageList = useMemo(
     () =>
       [...messageList].sort(
