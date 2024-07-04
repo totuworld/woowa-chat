@@ -242,14 +242,14 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   return (
     <ServiceLayout
       minH="100vh"
-      backgroundColor="gray.400"
+      backgroundColor="gray.200"
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
       title="우수타"
       pt={16}
     >
-      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.400">
+      <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
         {isOwner && isPreview === false && (
           <Box mb="2">
             <Link href="/list">
