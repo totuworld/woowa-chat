@@ -246,7 +246,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
-      title="우수타"
+      title="전사발표Q&A"
       pt={16}
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
