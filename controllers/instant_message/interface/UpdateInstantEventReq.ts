@@ -7,5 +7,6 @@ export interface UpdateInstantEventReq {
     endDate: string;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   };
 }

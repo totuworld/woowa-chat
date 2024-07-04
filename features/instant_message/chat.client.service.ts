@@ -59,6 +59,7 @@ async function updateInfo({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   instantEventId: string;
   title: string;
@@ -67,6 +68,7 @@ async function updateInfo({
   endDate?: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.update';
   try {
@@ -78,6 +80,7 @@ async function updateInfo({
       endDate,
       titleImg,
       bgImg,
+      isQnA,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {

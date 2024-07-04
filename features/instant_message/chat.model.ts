@@ -157,6 +157,7 @@ async function update({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   instantEventId: string;
   title: string;
@@ -165,6 +166,7 @@ async function update({
   endDate: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }) {
   const updateInstantEventBody: {
     title: string;
@@ -174,11 +176,13 @@ async function update({
     closed: boolean;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   } = {
     title,
     startDate,
     endDate,
     closed: false,
+    isQnA: isQnA ?? false,
   };
   if (desc !== undefined) {
     updateInstantEventBody.desc = desc.replace(/\n/g, '\\n');

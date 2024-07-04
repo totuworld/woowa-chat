@@ -63,7 +63,7 @@ const CreateEvent = function ({
   const [dateRange, setDateRange] = useState<[Moment | null, Moment | null]>([tempStartDate, tempEndDate]);
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
-  const [isQnA, setIsQnA] = useState(false);
+  const [isQnA, setIsQnA] = useState(origin?.isQnA ?? false);
 
   async function extractData() {
     let titleImgUrl: string | null = null;
@@ -123,7 +123,6 @@ const CreateEvent = function ({
       bgImg,
       isQnA,
     };
-    console.log(saveData);
     return saveData;
   }
 

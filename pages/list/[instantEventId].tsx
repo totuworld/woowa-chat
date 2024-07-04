@@ -45,6 +45,7 @@ async function updateEvent({
   endDate,
   titleImg,
   bgImg,
+  isQnA,
 }: {
   instantEventId: string;
   title: string;
@@ -53,6 +54,7 @@ async function updateEvent({
   endDate?: string;
   titleImg?: string;
   bgImg?: string;
+  isQnA?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -69,6 +71,7 @@ async function updateEvent({
       endDate,
       titleImg,
       bgImg,
+      isQnA,
     });
     return {
       result: true,
@@ -207,6 +210,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     endDate?: string;
     titleImg?: string;
     bgImg?: string;
+    isQnA?: boolean;
   }) {
     const resp = await updateEvent(data);
     if (resp.result === false) {
