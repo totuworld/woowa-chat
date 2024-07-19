@@ -143,7 +143,7 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueV
             🎨 프리뷰 모드 🎨
           </Center>
         )}
-        {uniqueVoterCount !== undefined && (
+        {uniqueVoterCount !== undefined && (instantEventInfo.isQnA === undefined || instantEventInfo.isQnA === false) && (
           <Text fontSize="sm" style={{ marginTop: '10px' }}>
             전체 투표 참여자수: {uniqueVoterCount}명
           </Text>
