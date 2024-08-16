@@ -243,9 +243,9 @@ async function messageList(req: NextApiRequest, res: NextApiResponse) {
     throw new BadReqError('authorization 누락');
   }
   const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
-  // 우아한형제들 email이 아닌 경우!
-  if (userInfoByAuth.email !== undefined && /@woowahan\.com$/.test(userInfoByAuth.email) === false) {
-    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
+  // 우아한청년들 email이 아닌 경우!
+  if (userInfoByAuth.email !== undefined && /@woowayouths\.com$/.test(userInfoByAuth.email) === false) {
+    throw new BadReqError('@woowayouths.com 이메일만 지원합니다.');
   }
   const validateResp = validateParamWithData<{
     query: {
@@ -275,9 +275,9 @@ async function messageListWithUniqueVoter(req: NextApiRequest, res: NextApiRespo
     throw new BadReqError('authorization 누락');
   }
   const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
-  // 우아한형제들 email이 아닌 경우!
-  if (userInfoByAuth.email !== undefined && /@woowahan\.com$/.test(userInfoByAuth.email) === false) {
-    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
+  // 우아한청년들 email이 아닌 경우!
+  if (userInfoByAuth.email !== undefined && /@woowayouths\.com$/.test(userInfoByAuth.email) === false) {
+    throw new BadReqError('@woowayouths.com 이메일만 지원합니다.');
   }
   const validateResp = validateParamWithData<{
     query: {

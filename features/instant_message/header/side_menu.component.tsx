@@ -150,7 +150,7 @@ const convertDownloadDataToExcelInfo = (infosList: InInstantEventDownloadItem[])
     id: mv.id,
     메시지: mv.message,
     '메시지 등록일자': mv.createAt,
-    궁금해요: mv.LIKE,
+    공감해요: mv.LIKE,
     '다르게 생각해요': mv.NEXT,
     ㅋㅋㅋㅋ: mv.HAHA,
     동공지진: mv.EYE,

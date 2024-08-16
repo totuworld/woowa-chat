@@ -28,7 +28,6 @@ import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import { REACTION_TYPE } from './reaction_type';
-import IconDown from './icon_down';
 import IconUp from './icon_up';
 
 interface Props {
@@ -538,37 +537,7 @@ const InstantMessageItem = function ({
                   }
                 }}
               >
-                궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
-              </Button>
-            </GridItem>
-            <GridItem key="grid-item-vote-down" flex={1}>
-              <Button
-                isLoading={isSendingVote.DOWN}
-                disabled={isSendingVote.DOWN}
-                fontSize="xs"
-                width="full"
-                leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
-                variant="ghost"
-                height="4"
-                color="black"
-                _hover={{ bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                onClick={() => {
-                  if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
-                    sendReaction({
-                      isAdd: false,
-                      type: 'DOWN',
-                    });
-                  }
-                  if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
-                    sendReaction({
-                      isAdd: true,
-                      type: 'DOWN',
-                    });
-                  }
-                }}
-              >
-                다음에요 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
+                공감해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
               </Button>
             </GridItem>
             {((isEditMode === false && eventState === 'reply') || havePostReplyPrivilege === true) && (

@@ -27,8 +27,8 @@ async function registerUser(req: NextApiRequest, res: NextApiResponse) {
   if (email === undefined) {
     throw new BadReqError('email이 존재하지 않습니다');
   }
-  if (/@woowahan\.com$/.test(email) === false) {
-    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
+  if (/@woowayouths\.com$/.test(email) === false) {
+    throw new BadReqError('@woowayouths.com 이메일만 지원합니다.');
   }
   let screenName = validateResp.data.body.screenName ?? undefined;
   // 트위터에서 정보를 찾아야하나?

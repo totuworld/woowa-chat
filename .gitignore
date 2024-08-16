@@ -37,4 +37,5 @@ yarn-error.log*
 .vercel
 
 fly.toml
+fly.woowa.toml
 fly.youths.toml
