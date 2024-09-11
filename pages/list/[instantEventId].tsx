@@ -393,7 +393,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 <img src="/intro.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
                   <Heading>우수타</Heading>
-                  <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
+                  <Text>이 서비스는 우아한청년들 임직원용 서비스입니다.</Text>
                 </Flex>
               </Box>
             </Center>
@@ -425,6 +425,11 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               refetch();
             }}
           />
+        )}
+        {authUser !== null && (
+          <Box>
+            <img src="/ground_rule.png" alt="ground_rule" />
+          </Box>
         )}
         <Presentation
           messageList={sortedMessageList.filter((fv) => fv.deny === undefined || fv.deny === false)}
