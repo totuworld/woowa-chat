@@ -390,7 +390,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           <Box maxW="xl" mx="auto" minH="80vh">
             <Center marginBottom="10" p="6">
               <Box>
-                <img src="/intro.png" alt="hero" />
+                <img src="/main_youths.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
                   <Heading>우수타</Heading>
                   <Text>이 서비스는 우아한청년들 임직원용 서비스입니다.</Text>
@@ -426,7 +426,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             }}
           />
         )}
-        {authUser !== null && (
+        {authUser !== null && showPresentation === false && eventState === 'question' && (
           <Box>
             <img src="/ground_rule.png" alt="ground_rule" />
           </Box>
