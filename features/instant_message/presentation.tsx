@@ -1,4 +1,4 @@
-import { Box, Button, Spacer, Stack } from '@chakra-ui/react';
+import { Badge, Box, Button, Spacer, Stack, Text } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import IconDown from './message_item/icon_down';
@@ -122,6 +122,8 @@ const PresentationView = function ({
   currentMessage,
   printMessage,
   setFontSize,
+  title,
+  category,
 }: {
   fontSize: string;
   currentIndex: number;
@@ -130,6 +132,10 @@ const PresentationView = function ({
   currentMessage: InInstantEventMessage | undefined;
   printMessage: (string | JSX.Element)[] | string;
   setFontSize: React.Dispatch<React.SetStateAction<string>>;
+  // eslint-disable-next-line react/require-default-props
+  title?: string;
+  // eslint-disable-next-line react/require-default-props
+  category?: string;
 }) {
   return (
     <Box
@@ -193,6 +199,16 @@ const PresentationView = function ({
           큰
         </Button>
       </Stack>
+      {(category || title) && (
+        <Box mb="2">
+          {category && <Badge colorScheme="blue">{category}</Badge>}
+          {title && (
+            <Text fontSize="xl" fontWeight="bold" marginBottom="5">
+              {title}
+            </Text>
+          )}
+        </Box>
+      )}
       <Box
         overflowY="scroll"
         style={{
@@ -330,6 +346,8 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
           currentMessage={currentMessage}
           printMessage={printMessage}
           setFontSize={setFontSize}
+          title={currentMessage?.title}
+          category={currentMessage?.category}
         />
       )}
       {mode === 'REPLY' && (

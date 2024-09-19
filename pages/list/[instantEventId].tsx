@@ -1,11 +1,12 @@
 import { GetServerSideProps, NextPage } from 'next';
 import {
-  Avatar,
   Box,
   Button,
   Center,
   Flex,
   Heading,
+  Input,
+  Select,
   Spacer,
   Text,
   Textarea,
@@ -88,7 +89,17 @@ interface Props {
   instantEventInfo: InInstantEvent | null;
 }
 
-async function postMessage({ message, instantEventId }: { message: string; instantEventId: string }) {
+async function postMessage({
+  message,
+  instantEventId,
+  title,
+  category,
+}: {
+  message: string;
+  instantEventId: string;
+  title?: string;
+  category?: string;
+}) {
   if (message.length <= 0) {
     return {
       result: false,
@@ -99,6 +110,8 @@ async function postMessage({ message, instantEventId }: { message: string; insta
     await ChatClientService.post({
       instantEventId,
       message,
+      title,
+      category,
     });
     return {
       result: true,
@@ -116,6 +129,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const toast = useToast();
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
+  const [category, updateCategory] = useState('');
+  const [title, updateTitle] = useState('');
   const [message, updateMessage] = useState('');
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
@@ -309,10 +324,34 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
+            <Select
+              placeholder="작성하실 질문의 카테고리를 선택해주세요"
+              mb="2"
+              size="sm"
+              onChange={(e) => {
+                updateCategory(e.target.value);
+              }}
+            >
+              <option value="인사/지원">인사/지원</option>
+              <option value="조직문화">조직문화</option>
+              <option value="업무환경">업무환경</option>
+              <option value="PPC 운영">PPC 운영</option>
+              <option value="그 밖의 수다">그 밖의 수다(칭찬합시다, 병우님과 수다 등등)</option>
+            </Select>
+            <Input
+              placeholder="질문 제목을 입력해주세요"
+              mb="2"
+              fontSize="sm"
+              bg="gray.100"
+              border="none"
+              boxShadow="none !important"
+              borderRadius="md"
+              resize="none"
+              onChange={(e) => {
+                updateTitle(e.target.value);
+              }}
+            />
             <Flex>
-              <Box pt="1" pr="2">
-                <Avatar size="xs" src="/profile_anonymous.png" />
-              </Box>
               <Textarea
                 bg="gray.100"
                 border="none"
@@ -324,7 +363,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 minRows={1}
                 maxRows={14}
                 overflow="hidden"
-                fontSize="xs"
+                fontSize="sm"
                 mr="2"
                 as={ResizeTextarea}
                 value={message}
@@ -361,6 +400,8 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                   const resp = await postMessage({
                     message: message.trim(),
                     instantEventId: instantEventInfo.instantEventId,
+                    title,
+                    category,
                   });
                   if (resp.result === false) {
                     toast({
@@ -377,6 +418,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                   if (isOwner) {
                     setListLoadTrigger((prev) => !prev);
                   }
+                  updateTitle('');
                   updateMessage('');
                   setSending(false);
                 }}

@@ -4,6 +4,8 @@ import { REACTION_TYPE } from '@/features/instant_message/message_item/reaction_
 export interface InInstantEventMessageBase {
   id: string;
   message: string;
+  title?: string;
+  category?: string;
   vote: number;
   voter?: string[];
   reaction?: { type: REACTION_TYPE; voter: string }[];

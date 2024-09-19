@@ -513,6 +513,7 @@ async function updateBody(req: NextApiRequest, res: NextApiResponse) {
       instantEventId: string;
       messageId: string;
       message: string;
+      title?: string;
     };
   }>(
     {

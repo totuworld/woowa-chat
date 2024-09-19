@@ -280,9 +280,34 @@ async function immediateClosSendMessagePeriod({ instantEventId }: { instantEvent
   }
 }
 
-async function post({ instantEventId, message }: { instantEventId: string; message: string }): Promise<Resp<unknown>> {
+async function post({
+  instantEventId,
+  message,
+  title,
+  category,
+}: {
+  instantEventId: string;
+  message: string;
+  title?: string;
+  category?: string;
+}): Promise<Resp<unknown>> {
   const url = '/api/instant-event.messages.add';
   try {
+    const data: {
+      instantEventId: string;
+      message: string;
+      title?: string;
+      category?: string;
+    } = {
+      instantEventId,
+      message,
+    };
+    if (title) {
+      data.title = title;
+    }
+    if (category) {
+      data.category = category;
+    }
     const resp = await requester({
       option: {
         url,
@@ -290,6 +315,8 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
         data: {
           instantEventId,
           message,
+          title,
+          category,
         },
       },
     });
@@ -479,14 +506,25 @@ async function updateMessage({
   instantEventId,
   messageId,
   message,
+  title,
 }: {
   instantEventId: string;
   messageId: string;
   message: string;
+  title?: string;
 }): Promise<Resp<void>> {
   const url = '/api/instant-event.messages.update_body';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
   try {
+    const updateValue: {
+      instantEventId: string;
+      messageId: string;
+      message: string;
+      title?: string;
+    } = { instantEventId, messageId, message };
+    if (title !== undefined) {
+      updateValue.title = title;
+    }
     await requester<InInstantEventMessage>({
       option: {
         url,
@@ -494,7 +532,7 @@ async function updateMessage({
         headers: {
           authorization: token ?? '',
         },
-        data: { instantEventId, messageId, message },
+        data: updateValue,
       },
     });
     return { status: 200 };

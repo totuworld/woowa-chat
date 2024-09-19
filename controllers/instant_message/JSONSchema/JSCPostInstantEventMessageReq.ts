@@ -13,6 +13,12 @@ const JSCPostInstantEventMessageReq: JSONSchema6 = {
           type: 'string',
           maxLength: 5000,
         },
+        title: {
+          type: 'string',
+        },
+        category: {
+          type: 'string',
+        },
       },
       required: ['instantEventId', 'message'],
       type: 'object',

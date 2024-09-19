@@ -15,6 +15,9 @@ const JSCUpdateBodyReq: JSONSchema6 = {
         message: {
           type: 'string',
         },
+        title: {
+          type: 'string',
+        },
       },
       required: ['instantEventId', 'messageId', 'message'],
       type: 'object',

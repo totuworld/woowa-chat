@@ -298,7 +298,17 @@ async function closeSendMessage({ instantEventId }: { instantEventId: string }) 
 }
 
 /** 질문 등록 */
-async function post({ instantEventId, message }: { instantEventId: string; message: string }) {
+async function post({
+  instantEventId,
+  message,
+  category,
+  title,
+}: {
+  instantEventId: string;
+  message: string;
+  title?: string;
+  category?: string;
+}) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
@@ -325,7 +335,21 @@ async function post({ instantEventId, message }: { instantEventId: string; messa
       }
     }
     const newPostRef = eventRef.collection(INSTANT_MESSAGE).doc();
-    await transaction.create(newPostRef, { message, vote: 0, sortWeight: 0, createAt: FieldValue.serverTimestamp() });
+    const createData: {
+      message: string;
+      vote: number;
+      sortWeight: number;
+      createAt: firestore.FieldValue;
+      category?: string;
+      title?: string;
+    } = { message, vote: 0, sortWeight: 0, createAt: FieldValue.serverTimestamp() };
+    if (title !== undefined && title !== null && title.length > 0) {
+      createData.title = title;
+    }
+    if (category !== undefined && category !== null && category.length > 0) {
+      createData.category = category;
+    }
+    await transaction.create(newPostRef, createData);
   });
 }
 
@@ -1038,11 +1062,13 @@ async function updateMessage({
   messageId,
   currentUserId,
   message,
+  title,
 }: {
   instantEventId: string;
   messageId: string;
   currentUserId: string;
   message: string;
+  title?: string;
 }): Promise<void> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -1060,7 +1086,11 @@ async function updateMessage({
     if (ownerMemberDoc.exists === false) {
       throw new CustomServerError({ statusCode: 401, message: '권한없음' });
     }
-    await transaction.update(messageRef, { message });
+    const updateValue: { message: string; title?: string } = { message };
+    if (title !== undefined) {
+      updateValue.title = title;
+    }
+    await transaction.update(messageRef, updateValue);
   });
 }
 

@@ -155,6 +155,7 @@ const InstantMessageItem = function ({
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [title, updateTitle] = useState(item.title);
   const [message, updateMessage] = useState(item.message);
   const [isSendingVote, setSendingVote] = useState({
     LIKE: false,
@@ -211,6 +212,7 @@ const InstantMessageItem = function ({
   function turnOnEditer() {
     setIsEditMode(true);
     updateMessage(item.message);
+    updateTitle(item.title);
   }
   function turnOffEditer() {
     setIsEditMode(false);
@@ -301,7 +303,7 @@ const InstantMessageItem = function ({
     });
   }
 
-  function updateMessageToServer(msg: string) {
+  function updateMessageToServer({ msg, title: sendTitle }: { msg: string; title?: string }) {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
@@ -313,6 +315,7 @@ const InstantMessageItem = function ({
       instantEventId,
       messageId: item.id,
       message: msg,
+      title: sendTitle,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
@@ -474,6 +477,22 @@ const InstantMessageItem = function ({
       <Box p="2">
         <Box p="2">
           {isEditMode && (
+            <Input
+              bg="gray.100"
+              border="none"
+              boxShadow="none !important"
+              placeholder="제목을 입력하세요"
+              borderRadius="md"
+              fontSize="sm"
+              mr="2"
+              mb="2"
+              value={title}
+              onChange={(e) => {
+                updateTitle(e.target.value);
+              }}
+            />
+          )}
+          {isEditMode && (
             <Textarea
               bg="gray.100"
               border="none"
@@ -488,6 +507,12 @@ const InstantMessageItem = function ({
                 updateMessage(e.target.value);
               }}
             />
+          )}
+          {item.category && isEditMode === false && <Badge colorScheme="blue">{item.category}</Badge>}
+          {item.title && isEditMode === false && (
+            <Text fontSize="lg" mb="2">
+              {item.title}
+            </Text>
           )}
           {isEditMode === false && (
             <Text whiteSpace="pre-line" fontSize="sm">
@@ -592,7 +617,10 @@ const InstantMessageItem = function ({
                   _hover={{ bg: 'white' }}
                   _focus={{ bg: 'white' }}
                   onClick={() => {
-                    updateMessageToServer(message);
+                    updateMessageToServer({
+                      msg: message,
+                      title,
+                    });
                   }}
                 >
                   수정 반영하기
