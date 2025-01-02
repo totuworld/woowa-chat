@@ -21,6 +21,7 @@ const INSTANT_EVENT_INFO = 'collection_info/instants';
 const INSTANT_MESSAGE = 'messages';
 
 const OWNER_MEMBER_COLLECTION = 'owner_members';
+const LEADER_MEMBER_INFO = 'leader_members/members';
 
 async function findAllEvent(): Promise<InInstantEvent[]> {
   const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).orderBy('createCount', 'desc');
@@ -328,8 +329,10 @@ async function post({
   showOnlyAdmin: boolean;
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
+  const leaderMemberInfoRef = FirebaseAdmin.getInstance().Firestore.doc(LEADER_MEMBER_INFO);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
+    const leaderMemberDoc = await transaction.get(leaderMemberInfoRef);
 
     if (eventDoc.exists === false) {
       throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트에 질문을 보내고 있네요 ☠️' });
@@ -350,6 +353,16 @@ async function post({
       if (isBefore === false) {
         await transaction.update(eventRef, { closed: true });
         throw new CustomServerError({ statusCode: 400, message: '종료된 이벤트에 질문을 보내고 있네요 ☠️' });
+      }
+    }
+    // eventDoc.isLeaders 가 true이고, leaderMemberInfo.members에 email이 포함되어 있지 않다면, 에러를 발생시킨다.
+    console.log('eventInfo.isLeadersOnly', eventInfo.isLeadersOnly);
+    console.log('leaderMemberDoc.exists', leaderMemberDoc.exists);
+    if (eventInfo.isLeadersOnly === true && leaderMemberDoc.exists) {
+      const leaderMemberInfo = leaderMemberDoc.data() as { members: string[] };
+      const isLeader = leaderMemberInfo.members.includes(email);
+      if (isLeader === false) {
+        throw new CustomServerError({ statusCode: 400, message: '메시지 등록 권한이 없습니다' });
       }
     }
     const newPostRef = eventRef.collection(INSTANT_MESSAGE).doc();
@@ -502,16 +515,29 @@ async function messageListWithUniqueVoter({
     const ownerMemberRef = FirebaseAdmin.getInstance()
       .Firestore.collection(OWNER_MEMBER_COLLECTION)
       .doc(currentUserUid);
+    const leaderMemberInfoRef = FirebaseAdmin.getInstance().Firestore.doc(LEADER_MEMBER_INFO);
     const eventDocRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
     const colRef = eventDocRef.collection(INSTANT_MESSAGE).orderBy('sortWeight', 'desc').orderBy('createAt', 'desc');
     const eventDoc = await transaction.get(eventDocRef);
     const colDocs = await transaction.get(colRef);
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const leaderMemberDoc = await transaction.get(leaderMemberInfoRef);
     const eventInfo = eventDoc.data() as InInstantEvent;
     const eventState = InstantEventUtil.calEventState(eventInfo);
     const isShowAll = eventState === 'showAll';
     const isOwnerMember = ownerMemberDoc.exists;
     const voterSet = new Set<string>();
+    const leaderMemberInfo = leaderMemberDoc.data() as { members: string[] };
+    const isLeader = leaderMemberInfo.members.includes(currentUserEmail);
+
+    // 만약 eventDoc.isLeadersOnly가 true이고, isLeader가 false라면, 무조건 빈 목록을 반환한다.
+    if (eventInfo.isLeadersOnly === true && isLeader === false) {
+      return {
+        list: [],
+        uniqueVoterCount: 0,
+      };
+    }
+
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
       const voted = (() => {

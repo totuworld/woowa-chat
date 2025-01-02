@@ -96,11 +96,24 @@ async function postMessage({
     };
   }
   try {
-    await ChatClientService.post({
+    const resp = await ChatClientService.post({
       instantEventId,
       message,
       showOnlyAdmin,
     });
+    if (resp.status !== 200 && resp.error !== undefined) {
+      return {
+        result: false,
+        message:
+          resp.error &&
+          typeof resp.error === 'object' &&
+          'data' in resp.error &&
+          typeof resp.error.data === 'object' &&
+          resp.error.data !== null
+            ? (resp.error.data as { message: string }).message
+            : '등록 실패',
+      };
+    }
     return {
       result: true,
     };
@@ -377,10 +390,19 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                     instantEventId: instantEventInfo.instantEventId,
                     showOnlyAdmin,
                   });
-                  if (resp.result === false) {
+                  if (resp.result === false && resp.message !== undefined) {
+                    toast({
+                      title: '메시지 등록 실패',
+                      description: resp.message,
+                      position: 'top-right',
+                      status: 'error',
+                    });
+                  }
+                  if (resp.result === false && resp.message === undefined) {
                     toast({
                       title: '메시지 등록 실패',
                       position: 'top-right',
+                      status: 'error',
                     });
                   }
                   if (resp.result === true) {
