@@ -32,8 +32,14 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.chat
+.env.youth
+.env.woowa
+.env.leaders
 
 # vercel
 .vercel
 
 fly.toml
+fly.leaders.toml
+fly.youths.toml

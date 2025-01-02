@@ -20,6 +20,7 @@ async function createEvent({
   titleImg,
   bgImg,
   isQnA,
+  isLeadersOnly,
 }: {
   title: string;
   desc?: string;
@@ -28,6 +29,7 @@ async function createEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isLeadersOnly?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -36,7 +38,16 @@ async function createEvent({
     };
   }
   try {
-    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
+    const resp = await ChatClientService.create({
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+      isQnA,
+      isLeadersOnly,
+    });
     return {
       result: true,
       instantEventId: resp.payload?.instantEventId,
@@ -86,6 +97,7 @@ const ChatList = function () {
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isLeadersOnly?: boolean;
   }) {
     const resp = await createEvent(data);
     if (resp.result === false) {

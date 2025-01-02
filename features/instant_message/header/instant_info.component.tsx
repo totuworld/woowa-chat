@@ -119,9 +119,18 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueV
   const linkText = convertMarkdownLinksToJsx(printDesc);
   const bodyText = convertMarkdownBoldToJsx(linkText);
   const boldTitle = convertMarkdownBoldToJsx([instantEventInfo.title] ?? ['']);
+  const titleImg = (() => {
+    if (instantEventInfo.titleImg) {
+      return instantEventInfo.titleImg;
+    }
+    if (instantEventInfo.isLeadersOnly === true) {
+      return '/default_title_leader.png';
+    }
+    return DEFAULT_IMG;
+  })();
   return (
     <>
-      <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
+      <Image src={titleImg} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{boldTitle}</Text>
         <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>

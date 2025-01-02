@@ -31,6 +31,9 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
         isQnA: {
           type: 'boolean',
         },
+        isLeadersOnly: {
+          type: 'boolean',
+        },
       },
       required: ['title', 'startDate', 'endDate'],
       type: 'object',

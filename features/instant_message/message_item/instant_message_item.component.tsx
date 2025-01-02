@@ -39,6 +39,9 @@ interface Props {
   /** QnA 모드인가? */
   // eslint-disable-next-line react/require-default-props
   isQnA?: boolean;
+  /** 리더만 볼 수 있는 모드인가? */
+  // eslint-disable-next-line react/require-default-props
+  isLeaderOnly?: boolean;
   item: InInstantEventMessage;
   onSendComplete: () => void;
   // eslint-disable-next-line react/require-default-props
@@ -154,6 +157,7 @@ const InstantMessageItem = function ({
   eventState,
   onDeleteComplete,
   isQnA = false,
+  isLeaderOnly = false,
 }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
@@ -450,6 +454,25 @@ const InstantMessageItem = function ({
     );
   }
 
+  const showReplyFlag = (() => {
+    if (eventState === 'pre') return false;
+    if (eventState === 'question' && isLeaderOnly === false) return false;
+    if (eventState === 'question' && isLeaderOnly === true) return true;
+    return true;
+  })();
+
+  // 댓글 달기 가능한지 확인
+  const canReply = (() => {
+    /**
+     * ((isEditMode === false && eventState === 'reply' && isQnA === false) ||
+              havePostReplyPrivilege === true)
+     */
+    if (havePostReplyPrivilege === true) return true;
+    if (isEditMode === false && eventState === 'reply' && isQnA === false) return true;
+    if (isEditMode === false && eventState === 'question' && isLeaderOnly === true) return true;
+    return false;
+  })();
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -551,7 +574,7 @@ const InstantMessageItem = function ({
           )}
         </Box>
         {!(eventState === 'pre' || eventState === 'question') && <Divider />}
-        {(item.deny === undefined || item.deny === false) && !(eventState === 'pre' || eventState === 'question') && (
+        {(item.deny === undefined || item.deny === false) && showReplyFlag && (
           <Flex
             minWidth="max-content"
             alignItems="center"
@@ -650,8 +673,7 @@ const InstantMessageItem = function ({
                 </Tooltip>
               </GridItem>
             )}
-            {((isEditMode === false && eventState === 'reply' && isQnA === false) ||
-              havePostReplyPrivilege === true) && (
+            {canReply && (
               <GridItem key="grid-item-reply" flex={1}>
                 <Button
                   fontSize="xs"
@@ -725,7 +747,7 @@ const InstantMessageItem = function ({
             )}
           </Box>
         )}
-        {!(eventState === 'pre' || eventState === 'question') && (
+        {showReplyFlag && (
           <Box>
             {item.reply &&
               item.reply.length > 0 &&

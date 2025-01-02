@@ -131,6 +131,9 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     if (instantEventInfo?.isQnA === true) {
       setLogo('/logo_qna.png');
     }
+    if (instantEventInfo?.isLeadersOnly === true) {
+      setLogo('/logo_leaders.png');
+    }
     return () => {
       setLogo('/logo.png');
     };
@@ -234,7 +237,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
-      title="전사발표Q&A"
+      title="리더십타운홀"
       pt={16}
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">

@@ -7,5 +7,6 @@ export interface CreateInstantEventReq {
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isLeadersOnly?: boolean;
   };
 }

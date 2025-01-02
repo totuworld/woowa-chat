@@ -16,6 +16,7 @@ async function create({
   titleImg,
   bgImg,
   isQnA,
+  isLeadersOnly,
 }: {
   title: string;
   desc?: string;
@@ -24,6 +25,7 @@ async function create({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isLeadersOnly?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.create';
   try {
@@ -35,6 +37,7 @@ async function create({
       titleImg,
       bgImg,
       isQnA,
+      isLeadersOnly,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {
@@ -60,6 +63,7 @@ async function updateInfo({
   titleImg,
   bgImg,
   isQnA,
+  isLeadersOnly,
 }: {
   instantEventId: string;
   title: string;
@@ -69,6 +73,7 @@ async function updateInfo({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isLeadersOnly?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.update';
   try {
@@ -81,6 +86,7 @@ async function updateInfo({
       titleImg,
       bgImg,
       isQnA,
+      isLeadersOnly,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {

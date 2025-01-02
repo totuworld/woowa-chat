@@ -33,6 +33,7 @@ const CreateEvent = function ({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isLeadersOnly?: boolean;
   }) => void;
   onClose: () => void;
   mode: 'CREATE' | 'MODIFY';
@@ -53,6 +54,7 @@ const CreateEvent = function ({
     /** 배경 이미지 */
     bgImg?: string;
     isQnA?: boolean;
+    isLeadersOnly?: boolean;
   };
 }) {
   const initialRef = useRef<any>();
@@ -64,6 +66,7 @@ const CreateEvent = function ({
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [isQnA, setIsQnA] = useState(origin?.isQnA ?? false);
+  const [isLeadersOnly, setIsLeadersOnly] = useState(origin?.isLeadersOnly ?? false);
 
   async function extractData() {
     let titleImgUrl: string | null = null;
@@ -122,6 +125,7 @@ const CreateEvent = function ({
       titleImg,
       bgImg,
       isQnA,
+      isLeadersOnly,
     };
     return saveData;
   }
@@ -171,15 +175,30 @@ const CreateEvent = function ({
       </FormControl>
       <FormControl mt={4}>
         {/* Q&A로 동작할지 여부를 묻는 체크 박스. 기본값을 false */}
-        <FormLabel>Q&A로 동작 여부</FormLabel>
+        <FormLabel>전사발표 Q&A</FormLabel>
         <Checkbox
           size="md"
           isChecked={isQnA}
           onChange={() => {
             setIsQnA((prev) => !prev);
+            setIsLeadersOnly(false);
           }}
         >
-          Q&A로 전환(OO님만 보세요 미노출)
+          전사발표 Q&A로 전환
+        </Checkbox>
+      </FormControl>
+      <FormControl mt={4}>
+        {/* Q&A로 동작할지 여부를 묻는 체크 박스. 기본값을 false */}
+        <FormLabel>리더십 타운홀 QA</FormLabel>
+        <Checkbox
+          size="md"
+          isChecked={isLeadersOnly}
+          onChange={() => {
+            setIsLeadersOnly((prev) => !prev);
+            setIsQnA(false);
+          }}
+        >
+          리더십 타운홀 Q&A로 전환(질문 등록 및 댓글 등록 기간이 별도로 없음)
         </Checkbox>
       </FormControl>
       <FormControl mt={4}>
