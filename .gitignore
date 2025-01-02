@@ -41,5 +41,6 @@ yarn-error.log*
 .vercel
 
 fly.toml
+fly.chat.toml
 fly.leaders.toml
 fly.youths.toml
