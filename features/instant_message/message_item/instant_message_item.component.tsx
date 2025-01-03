@@ -473,6 +473,17 @@ const InstantMessageItem = function ({
     return false;
   })();
 
+  const showNextReaction = (() => {
+    if (isLeaderOnly === true) return false;
+    return isQnA === false;
+  })();
+
+  // 궁금해요 버튼 명
+  const likeButtonText = (() => {
+    if (isLeaderOnly === true) return '공감';
+    return '궁금해요';
+  })();
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -625,12 +636,12 @@ const InstantMessageItem = function ({
                       }
                     }}
                   >
-                    궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+                    {likeButtonText} {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
                   </Button>
                 </Tooltip>
               </GridItem>
             )}
-            {isQnA === false && (
+            {showNextReaction && (
               <GridItem key="grid-item-vote-down" flex={1}>
                 <Tooltip
                   isDisabled={memoReaction.has('DOWN') === false}
