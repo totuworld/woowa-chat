@@ -484,6 +484,12 @@ const InstantMessageItem = function ({
     return '궁금해요';
   })();
 
+  const isPossibleReaction = (() => {
+    if (eventState === 'reply') return true;
+    if (eventState === 'question' && isLeaderOnly === true) return true;
+    return false;
+  })();
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -622,13 +628,13 @@ const InstantMessageItem = function ({
                     _hover={{ bg: 'white' }}
                     _focus={{ bg: 'white' }}
                     onClick={() => {
-                      if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
+                      if (isPossibleReaction && memoReaction.has('LIKE') === true) {
                         sendReaction({
                           isAdd: false,
                           type: 'LIKE',
                         });
                       }
-                      if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
+                      if (isPossibleReaction && memoReaction.has('LIKE') === false) {
                         sendReaction({
                           isAdd: true,
                           type: 'LIKE',
