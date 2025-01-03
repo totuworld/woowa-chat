@@ -35,6 +35,7 @@ async function updateEvent({
   titleImg,
   bgImg,
   isQnA,
+  isLeadersOnly,
 }: {
   instantEventId: string;
   title: string;
@@ -44,6 +45,7 @@ async function updateEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isLeadersOnly?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -61,6 +63,7 @@ async function updateEvent({
       titleImg,
       bgImg,
       isQnA,
+      isLeadersOnly,
     });
     return {
       result: true,
@@ -227,6 +230,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isLeadersOnly?: boolean;
   }) {
     const resp = await updateEvent(data);
     if (resp.result === false) {
