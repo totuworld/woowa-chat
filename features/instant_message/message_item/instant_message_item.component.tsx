@@ -31,6 +31,7 @@ import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import { REACTION_TYPE } from './reaction_type';
 import IconDown from './icon_down';
 import IconUp from './icon_up';
+import IconHeart from './icon_heart';
 
 interface Props {
   instantEventId: string;
@@ -483,6 +484,10 @@ const InstantMessageItem = function ({
     if (isLeaderOnly === true) return '공감';
     return '궁금해요';
   })();
+  const likeButtonIcon = (() => {
+    if (isLeaderOnly === true) return <IconHeart size={16} active={memoReaction.has('LIKE') === true} />;
+    return <IconUp size={16} active={memoReaction.has('LIKE') === true} />;
+  })();
 
   const isPossibleReaction = (() => {
     if (eventState === 'reply') return true;
@@ -622,7 +627,7 @@ const InstantMessageItem = function ({
                     disabled={isSendingVote.LIKE}
                     fontSize="xs"
                     width="full"
-                    leftIcon={<IconUp size={16} active={memoReaction.has('LIKE') === true} />}
+                    leftIcon={likeButtonIcon}
                     variant="ghost"
                     height="4"
                     _hover={{ bg: 'white' }}
