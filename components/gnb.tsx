@@ -45,7 +45,7 @@ const GNB: React.FC = function () {
               window.location.href = '/list';
             }}
           >
-            우수타 목록
+            Q&A 목록
           </MenuItem>
         )}
         {isOwner && (

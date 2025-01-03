@@ -62,7 +62,7 @@ async function createEvent({
 }
 
 const ChatList = function () {
-  const { isOwner } = useAuth();
+  const { isOwner, authUser } = useAuth();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
@@ -78,7 +78,7 @@ const ChatList = function () {
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
     {
-      enabled: true,
+      enabled: authUser !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -126,7 +126,7 @@ const ChatList = function () {
               onOpen();
             }}
           >
-            우수타 이벤트 생성
+            Q&A 이벤트 생성
           </Button>
         )}
       </Box>

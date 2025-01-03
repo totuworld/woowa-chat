@@ -1,0 +1,93 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import FirebaseAdmin from '@/models/firebase_admin';
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+
+const leaders = [
+  'ak@woowahan.com',
+  'kyekwon.jo@woowahan.com',
+  'ran@woowahan.com',
+  'mscho@woowahan.com',
+  'jameskwon@woowahan.com',
+  'hmhwang@woowahan.com',
+  'changhoon.kim@woowahan.com',
+  'kevin.kwon@woowahan.com',
+  'yhj@woowahan.com',
+  'sohee.choi@woowahan.com',
+  'ysoh@woowahan.com',
+  'nami@woowahan.com',
+  'js.kang@woowahan.com',
+  'bigsexy77@woowahan.com',
+  'minah.park@woowahan.com',
+  'hysong@woowahan.com',
+  'jaedeok@woowahan.com',
+  'sp6218@woowahan.com',
+  'mjang@woowahan.com',
+  'leah.yeon@woowahan.com',
+  'myunhee.lee@woowahan.com',
+  'jyhwang@woowahan.com',
+  'jihyekim@woowahan.com',
+  'parker@woowahan.com',
+  'kiho.lee@woowahan.com',
+  'frodo@woowahan.com',
+  'hyunjung.kang@woowahan.com',
+  'sjchoi@woowahan.com',
+  'zune@woowahan.com',
+  'miyoung.kwon@woowahan.com',
+  'jane.kim@woowahan.com',
+  'soyoungjeon@woowahan.com',
+  'khcho@woowahan.com',
+  'ckyun@woowahan.com',
+  'jaehas@woowahan.com',
+  'donggyu@woowahan.com',
+  'choisk@woowahan.com',
+  'hyunjikim@woowahan.com',
+  'iskim@woowahan.com',
+  'hwangjt@woowahan.com',
+  'steven.han@woowahan.com',
+  'scott@woowahan.com',
+  'arcrim@woowahan.com',
+  'eunyoungkim@woowahan.com',
+  'pobi@woowahan.com',
+  'hyo@woowahan.com',
+  'edwardjee@woowahan.com',
+  'bigface@woowahan.com',
+  'student@woowahan.com',
+  'cr.bang@woowahan.com',
+  'zka@woowahan.com',
+  'daeykim14@woowahan.com',
+  'jongtae.kim@woowahan.com',
+  'wonsama@woowahan.com',
+  'centerline74@woowahan.com',
+  'mshan@woowahan.com',
+  'jkan@woowahan.com',
+  'hdkim@woowahan.com',
+  'junyong.park@woowahan.com',
+  'juwankim@woowahan.com',
+  'shawn79@woowahan.com',
+  'jia.kwak@woowahan.com',
+  'ih.ha@woowahan.com',
+  'hs.kim@woowahan.com',
+  'hnna@woowahan.com',
+  'mcyong431@woowahan.com',
+  'zen@woowahan.com',
+  'kingssnow.park@woowahan.com',
+  'leejaeil@woowahan.com',
+  'hys@woowahan.com',
+  'hjban@woowahan.com',
+  'kimsey@woowahan.com',
+  'insadol@woowahan.com',
+  'arhwang@woowahan.com',
+  'okmcman@woowahan.com',
+  'msuh@woowahan.com',
+];
+
+export default async function handler(_: NextApiRequest, res: NextApiResponse) {
+  const doc = await FirebaseAdmin.getInstance().Firestore.doc('leader_members/members');
+  // 기존 members 필드를 가져옵니다.
+  const snapshot = await doc.get();
+  const data = snapshot.data();
+  const members = data?.members || [];
+  // doc의 members 필드에 leaders를 추가합니다.
+  await doc.update({ members: [...members, ...leaders] });
+  res.status(200).json({ name: 'John Doe' });
+}

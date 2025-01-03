@@ -8,13 +8,13 @@ interface InGNBContext {
 }
 
 const GNBContext = createContext<InGNBContext>({
-  logo: '/logo.png',
+  logo: '/logo_leaders.png',
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setLogo: () => {},
 });
 
 export const GNBProvider = function ({ children }: { children: React.ReactNode }) {
-  const [logo, setLogo] = useState('/logo.png');
+  const [logo, setLogo] = useState('/logo_leaders.png');
   const contextValue = useMemo(() => ({ logo, setLogo }), [logo, setLogo]);
   return <GNBContext.Provider value={contextValue}>{children}</GNBContext.Provider>;
 };
