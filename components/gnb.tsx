@@ -57,6 +57,15 @@ const GNB: React.FC = function () {
             관리자 추가/삭제
           </MenuItem>
         )}
+        {isOwner && (
+          <MenuItem
+            onClick={() => {
+              window.location.href = '/leader-members';
+            }}
+          >
+            리더 목록 관리
+          </MenuItem>
+        )}
         <MenuItem onClick={signOut}>로그아웃</MenuItem>
       </MenuList>
     </Menu>
