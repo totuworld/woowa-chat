@@ -20,6 +20,8 @@ async function add(req: NextApiRequest, res: NextApiResponse) {
   if (token === undefined) {
     throw new CustomServerError({ statusCode: 401, message: '인증이 필요합니다' });
   }
+
+  console.log(token);
   const senderUid: string = await verifyFirebaseIdToken(token);
   const validateResp = validateParamWithData<{
     body: {

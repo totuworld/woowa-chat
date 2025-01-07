@@ -39,8 +39,12 @@ async function add(email: string, senderUid: string) {
     throw new CustomServerError({ statusCode: 403, message: '리더 관리 권한이 없습니다.' });
   }
   const eventColRef = FirebaseAdmin.getInstance().Firestore.doc(LEADER_MEMBER_INFO);
+
+  // email에 ,가 포함되었는지 확인 후 분리해서 배열로 만든다
+  const emailList = email.split(',').map((item) => item.trim());
+
   await eventColRef.update({
-    members: FieldValue.arrayUnion(email),
+    members: FieldValue.arrayUnion(...emailList),
   });
 }
 
