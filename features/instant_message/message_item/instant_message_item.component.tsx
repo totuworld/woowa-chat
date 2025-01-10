@@ -450,6 +450,9 @@ const InstantMessageItem = function ({
     );
   }
 
+  const reactionPossible = ['question', 'reply'].includes(eventState);
+  const showReactionCount = isOwner || eventState === 'showAll' || eventState === 'question' || eventState === 'reply';
+
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
       <Box>
@@ -551,7 +554,7 @@ const InstantMessageItem = function ({
           )}
         </Box>
         {!(eventState === 'pre' || eventState === 'question') && <Divider />}
-        {(item.deny === undefined || item.deny === false) && !(eventState === 'pre' || eventState === 'question') && (
+        {(item.deny === undefined || item.deny === false) && !(eventState === 'pre') && (
           <Flex
             minWidth="max-content"
             alignItems="center"
@@ -588,13 +591,13 @@ const InstantMessageItem = function ({
                     _hover={{ bg: 'white' }}
                     _focus={{ bg: 'white' }}
                     onClick={() => {
-                      if (eventState === 'reply' && memoReaction.has('LIKE') === true) {
+                      if (reactionPossible && memoReaction.has('LIKE') === true) {
                         sendReaction({
                           isAdd: false,
                           type: 'LIKE',
                         });
                       }
-                      if (eventState === 'reply' && memoReaction.has('LIKE') === false) {
+                      if (reactionPossible && memoReaction.has('LIKE') === false) {
                         sendReaction({
                           isAdd: true,
                           type: 'LIKE',
@@ -602,7 +605,7 @@ const InstantMessageItem = function ({
                       }
                     }}
                   >
-                    궁금해요 {isOwner || eventState === 'showAll' ? memoReaction.get('LIKE') : ''}
+                    궁금해요 {showReactionCount ? memoReaction.get('LIKE') : ''}
                   </Button>
                 </Tooltip>
               </GridItem>
@@ -631,13 +634,13 @@ const InstantMessageItem = function ({
                     _hover={{ bg: 'white' }}
                     _focus={{ bg: 'white' }}
                     onClick={() => {
-                      if (eventState === 'reply' && memoReaction.has('DOWN') === true) {
+                      if (reactionPossible && memoReaction.has('DOWN') === true) {
                         sendReaction({
                           isAdd: false,
                           type: 'DOWN',
                         });
                       }
-                      if (eventState === 'reply' && memoReaction.has('DOWN') === false) {
+                      if (reactionPossible && memoReaction.has('DOWN') === false) {
                         sendReaction({
                           isAdd: true,
                           type: 'DOWN',
@@ -645,7 +648,7 @@ const InstantMessageItem = function ({
                       }
                     }}
                   >
-                    다음에요 {isOwner || eventState === 'showAll' ? memoReaction.get('DOWN') : ''}
+                    다음에요 {showReactionCount ? memoReaction.get('DOWN') : ''}
                   </Button>
                 </Tooltip>
               </GridItem>
