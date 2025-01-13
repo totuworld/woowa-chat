@@ -609,7 +609,7 @@ const InstantMessageItem = function ({
                 </Tooltip>
               </GridItem>
             )}
-            {((isEditMode === false && eventState === 'reply' && isQnA === false) ||
+            {((isEditMode === false && (eventState === 'question' || eventState === 'reply') && isQnA === false) ||
               havePostReplyPrivilege === true) && (
               <GridItem key="grid-item-reply" flex={1}>
                 <Button
@@ -684,7 +684,7 @@ const InstantMessageItem = function ({
             )}
           </Box>
         )}
-        {!(eventState === 'pre' || eventState === 'question') && (
+        {!(eventState === 'pre') && (
           <Box>
             {item.reply &&
               item.reply.length > 0 &&
