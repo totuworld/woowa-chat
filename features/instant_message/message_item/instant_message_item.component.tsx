@@ -610,49 +610,6 @@ const InstantMessageItem = function ({
                 </Tooltip>
               </GridItem>
             )}
-            {isQnA === false && (
-              <GridItem key="grid-item-vote-down" flex={1}>
-                <Tooltip
-                  isDisabled={memoReaction.has('DOWN') === false}
-                  fontSize="xs"
-                  label={item
-                    .reaction!.filter((reaction) => reaction.type === 'DOWN' && reaction.userName && reaction.email)
-                    .map(
-                      (reaction, idx) =>
-                        `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
-                    )}
-                >
-                  <Button
-                    isLoading={isSendingVote.DOWN}
-                    disabled={isSendingVote.DOWN}
-                    fontSize="xs"
-                    width="full"
-                    leftIcon={<IconDown size={16} active={memoReaction.has('DOWN') === true} />}
-                    variant="ghost"
-                    height="4"
-                    color="black"
-                    _hover={{ bg: 'white' }}
-                    _focus={{ bg: 'white' }}
-                    onClick={() => {
-                      if (reactionPossible && memoReaction.has('DOWN') === true) {
-                        sendReaction({
-                          isAdd: false,
-                          type: 'DOWN',
-                        });
-                      }
-                      if (reactionPossible && memoReaction.has('DOWN') === false) {
-                        sendReaction({
-                          isAdd: true,
-                          type: 'DOWN',
-                        });
-                      }
-                    }}
-                  >
-                    다음에요 {showReactionCount ? memoReaction.get('DOWN') : ''}
-                  </Button>
-                </Tooltip>
-              </GridItem>
-            )}
             {((isEditMode === false && eventState === 'reply' && isQnA === false) ||
               havePostReplyPrivilege === true) && (
               <GridItem key="grid-item-reply" flex={1}>
