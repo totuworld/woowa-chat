@@ -42,7 +42,7 @@ export const PRIVILEGE_NAME_AND_NO: { [key in PrivilegeKeys]: { name: string; no
   setPin: { name: '메시지 pin 권한', no: PRIVILEGE_NO.setPin },
   deleteReply: { name: '댓글 삭제 권한', no: PRIVILEGE_NO.deleteReply },
   updateReply: { name: '댓글 수정 권한', no: PRIVILEGE_NO.updateReply },
-  readAdminOnlyMessage: { name: '국환님만 보세요 열람 권한', no: PRIVILEGE_NO.readAdminOnlyMessage },
+  readAdminOnlyMessage: { name: '범석님만 보세요 열람 권한', no: PRIVILEGE_NO.readAdminOnlyMessage },
   /** 관리자 추가/삭제 권한 */
   addOrRemoveAdmin: { name: '관리자 추가/삭제 권한', no: PRIVILEGE_NO.addOrRemoveAdmin },
   /** 관리자 역할 추가/삭제 권한 */
@@ -66,7 +66,7 @@ PRIVILEGE_MAP.set(PRIVILEGE_NO.setPin.toString(), { name: '메시지 pin 권한'
 PRIVILEGE_MAP.set(PRIVILEGE_NO.deleteReply.toString(), { name: '댓글 삭제 권한', no: PRIVILEGE_NO.deleteReply });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.updateReply.toString(), { name: '댓글 수정 권한', no: PRIVILEGE_NO.updateReply });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.readAdminOnlyMessage.toString(), {
-  name: '국환님만 보세요 열람 권한',
+  name: '범석님만 보세요 열람 권한',
   no: PRIVILEGE_NO.readAdminOnlyMessage,
 });
 PRIVILEGE_MAP.set(PRIVILEGE_NO.addOrRemoveAdmin.toString(), {

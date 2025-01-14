@@ -1,5 +1,17 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Box, Button, Center, Flex, Heading, Spacer, Text, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Center,
+  Checkbox,
+  Flex,
+  Heading,
+  Spacer,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
@@ -118,7 +130,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [message, updateMessage] = useState('');
-  const [showOnlyAdmin] = useState(false);
+  const [showOnlyAdmin, setShowOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
@@ -323,6 +335,20 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
+            {(instantEventInfo.isQnA === undefined || instantEventInfo.isQnA === false) && (
+              <Checkbox
+                isChecked={showOnlyAdmin}
+                size="sm"
+                pt="2"
+                pb="4"
+                onChange={() => {
+                  setShowOnlyAdmin((prev) => !prev);
+                }}
+              >
+                범석님만 보세요
+              </Checkbox>
+            )}
+
             <Flex>
               <Textarea
                 bg="gray.100"

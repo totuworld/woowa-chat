@@ -549,7 +549,7 @@ const InstantMessageItem = function ({
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
           {item.showOnlyAdmin !== undefined && item.showOnlyAdmin === true && (
-            <Badge colorScheme="red">국환님만 보세요</Badge>
+            <Badge colorScheme="red">범석님만 보세요</Badge>
           )}
         </Box>
         {!(eventState === 'pre' || eventState === 'question') && <Divider />}
