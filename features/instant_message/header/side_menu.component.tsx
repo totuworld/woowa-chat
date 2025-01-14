@@ -321,6 +321,14 @@ const InstantEventHeaderSideMenu = function ({ eventState, instantEventInfo, onC
           >
             이벤트 재개
           </MenuItem>
+          <MenuItem
+            onClick={() => {
+              // 같은 Url인데 query params로 isPreview=true를 넘겨서 연다
+              window.open(`/list/${instantEventInfo.instantEventId}?isPreview=true`, '_blank');
+            }}
+          >
+            프리뷰 모드로 열기
+          </MenuItem>
         </MenuList>
       </Menu>
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>

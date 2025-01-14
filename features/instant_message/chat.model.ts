@@ -504,7 +504,6 @@ async function messageListWithUniqueVoter({
     const eventState = InstantEventUtil.calEventState(eventInfo);
     const isShowAll = eventState === 'showAll';
     const isOwnerMember = ownerMemberDoc.exists;
-    const underCoverOwnerMember = isOwnerMember && isPreview;
     const voterSet = new Set<string>();
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
