@@ -481,6 +481,7 @@ async function messageListWithUniqueVoter({
   instantEventId,
   currentUserUid,
   currentUserEmail,
+  isPreview,
 }: {
   instantEventId: string;
   currentUserUid: string;
@@ -503,6 +504,7 @@ async function messageListWithUniqueVoter({
     const eventState = InstantEventUtil.calEventState(eventInfo);
     const isShowAll = eventState === 'showAll';
     const isOwnerMember = ownerMemberDoc.exists;
+    const underCoverOwnerMember = isOwnerMember && isPreview;
     const voterSet = new Set<string>();
     const originData = colDocs.docs.map((mv) => {
       const docData = mv.data() as Omit<InInstantEventMessageServer, 'id'>;
@@ -536,6 +538,16 @@ async function messageListWithUniqueVoter({
         docData.showOnlyAdmin !== undefined &&
         docData.showOnlyAdmin === true &&
         isMyMessage === false
+      ) {
+        return null;
+      }
+      // 운영자라도, preview 모드일때는 비공개 메시지 노출하지 않음
+      if (
+        isOwnerMember === true &&
+        docData.showOnlyAdmin !== undefined &&
+        docData.showOnlyAdmin === true &&
+        isMyMessage === false &&
+        isPreview === true
       ) {
         return null;
       }
