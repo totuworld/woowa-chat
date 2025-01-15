@@ -14,3 +14,7 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.small-checkbox .chakra-checkbox__label {
+  font-size: 10px;
+}

@@ -335,20 +335,6 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
-            {(instantEventInfo.isQnA === undefined || instantEventInfo.isQnA === false) && (
-              <Checkbox
-                isChecked={showOnlyAdmin}
-                size="sm"
-                pt="2"
-                pb="4"
-                onChange={() => {
-                  setShowOnlyAdmin((prev) => !prev);
-                }}
-              >
-                범석님만 보세요
-              </Checkbox>
-            )}
-
             <Flex>
               <Textarea
                 bg="gray.100"
@@ -420,6 +406,22 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 등록
               </Button>
             </Flex>
+            {(instantEventInfo.isQnA === undefined || instantEventInfo.isQnA === false) && (
+              <Flex justify="flex-end">
+                <Checkbox
+                  className="small-checkbox"
+                  isChecked={showOnlyAdmin}
+                  size="sm"
+                  pt="2"
+                  pb="4"
+                  onChange={() => {
+                    setShowOnlyAdmin((prev) => !prev);
+                  }}
+                >
+                  범석님만 보세요
+                </Checkbox>
+              </Flex>
+            )}
           </Box>
         )}
         {authUser === null && (
