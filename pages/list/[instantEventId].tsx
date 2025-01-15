@@ -407,7 +407,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               </Button>
             </Flex>
             {(instantEventInfo.isQnA === undefined || instantEventInfo.isQnA === false) && (
-              <Flex justify="flex-end">
+              <Flex>
                 <Checkbox
                   className="small-checkbox"
                   isChecked={showOnlyAdmin}

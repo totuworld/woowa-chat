@@ -31,6 +31,17 @@ async function findAllEvent(): Promise<InInstantEvent[]> {
 
     const allEvent: InInstantEvent[] = data.reduce((acc: InInstantEvent[], doc) => {
       const innerData = doc.data() as InInstantEvent;
+
+      // 상태가 showAll이면 제거한다
+      if (
+        innerData.showAllReply !== undefined &&
+        innerData.showAllReply === true &&
+        innerData.closed !== undefined &&
+        innerData.closed === false
+      ) {
+        return acc;
+      }
+
       if (innerData.closed !== undefined && innerData.closed === false) {
         acc.push({ ...innerData, instantEventId: doc.id });
       }
