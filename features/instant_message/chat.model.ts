@@ -323,12 +323,14 @@ async function post({
   userName,
   email,
   showOnlyAdmin,
+  category,
 }: {
   instantEventId: string;
   message: string;
   userName: string;
   email: string;
   showOnlyAdmin: boolean;
+  category?: string;
 }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -360,6 +362,7 @@ async function post({
       message,
       userName,
       email,
+      category: category ?? '',
       vote: 0,
       sortWeight: 0,
       createAt: FieldValue.serverTimestamp(),

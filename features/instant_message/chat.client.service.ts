@@ -290,10 +290,12 @@ async function post({
   instantEventId,
   message,
   showOnlyAdmin,
+  category,
 }: {
   instantEventId: string;
   message: string;
   showOnlyAdmin: boolean;
+  category?: string;
 }): Promise<Resp<unknown>> {
   const url = '/api/instant-event.messages.add';
   const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
@@ -306,6 +308,7 @@ async function post({
           instantEventId,
           message,
           showOnlyAdmin,
+          category,
           authorization: token,
         },
       },

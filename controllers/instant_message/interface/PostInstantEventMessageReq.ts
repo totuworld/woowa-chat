@@ -4,5 +4,6 @@ export interface PostInstantEventMessageReq {
     message: string;
     authorization: string;
     showOnlyAdmin: boolean;
+    category?: string;
   };
 }

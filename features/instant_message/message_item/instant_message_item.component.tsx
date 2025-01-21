@@ -541,6 +541,11 @@ const InstantMessageItem = function ({
               }}
             />
           )}
+          {item.category !== undefined && (
+            <Badge colorScheme="gray" mb={2}>
+              {item.category}
+            </Badge>
+          )}
           {isEditMode === false && (
             <Text whiteSpace="pre-line" fontSize="sm">
               {printMessage}

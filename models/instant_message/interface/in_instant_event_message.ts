@@ -15,6 +15,8 @@ export interface InInstantEventMessageBase {
   userName?: string;
   /** 등록한 사용자 이메일 */
   email?: string;
+  /** 질문 카테고리 */
+  category?: string;
 }
 
 export interface InInstantEventMessage extends InInstantEventMessageBase {

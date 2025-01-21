@@ -6,6 +6,7 @@ import {
   Checkbox,
   Flex,
   Heading,
+  Select,
   Spacer,
   Text,
   Textarea,
@@ -96,10 +97,12 @@ async function postMessage({
   message,
   instantEventId,
   showOnlyAdmin,
+  category,
 }: {
   message: string;
   instantEventId: string;
   showOnlyAdmin: boolean;
+  category?: string;
 }) {
   if (message.length <= 0) {
     return {
@@ -112,6 +115,7 @@ async function postMessage({
       instantEventId,
       message,
       showOnlyAdmin,
+      category,
     });
     return {
       result: true,
@@ -129,6 +133,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const toast = useToast();
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
+  const [msgCategory, setMsgCategory] = useState<string>('HR제도');
   const [message, updateMessage] = useState('');
   const [showOnlyAdmin, setShowOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
@@ -336,6 +341,19 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
+              <Select
+                size="sm"
+                width="150px"
+                onChange={(e) => {
+                  setMsgCategory(e.target.value);
+                }}
+              >
+                <option value="HR제도">HR제도</option>
+                <option value="근무환경">근무환경</option>
+                <option value="리더십">리더십</option>
+                <option value="사업 방향">사업 방향</option>
+                <option value="일문화">일문화</option>
+              </Select>
               <Textarea
                 bg="gray.100"
                 border="none"
@@ -349,6 +367,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 overflow="hidden"
                 fontSize="xs"
                 mr="2"
+                ml="2"
                 as={ResizeTextarea}
                 value={message}
                 onChange={(e) => {
@@ -383,6 +402,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                   setSending(true);
                   const resp = await postMessage({
                     message: message.trim(),
+                    category: msgCategory,
                     instantEventId: instantEventInfo.instantEventId,
                     showOnlyAdmin,
                   });
