@@ -387,7 +387,6 @@ function extractReaction({
   // 익명 노출 여부
   showOnlyAdmin?: boolean;
 }) {
-  console.log(showOnlyAdmin);
   if (reaction === undefined) {
     return [];
   }
@@ -581,7 +580,7 @@ async function messageListWithUniqueVoter({
       const returnData = {
         ...docData,
         userName: docData.userName && isOwnerMember ? docData.userName : undefined,
-        email: docData.email && isOwnerMember ? docData.email : undefined,
+        email: docData.email && (isOwnerMember || isMyMessage) ? docData.email : undefined,
         id: mv.id,
         voter: [],
         voted,
@@ -602,14 +601,20 @@ async function messageListWithUniqueVoter({
                     return {
                       ...replyMv,
                       userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
-                      email: replyMv.email && isOwnerMember ? replyMv.email : undefined,
+                      email:
+                        replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
+                          ? replyMv.email
+                          : undefined,
                       reply: '비공개 처리된 메시지입니다.',
                     };
                   }
                   return {
                     ...replyMv,
                     userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
-                    email: replyMv.email && isOwnerMember ? replyMv.email : undefined,
+                    email:
+                      replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
+                        ? replyMv.email
+                        : undefined,
                   };
                 })
                 .sort((a, b) => {
@@ -745,10 +750,12 @@ async function messageInfo({
   instantEventId,
   messageId,
   currentUserUid,
+  currentUserEmail,
 }: {
   instantEventId: string;
   messageId: string;
   currentUserUid: string;
+  currentUserEmail: string;
 }): Promise<InInstantEventMessage> {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
@@ -785,7 +792,8 @@ async function messageInfo({
   return {
     ...resp.docData,
     userName: resp.docData.userName && isOwnerMember ? resp.docData.userName : undefined,
-    email: resp.docData.email && isOwnerMember ? resp.docData.email : undefined,
+    email:
+      resp.docData.email && (isOwnerMember || resp.docData.email === currentUserEmail) ? resp.docData.email : undefined,
     voted,
     reaction: extractReaction({
       reaction: resp.docData.reaction,
@@ -807,13 +815,13 @@ async function messageInfo({
                   ...mv,
                   reply: '비공개 처리된 메시지입니다.',
                   userName: mv.userName && isOwnerMember ? mv.userName : undefined,
-                  email: mv.email && isOwnerMember ? mv.email : undefined,
+                  email: mv.email && (isOwnerMember || mv.email === currentUserEmail) ? mv.email : undefined,
                 };
               }
               return {
                 ...mv,
                 userName: mv.userName && isOwnerMember ? mv.userName : undefined,
-                email: mv.email && isOwnerMember ? mv.email : undefined,
+                email: mv.email && (isOwnerMember || mv.email === currentUserEmail) ? mv.email : undefined,
               };
             })
             .sort((a, b) => {

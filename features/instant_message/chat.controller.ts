@@ -349,6 +349,11 @@ async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   if (senderUid === undefined) {
     throw new BadReqError('authorization 누락');
   }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  // 우아한형제들 email이 아닌 경우!
+  if (userInfoByAuth.email !== undefined && /@woowahan\.com$/.test(userInfoByAuth.email) === false) {
+    throw new BadReqError('@woowahan.com 이메일만 지원합니다.');
+  }
   const validateResp = validateParamWithData<{
     query: {
       instantEventId: string;
@@ -363,7 +368,11 @@ async function getMessageInfo(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
-  const result = await ChatModel.messageInfo({ ...validateResp.data.query, currentUserUid: senderUid });
+  const result = await ChatModel.messageInfo({
+    ...validateResp.data.query,
+    currentUserUid: senderUid,
+    currentUserEmail: userInfoByAuth.email!,
+  });
   return res.status(200).json(result);
 }
 
