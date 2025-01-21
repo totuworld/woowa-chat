@@ -38,6 +38,7 @@ import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
 import Presentation from '@/features/instant_message/presentation';
 import { useGNB } from '@/contexts/gnb.context';
+import { sortLatest, sortMostLiked } from '@/features/instant_message/sortMessageList';
 
 async function updateEvent({
   instantEventId,
@@ -139,6 +140,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
+  const [sortRule, setSortRule] = useState<'latest' | 'most_liked'>('latest');
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
@@ -155,22 +157,19 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
 
   const sortedMessageList = useMemo(
     () =>
-      [...messageList].sort(
-        (a, b) =>
-          // 정렬 기준
-          // eventState === 'showAll' 일때는 reaction의 길이가 많은게 먼저다.
-          // 그 뒤로 sortWeight를 비교한다.
-          // 그러나 다른때는 sortWeight만 가지고 비교한다.
-          // if (eventState === 'showAll') {
-          //   if (a.reaction === undefined && b.reaction === undefined) return 0;
-          //   if (a.reaction === undefined) return 1;
-          //   if (b.reaction === undefined) return -1;
-          //   if (a.reaction.length > b.reaction.length) return -1;
-          //   if (a.reaction.length < b.reaction.length) return 1;
-          // }
-          b.sortWeight - a.sortWeight,
+      [...messageList].sort((a, b) =>
+        // 정렬 기준
+        {
+          if (sortRule === 'latest') {
+            return a.createAt < b.createAt ? 1 : -1;
+          }
+          if (sortRule === 'most_liked') {
+            return (a.reaction?.length ?? 0) < (b.reaction?.length ?? 0) ? 1 : -1;
+          }
+          return a.sortWeight < b.sortWeight ? 1 : -1;
+        },
       ),
-    [messageList, eventState],
+    [messageList, sortRule],
   );
   const [isSending, setSending] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
@@ -338,6 +337,19 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             </Button>
           </Box>
         )}
+        <Flex alignItems="center" mt="4">
+          <Spacer />
+          <Select
+            width="20%"
+            size="sm"
+            onChange={(e) => {
+              setSortRule(e.target.value as 'latest' | 'most_liked');
+            }}
+          >
+            <option value="latest">최신 등록 순</option>
+            <option value="most_liked">공감 많은 순</option>
+          </Select>
+        </Flex>
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
             <Flex>
