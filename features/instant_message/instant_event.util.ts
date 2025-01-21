@@ -37,7 +37,8 @@ function calEventState(instantEventInfo: InInstantEvent | null) {
     return 'adminCheck'; // 관리자 정비 기간
   }
   if (now.isAfter(endDate) && instantEventInfo.collectReply === true) {
-    return 'reply'; // 댓글 등록 기간
+    // 원래는 댓글 등록 기간이나! 관리자 정비 기간으로 즉시 적용되도록 한다
+    return 'adminCheck'; // 댓글 등록 기간
   }
   return 'pre';
 }

@@ -240,7 +240,7 @@ const InstantEventMessageReply = function ({
 
   const memberMenuList = useMemo(() => {
     const returnMenuList = [];
-    if (eventState === 'showAll' || eventState === 'locked' || eventState === 'closed') return [];
+    if (eventState === 'adminCheck' || 'showAll' || eventState === 'locked' || eventState === 'closed') return [];
     if (authUser?.email === replyItem.email) {
       returnMenuList.push(
         <MenuItem
