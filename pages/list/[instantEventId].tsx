@@ -41,7 +41,6 @@ import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
 import Presentation from '@/features/instant_message/presentation';
 import { useGNB } from '@/contexts/gnb.context';
-import { sortLatest, sortMostLiked } from '@/features/instant_message/sortMessageList';
 
 async function updateEvent({
   instantEventId,

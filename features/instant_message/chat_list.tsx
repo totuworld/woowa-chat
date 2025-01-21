@@ -133,7 +133,7 @@ const ChatList = function () {
           const eventState = InstantEventUtil.calEventState(eventInfo);
           const badgeColor = (() => {
             if (eventState === 'closed' || eventState === 'locked') return 'red';
-            if (eventState === 'question' || eventState === 'reply') return 'green';
+            if (eventState === 'question' || eventState === 'adminCheck') return 'green';
             return 'gray';
           })();
           return (
