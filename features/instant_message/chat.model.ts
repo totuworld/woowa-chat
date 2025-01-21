@@ -374,21 +374,35 @@ function extractReaction({
   isShowAll,
   voted,
   UID,
+  showOnlyAdmin = false,
 }: {
   reaction: InInstantEventMessage['reaction'];
   isOwnerMember: boolean;
   isShowAll: boolean;
   voted: boolean;
   UID: string;
+  // 익명 노출 여부
+  showOnlyAdmin?: boolean;
 }) {
+  console.log(showOnlyAdmin);
   if (reaction === undefined) {
     return [];
   }
   if (reaction !== undefined && (isOwnerMember || isShowAll)) {
-    return reaction;
+    return [...reaction].map((mv) => ({
+      ...mv,
+      userName: mv.userName !== undefined && showOnlyAdmin ? mv.userName : undefined,
+      email: mv.email !== undefined && showOnlyAdmin ? mv.email : undefined,
+    }));
   }
   if (voted) {
-    return reaction.filter((fv) => fv.voter === UID);
+    return reaction
+      .filter((fv) => fv.voter === UID)
+      .map((mv) => ({
+        ...mv,
+        userName: mv.userName !== undefined && showOnlyAdmin ? mv.userName : undefined,
+        email: mv.email !== undefined && showOnlyAdmin ? mv.email : undefined,
+      }));
   }
   return [];
 }
@@ -563,19 +577,37 @@ async function messageListWithUniqueVoter({
       }
       const returnData = {
         ...docData,
+        userName: docData.userName && isOwnerMember ? docData.userName : undefined,
+        email: docData.email && isOwnerMember ? docData.email : undefined,
         id: mv.id,
         voter: [],
         voted,
-        reaction: extractReaction({ reaction: docData.reaction, isOwnerMember, isShowAll, voted, UID: currentUserUid }),
+        reaction: extractReaction({
+          reaction: docData.reaction,
+          isOwnerMember,
+          isShowAll,
+          voted,
+          UID: currentUserUid,
+          showOnlyAdmin: isOwnerMember && isPreview === false,
+        }),
         message: docData.message,
         reply:
           docData.reply !== undefined
             ? docData.reply
                 .map((replyMv) => {
                   if (replyMv.deny !== undefined && replyMv.deny) {
-                    return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
+                    return {
+                      ...replyMv,
+                      userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                      email: replyMv.email && isOwnerMember ? replyMv.email : undefined,
+                      reply: '비공개 처리된 메시지입니다.',
+                    };
                   }
-                  return { ...replyMv };
+                  return {
+                    ...replyMv,
+                    userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                    email: replyMv.email && isOwnerMember ? replyMv.email : undefined,
+                  };
                 })
                 .sort((a, b) => {
                   const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;

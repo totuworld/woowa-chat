@@ -570,7 +570,7 @@ const InstantMessageItem = function ({
             {isQnA === false && (
               <GridItem key="grid-item-vote-up" flex={1}>
                 <Tooltip
-                  isDisabled={memoReaction.has('LIKE') === false}
+                  isDisabled
                   fontSize="xs"
                   label={item
                     .reaction!.filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
