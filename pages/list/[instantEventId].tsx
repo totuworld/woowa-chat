@@ -4,19 +4,22 @@ import {
   Button,
   Center,
   Checkbox,
+  CircularProgress,
+  CircularProgressLabel,
   Flex,
   Heading,
   Select,
   Spacer,
   Text,
   Textarea,
+  Tooltip,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { ChevronLeftIcon } from '@chakra-ui/icons';
+import { ChevronLeftIcon, InfoOutlineIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
@@ -144,6 +147,23 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
+  // 주기적으로 데이터를 fetch할지 여부
+  const [isAutoFetch, setIsAutoFetch] = useState(true);
+
+  useEffect(() => {
+    if (eventState !== 'question') {
+      setIsAutoFetch(false);
+    }
+  }, [eventState]);
+
+  useEffect(() => {
+    if (isAutoFetch === true) {
+      const interval = setInterval(() => {
+        setListLoadTrigger((prev) => !prev);
+      }, 10_000);
+      return () => clearInterval(interval);
+    }
+  }, [isAutoFetch]);
 
   const { setLogo } = useGNB();
   useLayoutEffect(() => {
@@ -337,7 +357,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             </Button>
           </Box>
         )}
-        <Flex alignItems="center" mt="4">
+        <Flex alignItems="center" mt="2">
           <Spacer />
           <Select
             width="20%"
@@ -349,9 +369,30 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             <option value="latest">최신 등록 순</option>
             <option value="most_liked">공감 많은 순</option>
           </Select>
+          {eventState === 'question' && (
+            <div>
+              <CircularProgress
+                isIndeterminate={isAutoFetch}
+                size="20px"
+                onClick={() => {
+                  setIsAutoFetch((prev) => !prev);
+                }}
+              >
+                <CircularProgressLabel>{isAutoFetch ? 'ON' : 'OFF'}</CircularProgressLabel>
+              </CircularProgress>
+              <Tooltip label="10초마다 데이터를 자동으로 갱신합니다.">
+                <InfoOutlineIcon
+                  ml="2"
+                  onClick={() => {
+                    setIsAutoFetch((prev) => !prev);
+                  }}
+                />
+              </Tooltip>
+            </div>
+          )}
         </Flex>
         {eventState === 'question' && authUser !== null && (
-          <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
+          <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="2">
             <Flex>
               <Select
                 size="sm"
