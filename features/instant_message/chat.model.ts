@@ -750,6 +750,7 @@ async function messageInfo({
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const messageRef = eventRef.collection(INSTANT_MESSAGE).doc(messageId);
   const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserUid);
+  let isOwnerMember = false;
   const resp = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const eventDoc = await transaction.get(eventRef);
     const messageDoc = await transaction.get(messageRef);
@@ -762,6 +763,7 @@ async function messageInfo({
     }
     const eventInfo = eventDoc.data() as InInstantEvent;
     const eventState = InstantEventUtil.calEventState(eventInfo);
+    isOwnerMember = ownerMemberDoc.exists;
     return {
       docData: messageDoc.data() as InInstantEventMessageServer,
       isOwnerMember: ownerMemberDoc.exists,
@@ -779,6 +781,8 @@ async function messageInfo({
   })();
   return {
     ...resp.docData,
+    userName: resp.docData.userName && isOwnerMember ? resp.docData.userName : undefined,
+    email: resp.docData.email && isOwnerMember ? resp.docData.email : undefined,
     voted,
     reaction: extractReaction({
       reaction: resp.docData.reaction,
@@ -796,9 +800,18 @@ async function messageInfo({
         ? resp.docData.reply
             .map((mv) => {
               if (mv.deny !== undefined && mv.deny) {
-                return { ...mv, reply: '비공개 처리된 메시지입니다.' };
+                return {
+                  ...mv,
+                  reply: '비공개 처리된 메시지입니다.',
+                  userName: mv.userName && isOwnerMember ? mv.userName : undefined,
+                  email: mv.email && isOwnerMember ? mv.email : undefined,
+                };
               }
-              return { ...mv };
+              return {
+                ...mv,
+                userName: mv.userName && isOwnerMember ? mv.userName : undefined,
+                email: mv.email && isOwnerMember ? mv.email : undefined,
+              };
             })
             .sort((a, b) => {
               const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
