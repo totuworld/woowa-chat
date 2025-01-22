@@ -406,7 +406,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                   setMsgCategory(e.target.value);
                 }}
               >
-                <option value="비지니스">비지니스</option>
+                <option value="비즈니스">비즈니스</option>
                 <option value="리더십">리더십</option>
                 <option value="일문화">일문화</option>
                 <option value="HR제도">HR제도</option>
