@@ -379,7 +379,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               >
                 <CircularProgressLabel>{isAutoFetch ? 'ON' : 'OFF'}</CircularProgressLabel>
               </CircularProgress>
-              <Tooltip label="10초마다 데이터를 자동으로 갱신합니다.">
+              <Tooltip label="10초마다 데이터를 자동으로 갱신합니다. 클릭하여 OFF하면 데이터 갱신이 멈춰요.">
                 <InfoOutlineIcon
                   ml="2"
                   onClick={() => {
