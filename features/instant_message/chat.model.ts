@@ -579,7 +579,7 @@ async function messageListWithUniqueVoter({
       }
       const returnData = {
         ...docData,
-        userName: docData.userName && isOwnerMember ? docData.userName : undefined,
+        userName: docData.userName && isOwnerMember && isPreview === false ? docData.userName : undefined,
         email: docData.email && (isOwnerMember || isMyMessage) ? docData.email : undefined,
         id: mv.id,
         voter: [],
@@ -600,7 +600,7 @@ async function messageListWithUniqueVoter({
                   if (replyMv.deny !== undefined && replyMv.deny) {
                     return {
                       ...replyMv,
-                      userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                      userName: replyMv.userName && isOwnerMember && isPreview === false ? replyMv.userName : undefined,
                       email:
                         replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
                           ? replyMv.email
@@ -610,7 +610,7 @@ async function messageListWithUniqueVoter({
                   }
                   return {
                     ...replyMv,
-                    userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                    userName: replyMv.userName && isOwnerMember && isPreview === false ? replyMv.userName : undefined,
                     email:
                       replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
                         ? replyMv.email
