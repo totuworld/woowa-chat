@@ -136,7 +136,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const toast = useToast();
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
-  const [msgCategory, setMsgCategory] = useState<string>('HR제도');
+  const [msgCategory, setMsgCategory] = useState<string | undefined>(undefined);
   const [message, updateMessage] = useState('');
   const [showOnlyAdmin, setShowOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
@@ -396,15 +396,16 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               <Select
                 size="sm"
                 width="150px"
+                placeholder="-"
                 onChange={(e) => {
                   setMsgCategory(e.target.value);
                 }}
               >
+                <option value="비지니스">비지니스</option>
+                <option value="리더십">리더십</option>
+                <option value="일문화">일문화</option>
                 <option value="HR제도">HR제도</option>
                 <option value="근무환경">근무환경</option>
-                <option value="리더십">리더십</option>
-                <option value="사업 방향">사업 방향</option>
-                <option value="일문화">일문화</option>
               </Select>
               <Textarea
                 bg="gray.100"
