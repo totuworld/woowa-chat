@@ -396,8 +396,13 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               <Select
                 size="sm"
                 width="150px"
-                placeholder="-"
+                placeholder="필수선택"
+                required
                 onChange={(e) => {
+                  if (e.target.value.length <= 0) {
+                    setMsgCategory(undefined);
+                    return;
+                  }
                   setMsgCategory(e.target.value);
                 }}
               >
@@ -406,6 +411,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 <option value="일문화">일문화</option>
                 <option value="HR제도">HR제도</option>
                 <option value="근무환경">근무환경</option>
+                <option value="기타">기타</option>
               </Select>
               <Textarea
                 bg="gray.100"
@@ -429,7 +435,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               />
               <Button
                 isLoading={isSending}
-                disabled={isSending}
+                disabled={isSending || message.trim().length <= 0 || msgCategory === undefined}
                 bgColor={`${ColorPalette.mint}`}
                 textColor="white"
                 _hover={{ bg: ColorPalette.mint_disabled }}
