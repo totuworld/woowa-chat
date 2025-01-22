@@ -46,11 +46,11 @@ function calEventState(instantEventInfo: InInstantEvent | null) {
 const EventStateTOKorText = {
   pre: '준비중',
   reply: '댓글 등록 기간',
-  question: '질문 등록 기간',
+  question: '질문접수&댓글등록',
   closed: '종료',
-  locked: '댓글 등록 잠금',
+  locked: '잠금',
   showAll: '결과 공개',
-  adminCheck: '댓글 수집 준비중',
+  adminCheck: '공감톡톡 준비중',
   none: '-',
 };
 
