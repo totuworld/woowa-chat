@@ -142,7 +142,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
-  const [sortRule, setSortRule] = useState<'latest' | 'most_liked'>('latest');
+  const [sortRule, setSortRule] = useState<'latest' | 'most_liked' | 'onlyShowAdmin'>('latest');
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = InstantEventUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
@@ -174,22 +174,19 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
     };
   }, [instantEventInfo]);
 
-  const sortedMessageList = useMemo(
-    () =>
-      [...messageList].sort((a, b) =>
-        // 정렬 기준
-        {
-          if (sortRule === 'latest') {
-            return a.createAt < b.createAt ? 1 : -1;
-          }
-          if (sortRule === 'most_liked') {
-            return (a.reaction?.length ?? 0) < (b.reaction?.length ?? 0) ? 1 : -1;
-          }
-          return a.sortWeight < b.sortWeight ? 1 : -1;
-        },
-      ),
-    [messageList, sortRule],
-  );
+  const sortedMessageList = useMemo(() => {
+    if (sortRule === 'latest') {
+      return [...messageList].sort((a, b) => (a.createAt < b.createAt ? 1 : -1));
+    }
+    if (sortRule === 'most_liked') {
+      return [...messageList].sort((a, b) => ((a.reaction?.length ?? 0) < (b.reaction?.length ?? 0) ? 1 : -1));
+    }
+    if (sortRule === 'onlyShowAdmin') {
+      return messageList.filter((fv) => fv.showOnlyAdmin === true);
+    }
+    return [...messageList].sort((a, b) => (a.sortWeight < b.sortWeight ? 1 : -1));
+  }, [messageList, sortRule]);
+
   const [isSending, setSending] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
 
@@ -359,14 +356,15 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         <Flex alignItems="center" mt="2">
           <Spacer />
           <Select
-            width="20%"
+            width="auto"
             size="sm"
             onChange={(e) => {
-              setSortRule(e.target.value as 'latest' | 'most_liked');
+              setSortRule(e.target.value as 'latest' | 'most_liked' | 'onlyShowAdmin');
             }}
           >
             <option value="latest">최신 등록 순</option>
             <option value="most_liked">공감 많은 순</option>
+            {isOwner && <option value="onlyShowAdmin">범석님만 보세요</option>}
           </Select>
           {eventState === 'question' && (
             <div>
