@@ -169,18 +169,18 @@ const IndexPage: NextPage = function () {
       <Head>
         <meta property="og:url" content={mainUrl} />
         <meta property="og:image" content={`https://${publicRuntimeConfig.mainDomain}/main.jpg`} />
-        <meta property="og:site_name" content="우수타" />
-        <meta property="og:title" content="우수타 - 질문과 댓글 도우미" />
-        <meta property="og:description" content="우수타은 우수타 질문과 댓글을 돕는 서비스입니다." />
-        <meta name="twitter:title" content="우수타 - 질문과 댓글 도우미" />
-        <meta name="twitter:description" content="우수타은 우수타 질문과 댓글을 돕는 서비스입니다." />
+        <meta property="og:site_name" content="공감톡톡" />
+        <meta property="og:title" content="공감톡톡 - 질문과 댓글 도우미" />
+        <meta property="og:description" content="공감톡톡은 공감톡톡 질문과 댓글을 돕는 서비스입니다." />
+        <meta name="twitter:title" content="공감톡톡 - 질문과 댓글 도우미" />
+        <meta name="twitter:description" content="공감톡톡은 공감톡톡 질문과 댓글을 돕는 서비스입니다." />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content={`https://${publicRuntimeConfig.mainDomain}/main2.jpg`} />
-        <meta name="twitter:image:alt" content="우수타" />
+        <meta name="twitter:image:alt" content="공감톡톡" />
         <meta name="twitter:url" content={mainUrl} />
         <meta name="twitter:domain" content={publicRuntimeConfig.mainDomain} />
       </Head>
-      <ServiceLayout height="100vh" backgroundColor="gray.50" title="우수타" pt={16}>
+      <ServiceLayout height="100vh" backgroundColor="gray.50" title="공감톡톡" pt={16}>
         <Box maxW="xl" mx="auto" pl="2">
           {isOwner && !isOpen && (
             <Button
@@ -190,7 +190,7 @@ const IndexPage: NextPage = function () {
                 onOpen();
               }}
             >
-              우수타 이벤트 생성
+              공감톡톡 이벤트 생성
             </Button>
           )}
           <CreateEvent

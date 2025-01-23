@@ -266,7 +266,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
-      title="전사발표Q&A"
+      title="공감톡톡Q&A"
       pt={16}
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
@@ -507,7 +507,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               <Box>
                 <img src="/intro.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
-                  <Heading>우수타</Heading>
+                  <Heading>공감톡톡</Heading>
                   <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
                 </Flex>
               </Box>

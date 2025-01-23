@@ -96,7 +96,7 @@ async function findAllEventWithPage({ page = 1, size = 10 }: { page?: number; si
   return result;
 }
 
-/** 우수타 이벤트 생성 */
+/** 공감톡톡 이벤트 생성 */
 async function create({
   title,
   desc,
@@ -214,7 +214,7 @@ async function update({
   });
 }
 
-/** 우수타 이벤트 정보를 조회 */
+/** 공감톡톡 이벤트 정보를 조회 */
 async function get({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   const infoResp: InInstantEvent = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -231,7 +231,7 @@ async function get({ instantEventId }: { instantEventId: string }) {
   return infoResp;
 }
 
-/** 우수타 이벤트 잠금 처리 - 더이상 댓글 등록이 불가능해짐 */
+/** 공감톡톡 이벤트 잠금 처리 - 더이상 댓글 등록이 불가능해짐 */
 async function lock({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -243,7 +243,7 @@ async function lock({ instantEventId }: { instantEventId: string }) {
   });
 }
 
-/** 우수타 이벤트 댓글 수집 처리 - 질문을 공개하고, 댓글 수집을 시작하는 상태 */
+/** 공감톡톡 이벤트 댓글 수집 처리 - 질문을 공개하고, 댓글 수집을 시작하는 상태 */
 async function showMsgAndCollectReply({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -255,7 +255,7 @@ async function showMsgAndCollectReply({ instantEventId }: { instantEventId: stri
   });
 }
 
-/** 우수타 이벤트 공개 처리 - 일반 사용자도 댓글까지 조회가능 */
+/** 공감톡톡 이벤트 공개 처리 - 일반 사용자도 댓글까지 조회가능 */
 async function publish({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -267,7 +267,7 @@ async function publish({ instantEventId }: { instantEventId: string }) {
   });
 }
 
-/** 우수타 이벤트 비공개 처리 - lock 상태로 돌린다. */
+/** 공감톡톡 이벤트 비공개 처리 - lock 상태로 돌린다. */
 async function unpublish({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -279,7 +279,7 @@ async function unpublish({ instantEventId }: { instantEventId: string }) {
   });
 }
 
-/** 우수타 이벤트 종료 처리 - 질문이나 댓글을 미노출 */
+/** 공감톡톡 이벤트 종료 처리 - 질문이나 댓글을 미노출 */
 async function close({ instantEventId }: { instantEventId: string }) {
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
