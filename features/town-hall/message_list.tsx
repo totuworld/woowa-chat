@@ -54,7 +54,7 @@ const TownhallMessageList = function ({
             item={item}
             locked={eventState === 'locked' || eventState === 'showAll'}
             eventState={eventState}
-            isQnA={eventInfo.isQnA}
+            isShowName={isOwner}
             onSendComplete={() => {
               TownhallClientService.getMessageInfo({
                 instantEventId: eventInfo.instantEventId,

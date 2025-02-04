@@ -28,9 +28,9 @@ interface Props {
   instantEventId: string;
   locked: boolean;
   eventState: 'none' | 'locked' | 'closed' | 'question' | 'reply' | 'pre' | 'showAll' | 'adminCheck';
-  /** QnA 모드인가? */
+  /** 이름을 노출해야하나? */
   // eslint-disable-next-line react/require-default-props
-  isQnA?: boolean;
+  isShowName?: boolean;
   item: InInstantEventMessage;
   onSendComplete: () => void;
   // eslint-disable-next-line react/require-default-props
@@ -145,6 +145,7 @@ const TownhallMessageItem = function ({
   locked,
   eventState,
   onDeleteComplete,
+  isShowName = false,
 }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
@@ -380,7 +381,7 @@ const TownhallMessageItem = function ({
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
   const { userName, email } = item;
-  if (userName !== undefined && email !== undefined) {
+  if (userName !== undefined && email !== undefined && isShowName === true) {
     // email의 @ 뒤에 글자를 모두 삭제한다
     const emailId = email.replace(/@.*/, '');
     printMessage.push(
