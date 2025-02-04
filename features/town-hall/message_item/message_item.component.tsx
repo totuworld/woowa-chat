@@ -2,7 +2,6 @@ import {
   Badge,
   Box,
   Button,
-  Divider,
   Flex,
   GridItem,
   IconButton,
@@ -14,7 +13,6 @@ import {
   Spacer,
   Text,
   Textarea,
-  Tooltip,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -24,7 +22,6 @@ import { InInstantEventMessage } from '@/models/instant_message/interface/in_ins
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import TownhallClientService from '../townhall.client.service';
-import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 
 interface Props {

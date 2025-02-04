@@ -41,40 +41,6 @@ async function immediateCloseSendMessagePeriod({ instantEventId }: { instantEven
   }
 }
 
-async function lockEvent({ instantEventId }: { instantEventId: string }) {
-  try {
-    await TownhallClientService.lock({
-      instantEventId,
-    });
-    return {
-      result: true,
-    };
-  } catch (err) {
-    console.error(err);
-    return {
-      result: false,
-      message: '이벤트 잠금 실패',
-    };
-  }
-}
-
-async function unpublishEvent({ instantEventId }: { instantEventId: string }) {
-  try {
-    await TownhallClientService.unpublish({
-      instantEventId,
-    });
-    return {
-      result: true,
-    };
-  } catch (err) {
-    console.error(err);
-    return {
-      result: false,
-      message: '비공개 전환 실패',
-    };
-  }
-}
-
 async function closeEvent({ instantEventId }: { instantEventId: string }) {
   try {
     await TownhallClientService.close({

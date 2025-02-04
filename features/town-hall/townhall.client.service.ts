@@ -1,9 +1,6 @@
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
-import {
-  InInstantEventDownloadItem,
-  InInstantEventMessage,
-} from '@/models/instant_message/interface/in_instant_event_message';
+import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
 import { requester, Resp } from '@/utils/requester';
 
@@ -110,31 +107,6 @@ async function get({
       option: {
         url,
         method: 'GET',
-      },
-    });
-    return resp;
-  } catch (err) {
-    return {
-      status: 500,
-    };
-  }
-}
-
-async function getDownloadData({
-  instantEventId,
-}: {
-  instantEventId: string;
-}): Promise<Resp<InInstantEventDownloadItem[]>> {
-  const url = `/api/town-hall/messages.list.download/${instantEventId}`;
-  try {
-    const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
-    const resp = await requester<InInstantEventDownloadItem[]>({
-      option: {
-        url,
-        method: 'GET',
-        headers: {
-          authorization: token ?? '',
-        },
       },
     });
     return resp;
@@ -639,36 +611,6 @@ async function pinMessage({
       },
     });
     return { status: 200 };
-  } catch (err) {
-    return {
-      status: 500,
-    };
-  }
-}
-
-async function voteMessageInfo({
-  instantEventId,
-  messageId,
-  isUpvote = true,
-}: {
-  instantEventId: string;
-  messageId: string;
-  isUpvote?: boolean;
-}): Promise<Resp<InInstantEventMessage>> {
-  const url = '/api/town-hall/messages.vote';
-  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
-  try {
-    const resp = await requester<InInstantEventMessage>({
-      option: {
-        url,
-        method: 'PUT',
-        headers: {
-          authorization: token ?? '',
-        },
-        data: { instantEventId, messageId, isUpvote },
-      },
-    });
-    return resp;
   } catch (err) {
     return {
       status: 500,

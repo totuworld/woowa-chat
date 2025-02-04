@@ -113,7 +113,7 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
-const TownhallInfo = function ({ instantEventInfo, eventState, isPreview, uniqueVoterCount }: Props) {
+const TownhallInfo = function ({ instantEventInfo, eventState, isPreview }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
   const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
   const linkText = convertMarkdownLinksToJsx(printDesc);

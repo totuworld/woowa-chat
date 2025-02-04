@@ -3,7 +3,7 @@ import { Box, Button, Center, Flex, Heading, Spacer, Text, Textarea, useDisclosu
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
@@ -16,8 +16,6 @@ import getStringValueFromQuery from '@/utils/get_value_from_query';
 import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
-import CreateEvent from '@/features/instant_message/create_event.component';
-import MessageList from '@/features/instant_message/message_list';
 import GoogleLoginButton from '@/components/google_login_button';
 import { useGNB } from '@/contexts/gnb.context';
 import TownhallUtil from '@/features/town-hall/townhall.util';
@@ -127,27 +125,10 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
-  const [sortRule, setSortRule] = useState<'latest' | 'most_liked' | 'onlyShowAdmin'>('latest');
+  const [sortRule] = useState<'latest' | 'most_liked' | 'onlyShowAdmin'>('latest');
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const eventState = TownhallUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
-  // 주기적으로 데이터를 fetch할지 여부
-  const [isAutoFetch, setIsAutoFetch] = useState(true);
-
-  useEffect(() => {
-    if (eventState !== 'question') {
-      setIsAutoFetch(false);
-    }
-  }, [eventState]);
-
-  // useEffect(() => {
-  //   if (isAutoFetch === true) {
-  //     const interval = setInterval(() => {
-  //       setListLoadTrigger((prev) => !prev);
-  //     }, 10_000);
-  //     return () => clearInterval(interval);
-  //   }
-  // }, [isAutoFetch]);
 
   const { setLogo } = useGNB();
   useLayoutEffect(() => {

@@ -138,7 +138,7 @@ const TownHallMeetingPage: NextPage = function () {
             const eventState = TownhallUtil.calEventState(eventInfo);
             const badgeColor = (() => {
               if (eventState === 'closed' || eventState === 'locked') return 'red';
-              if (eventState === 'question' || eventState === 'adminCheck') return 'green';
+              if (eventState === 'question') return 'green';
               return 'gray';
             })();
             return (
