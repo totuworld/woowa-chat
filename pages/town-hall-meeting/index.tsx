@@ -5,8 +5,6 @@ import { useQuery } from 'react-query';
 import { Badge, Box, Button, Flex, Spacer, Spinner, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import { ServiceLayout } from '@/components/containers/service_layout';
-import { useGNB } from '@/contexts/gnb.context';
 import { useAuth } from '@/contexts/auth_user.context';
 
 import 'antd/dist/antd.css';
@@ -15,6 +13,8 @@ import TownhallClientService from '@/features/town-hall/townhall.client.service'
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import TownhallUtil from '@/features/town-hall/townhall.util';
 import TownhallHeaderSideMenu from '@/features/town-hall/header/side_menu.component';
+import { TownhallServiceLayout } from '@/features/town-hall/service_layout';
+import TownhallMainInfo from '@/features/town-hall/main_info';
 
 async function createEvent({
   title,
@@ -55,8 +55,7 @@ async function createEvent({
 }
 
 const TownHallMeetingPage: NextPage = function () {
-  const { setLogo } = useGNB();
-  const { isOwner } = useAuth();
+  const { isOwner, authUser } = useAuth();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
@@ -94,7 +93,7 @@ const TownHallMeetingPage: NextPage = function () {
     // eslint-disable-next-line no-return-await
     async () => await axios.get<InInstantEvent[]>('/api/town-hall/list'),
     {
-      enabled: true,
+      enabled: authUser !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -105,10 +104,8 @@ const TownHallMeetingPage: NextPage = function () {
     },
   );
 
-  // FIXME: 새로운 이미지 주면 이 부분 변경 필요
-  setLogo('/townhall_logo.png');
   return (
-    <ServiceLayout height="100vh" backgroundColor="gray.50" title="타운홀Q&A" pt={16}>
+    <TownhallServiceLayout height="100vh" backgroundColor="gray.50" title="타운홀Q&A" pt={16}>
       <Box maxW="xl" mx="auto" minH="95vh" overflow="scroll; height:200px;">
         <Box>
           {isOwner && !isOpen && (
@@ -197,7 +194,7 @@ const TownHallMeetingPage: NextPage = function () {
         )}
         {(status === 'success' || status === 'error') && eventList.length === 0 && isOwner && (
           <Box mt="6">
-            <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
+            <img style={{ width: '50%', margin: '0 auto' }} src="none_message.png" alt="목록 없음" />
             <Flex justify="center">
               <Box mb="6" height="100vh" fontSize="sm">
                 생성된 이벤트가 없어요.
@@ -205,8 +202,9 @@ const TownHallMeetingPage: NextPage = function () {
             </Flex>
           </Box>
         )}
+        {authUser === null && <TownhallMainInfo />}
       </Box>
-    </ServiceLayout>
+    </TownhallServiceLayout>
   );
 };
 

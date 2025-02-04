@@ -145,7 +145,6 @@ const TownhallMessageItem = function ({
   locked,
   eventState,
   onDeleteComplete,
-  isQnA = false,
 }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
@@ -381,7 +380,7 @@ const TownhallMessageItem = function ({
   const linkText = convertMarkdownLinksToJsx(item.message);
   const printMessage = convertMarkdownBoldToJsx(linkText);
   const { userName, email } = item;
-  if (userName !== undefined && email !== undefined && isQnA === false) {
+  if (userName !== undefined && email !== undefined) {
     // email의 @ 뒤에 글자를 모두 삭제한다
     const emailId = email.replace(/@.*/, '');
     printMessage.push(

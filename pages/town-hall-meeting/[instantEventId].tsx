@@ -3,12 +3,11 @@ import { Box, Button, Center, Flex, Heading, Spacer, Text, Textarea, useDisclosu
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
 import { useRouter } from 'next/router';
-import { ServiceLayout } from '@/components/containers/service_layout';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
@@ -17,13 +16,14 @@ import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
 import { useAuth } from '@/contexts/auth_user.context';
 import ColorPalette from '@/styles/color_palette';
 import GoogleLoginButton from '@/components/google_login_button';
-import { useGNB } from '@/contexts/gnb.context';
+
 import TownhallUtil from '@/features/town-hall/townhall.util';
 import TownhallClientService from '@/features/town-hall/townhall.client.service';
 import TownhallHeaderSideMenu from '@/features/town-hall/header/side_menu.component';
 import TownhallInfo from '@/features/town-hall/header/info.component';
 import CreateTownhallEvent from '@/features/town-hall/create_town_hall.component';
 import TownhallMessageList from '@/features/town-hall/message_list';
+import { TownhallServiceLayout } from '@/features/town-hall/service_layout';
 
 async function updateEvent({
   instantEventId,
@@ -130,14 +130,6 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   const eventState = TownhallUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
 
-  const { setLogo } = useGNB();
-  useLayoutEffect(() => {
-    setLogo('/townhall_logo.png');
-    return () => {
-      setLogo('/logo.png');
-    };
-  }, [instantEventInfo]);
-
   const sortedMessageList = useMemo(() => {
     if (sortRule === 'latest') {
       return [...messageList].sort((a, b) => (a.createAt < b.createAt ? 1 : -1));
@@ -223,7 +215,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   }
 
   return (
-    <ServiceLayout
+    <TownhallServiceLayout
       minH="100vh"
       backgroundColor="gray.200"
       bgImage={instantEventInfo.bgImg ?? undefined}
@@ -423,7 +415,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
           />
         )}
       </Box>
-    </ServiceLayout>
+    </TownhallServiceLayout>
   );
 };
 
