@@ -1,0 +1,703 @@
+import FirebaseAuthClient from '@/models/auth/firebase_auth_client';
+import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
+import {
+  InInstantEventDownloadItem,
+  InInstantEventMessage,
+} from '@/models/instant_message/interface/in_instant_event_message';
+import { getBaseUrl } from '@/utils/get_base_url';
+import { requester, Resp } from '@/utils/requester';
+
+async function create({
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+  isQnA,
+}: {
+  title: string;
+  desc?: string;
+  startDate?: string;
+  endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
+  isQnA?: boolean;
+}): Promise<Resp<{ instantEventId: string }>> {
+  const url = '/api/town-hall/create';
+  try {
+    const postData = {
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+      isQnA,
+    };
+    const resp = await requester<{ instantEventId: string }>({
+      option: {
+        url,
+        method: 'POST',
+        data: postData,
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function updateInfo({
+  instantEventId,
+  title,
+  desc,
+  startDate,
+  endDate,
+  titleImg,
+  bgImg,
+  isQnA,
+}: {
+  instantEventId: string;
+  title: string;
+  desc?: string;
+  startDate?: string;
+  endDate?: string;
+  titleImg?: string;
+  bgImg?: string;
+  isQnA?: boolean;
+}): Promise<Resp<{ instantEventId: string }>> {
+  const url = '/api/town-hall/update';
+  try {
+    const postData = {
+      instantEventId,
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+      isQnA,
+    };
+    const resp = await requester<{ instantEventId: string }>({
+      option: {
+        url,
+        method: 'PUT',
+        data: postData,
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function get({
+  instantEventId,
+  isServer = false,
+}: {
+  instantEventId: string;
+  isServer?: boolean;
+}): Promise<Resp<InInstantEvent>> {
+  const hostAndPort: string = getBaseUrl(isServer);
+  const url = `${hostAndPort}/api/town-hall/info/${instantEventId}`;
+  try {
+    const resp = await requester<InInstantEvent>({
+      option: {
+        url,
+        method: 'GET',
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function getDownloadData({
+  instantEventId,
+}: {
+  instantEventId: string;
+}): Promise<Resp<InInstantEventDownloadItem[]>> {
+  const url = `/api/town-hall/messages.list.download/${instantEventId}`;
+  try {
+    const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+    const resp = await requester<InInstantEventDownloadItem[]>({
+      option: {
+        url,
+        method: 'GET',
+        headers: {
+          authorization: token ?? '',
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function lock({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/lock';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function showMsgAndCollectReply({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/show-msg-collect-reply';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function publish({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/publish';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function unpublish({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/unpublish';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function close({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/close';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function reopen({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/reopen';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function immediateClosSendMessagePeriod({ instantEventId }: { instantEventId: string }): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/close-send-message';
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'PUT',
+        data: {
+          instantEventId,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function post({
+  instantEventId,
+  message,
+  showOnlyAdmin,
+  category,
+}: {
+  instantEventId: string;
+  message: string;
+  showOnlyAdmin: boolean;
+  category?: string;
+}): Promise<Resp<unknown>> {
+  const url = '/api/town-hall/messages.add';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const resp = await requester({
+      option: {
+        url,
+        method: 'POST',
+        data: {
+          instantEventId,
+          message,
+          showOnlyAdmin,
+          category,
+          authorization: token,
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function postReply({
+  instantEventId,
+  messageId,
+  reply,
+  author,
+}: {
+  instantEventId: string;
+  messageId: string;
+  reply: string;
+  author?: {
+    displayName: string;
+    photoURL?: string;
+  };
+}) {
+  const url = `/api/town-hall/messages.add.reply/${instantEventId}/${messageId}`;
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const sendData: {
+      reply: string;
+      author?: {
+        displayName: string;
+        photoURL?: string;
+      };
+    } = { reply };
+    if (author !== undefined) {
+      sendData.author = author;
+    }
+    const resp = await requester({
+      option: {
+        url,
+        method: 'POST',
+        data: sendData,
+        headers: token
+          ? {
+              authorization: token,
+            }
+          : {},
+      },
+    });
+    if (resp.status >= 400) {
+      return {
+        status: resp.status,
+        error: {
+          data: {
+            message: '댓글 등록에 실패했습니다.',
+          },
+        },
+      };
+    }
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function getMessageInfo({
+  instantEventId,
+  messageId,
+}: {
+  instantEventId: string;
+  messageId: string;
+}): Promise<Resp<InInstantEventMessage>> {
+  const url = `/api/town-hall/messages.info/${instantEventId}/${messageId}`;
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const resp = await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'GET',
+        headers: token
+          ? {
+              authorization: token,
+            }
+          : {},
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function denyMessage({
+  instantEventId,
+  messageId,
+  deny = true,
+}: {
+  instantEventId: string;
+  messageId: string;
+  deny?: boolean;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.deny';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, deny },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function deleteMessage({
+  instantEventId,
+  messageId,
+}: {
+  instantEventId: string;
+  messageId: string;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.delete';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function updateMessageSortWeight({
+  instantEventId,
+  messageId,
+  sortWeight,
+}: {
+  instantEventId: string;
+  messageId: string;
+  sortWeight: number;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.sort_weight';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, sortWeight },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function updateMessage({
+  instantEventId,
+  messageId,
+  message,
+}: {
+  instantEventId: string;
+  messageId: string;
+  message: string;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.update_body';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, message },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function updateReply({
+  instantEventId,
+  messageId,
+  replyId,
+  message,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+  message: string;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.update_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyId, message },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function denyReply({
+  instantEventId,
+  messageId,
+  replyId,
+  deny = true,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+  deny?: boolean;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.deny_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyId, deny },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function deleteReply({
+  instantEventId,
+  messageId,
+  replyId,
+}: {
+  instantEventId: string;
+  messageId: string;
+  replyId: string;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.delete_reply';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, replyId },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function pinMessage({
+  instantEventId,
+  messageId,
+}: {
+  instantEventId: string;
+  messageId: string;
+}): Promise<Resp<void>> {
+  const url = '/api/town-hall/messages.pin';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId },
+      },
+    });
+    return { status: 200 };
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+async function voteMessageInfo({
+  instantEventId,
+  messageId,
+  isUpvote = true,
+}: {
+  instantEventId: string;
+  messageId: string;
+  isUpvote?: boolean;
+}): Promise<Resp<InInstantEventMessage>> {
+  const url = '/api/town-hall/messages.vote';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const resp = await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token ?? '',
+        },
+        data: { instantEventId, messageId, isUpvote },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
+const TownhallClientService = {
+  create,
+  updateInfo,
+  get,
+  immediateClosSendMessagePeriod,
+  denyMessage,
+  deleteMessage,
+  denyReply,
+  deleteReply,
+  publish,
+  unpublish,
+  lock,
+  showMsgAndCollectReply,
+  close,
+  reopen,
+  post,
+  updateMessageSortWeight,
+  postReply,
+  updateReply,
+  getMessageInfo,
+  updateMessage,
+  pinMessage,
+};
+
+export default TownhallClientService;
