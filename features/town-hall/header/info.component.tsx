@@ -123,8 +123,8 @@ const TownhallInfo = function ({ instantEventInfo, eventState, isPreview }: Prop
     <>
       <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
-        <Text fontSize="md">{boldTitle}</Text>
-        <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>
+        <Text fontSize="lg">{boldTitle}</Text>
+        <Text fontSize="md" style={{ whiteSpace: 'pre-line' }}>
           {bodyText}
         </Text>
         {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
