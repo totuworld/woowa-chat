@@ -35,7 +35,7 @@ const TownhallGNB: React.FC = function () {
   );
   const logoutBtn = (
     <Menu>
-      <MenuButton as={IconButton} icon={<Avatar size="md" src="/profile_anonymous.png" />} borderRadius="full" />
+      <MenuButton as={IconButton} icon={<Avatar size="md" src="/none_message.png" />} borderRadius="full" />
       <MenuList>
         {isOwner && (
           <MenuItem

@@ -304,7 +304,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
                 bg="gray.100"
                 border="none"
                 boxShadow="none !important"
-                placeholder="질문할 내용을 입력해주세요"
+                placeholder="질문이 몽글몽글 떠오른다면? 여기로!"
                 borderRadius="md"
                 resize="none"
                 minH="unset"
@@ -378,7 +378,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
           <Box maxW="xl" mx="auto" minH="80vh">
             <Center marginBottom="10" p="6">
               <Box>
-                <img src="/intro.png" alt="hero" />
+                <img src="/none_message.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
                   <Heading>전사타운홀</Heading>
                   <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
