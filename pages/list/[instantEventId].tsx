@@ -170,7 +170,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       setLogo('/logo_qna.png');
     }
     return () => {
-      setLogo('/logo.png');
+      setLogo('/gnb_main_logo_resize.png');
     };
   }, [instantEventInfo]);
 
@@ -415,7 +415,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
                 bg="gray.100"
                 border="none"
                 boxShadow="none !important"
-                placeholder="질문할 내용을 입력해주세요"
+                placeholder="톡톡, 질문있나요?"
                 borderRadius="md"
                 resize="none"
                 minH="unset"
@@ -505,7 +505,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           <Box maxW="xl" mx="auto" minH="80vh">
             <Center marginBottom="10" p="6">
               <Box>
-                <img src="/intro.png" alt="hero" />
+                <img src="/none_message.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
                   <Heading>공감톡톡</Heading>
                   <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>

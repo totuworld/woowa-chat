@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import { useState, useMemo } from 'react';
+import { DateTime } from 'luxon';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
@@ -446,6 +447,7 @@ const InstantMessageItem = function ({
     printMessage.push(
       <Text key="text-email" color="gray.500" fontSize="xs" marginTop={2}>
         {userName}(@{emailId})
+        {isOwner && ` - ${DateTime.fromISO(item.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss')}`}
       </Text>,
     );
   }

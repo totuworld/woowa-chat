@@ -5,10 +5,10 @@ const MainInfo = function () {
     <Box maxW="xl" mx="auto">
       <Center marginBottom="10" p="6">
         <Box>
-          <img src="/intro.png" alt="hero" />
+          <img src="/none_message.png" alt="hero" />
           <Flex justify="center" alignItems="center" flexDir="column">
             <Heading>공감톡톡</Heading>
-            <Text fontSize="sm">우아한형제들만의 수다 문화, 공감톡톡</Text>
+            <Text fontSize="sm">공감과 이해가 톡톡! 공감톡톡</Text>
           </Flex>
         </Box>
       </Center>

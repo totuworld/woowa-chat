@@ -4,7 +4,6 @@ import {
   Button,
   Stack,
   useColorModeValue,
-  Spacer,
   Menu,
   MenuButton,
   Avatar,
@@ -37,7 +36,7 @@ const GNB: React.FC = function () {
   );
   const logoutBtn = (
     <Menu>
-      <MenuButton as={IconButton} icon={<Avatar size="md" src="/profile_anonymous.png" />} borderRadius="full" />
+      <MenuButton as={IconButton} icon={<Avatar size="md" src="/none_message.png" />} borderRadius="full" />
       <MenuList>
         {isOwner && (
           <MenuItem
@@ -82,15 +81,14 @@ const GNB: React.FC = function () {
         align="center"
         maxW="xl"
         mx="auto"
+        position="relative"
       >
-        <Spacer flex={{ base: 1 }} />
-        <Flex flex={{ base: 2 }} justify={{ base: 'center', md: 'start' }}>
+        <Flex flex={{ base: 2 }} justify={{ base: 'center' }}>
           <Link href="/">
             <img style={{ height: '40px', cursor: 'pointer' }} src={logo} alt="logo" />
           </Link>
         </Flex>
-
-        <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
+        <Stack flex={{ base: 1, md: 0 }} direction="row" spacing={6} position="absolute" top="10px" right="10px">
           {authInitialized ? loginBtn : logoutBtn}
         </Stack>
       </Flex>

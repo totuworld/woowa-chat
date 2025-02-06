@@ -387,7 +387,8 @@ const TownhallMessageItem = function ({
     const emailId = email.replace(/@.*/, '');
     printMessage.push(
       <Text key="text-email" color="gray.500" fontSize="xs" marginTop={2}>
-        {userName}(@{emailId}) - {DateTime.fromISO(item.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss')}
+        {userName}(@{emailId})
+        {isOwner && ` - ${DateTime.fromISO(item.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss')}`}
       </Text>,
     );
   }

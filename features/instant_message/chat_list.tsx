@@ -192,7 +192,7 @@ const ChatList = function () {
       )}
       {(status === 'success' || status === 'error') && eventList.length === 0 && isOwner && (
         <Box mt="6">
-          <img style={{ width: '50%', margin: '0 auto' }} src="/sorry@2x.png" alt="목록 없음" />
+          <img style={{ width: '50%', margin: '0 auto' }} src="/none_message.png" alt="목록 없음" />
           <Flex justify="center">
             <Box mb="6" height="100vh" fontSize="sm">
               생성된 이벤트가 없어요.
