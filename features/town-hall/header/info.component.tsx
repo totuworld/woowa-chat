@@ -127,7 +127,7 @@ const TownhallInfo = function ({ instantEventInfo, eventState, isPreview }: Prop
         <Text fontSize="md" style={{ whiteSpace: 'pre-line' }}>
           {bodyText}
         </Text>
-        {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
+        {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD HH:mm')}까지 질문 가능</Text>}
         {eventState === 'closed' && (
           <Center width="full" fontSize="xs">
             🚨 종료된 이벤트 입니다 🚨
