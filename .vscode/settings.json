@@ -3,5 +3,11 @@
         "source.fixAll": "explicit"
     },
     "editor.tabSize": 2,
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "github.copilot.chat.localeOverride": "ko",
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+      {
+        "text": "Conventional Commit 형식으로 다음 규칙에 따라 커밋 메시지를 작성해주세요. (형식: <gitmoji> <description>)\n\n규칙 1. gitmoji는 git diff 내용에 따라 다음 중 하나로 작성합니다:\n- :sparkles: 새로운 기능 또는 UI 추가\n- :bug: 버그 수정\n- :memo: 문서 수정\n- :lipstick: 코드 포맷팅, 단순 선언순서 변경\n- :recycle: 코드 리팩토링\n- :test_tube: 테스트 코드 추가\n- :construction_worker: 빌드 수정, 패키지 매니저 수정, 그 외 사소한 수정\n\n- :poop: 기타 사소한 수정\n규칙 2. scope는 optional 입니다. 변경 범위가 특정 앱(e.g. `ars-menu`) 또는 특정 패키지일 경우 작성하되, 리포 전체일 경우 scope를 작성하지 않습니다. scope가 'vscode'인 경우에도 scope를 작성하지 않습니다.\n예시:\n- feat: 새로운 로그인 기능 추가\n- fix(ars-menu): 메뉴 렌더링 버그 수정\n\n  다음의 git diff를 분석하여 적절한 commit 메시지를 작성해주세요. (단, pnpm-lock.yaml 파일 변경은 내용 분석 없이, 파일명만 참고해주세요.)"
+      }
+    ],
 }
