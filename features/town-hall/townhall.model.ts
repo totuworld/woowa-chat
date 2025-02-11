@@ -554,17 +554,6 @@ async function messageListWithUniqueVoter({
           return null;
         }
       }
-      if (isOwnerMember === false && isMyMessage === false) {
-        return null;
-      }
-      // 운영자 아니고, 내 메시지도 아니라면 비공개 메시지 노출하지 않음
-      if (isOwnerMember === false && isMyMessage === false) {
-        return null;
-      }
-      // 운영자라도 Preview 모드일 때는 내 메시지만 노출
-      if (isOwnerMember && isPreview && isMyMessage === false) {
-        return null;
-      }
       const returnData = {
         ...docData,
         userName: docData.userName && isOwnerMember && isPreview === false ? docData.userName : undefined,
