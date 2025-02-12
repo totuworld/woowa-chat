@@ -547,13 +547,6 @@ async function messageListWithUniqueVoter({
       if (isOwnerMember === false && docData.deny !== undefined && docData.deny === true) {
         return null;
       }
-      if (isOwnerMember === true) {
-        const ownerInfo = ownerMemberDoc.data() as InOwnerMember;
-        const hasReadAdminOnlyMessagePrivilege = ownerInfo.privilege.includes(PRIVILEGE_NO.readAdminOnlyMessage);
-        if (hasReadAdminOnlyMessagePrivilege === false && isMyMessage === false) {
-          return null;
-        }
-      }
       const returnData = {
         ...docData,
         userName: docData.userName && isOwnerMember && isPreview === false ? docData.userName : undefined,
