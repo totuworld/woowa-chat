@@ -1,9 +1,8 @@
-import { Box, Button, Spacer, Stack } from '@chakra-ui/react';
+import { Badge, Box, Button, Spacer, Stack } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
-import IconDown from './message_item/icon_down';
-import IconUp from './message_item/icon_up';
 import InstantEventMessageReply from './message_item/reply.component';
+import IconHeart from './message_item/icon_heart';
 
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
@@ -131,6 +130,7 @@ const PresentationView = function ({
   printMessage: (string | JSX.Element)[] | string;
   setFontSize: React.Dispatch<React.SetStateAction<string>>;
 }) {
+  const hasCategory = currentMessage !== undefined && currentMessage.category !== undefined;
   return (
     <Box
       backgroundColor="white"
@@ -146,17 +146,13 @@ const PresentationView = function ({
       display="flex"
       flexDirection="column"
     >
-      <Stack direction="row" align="center" marginBottom="9">
+      <Stack direction="row" align="center" marginBottom={hasCategory ? '4' : '9'}>
         <Box fontSize="xs" key="message-count">
           {currentIndex + 1} / {messageList.length}
         </Box>
         <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
-          <IconUp size={16} active={memoReaction.LIKE > 0} />
+          <IconHeart size={16} active={memoReaction.LIKE > 0} />
           {memoReaction.LIKE}
-        </Box>
-        <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
-          <IconDown size={16} active={memoReaction.DOWN > 0} />
-          {memoReaction.DOWN}
         </Box>
         <Box display="flex" alignItems="center" fontSize="xs" key="reply">
           댓글 {currentMessage !== undefined ? currentMessage.reply.length : 0} 개
@@ -193,6 +189,13 @@ const PresentationView = function ({
           큰
         </Button>
       </Stack>
+      {hasCategory && (
+        <Box>
+          <Badge colorScheme="gray" mb={2}>
+            {currentMessage.category}
+          </Badge>
+        </Box>
+      )}
       <Box
         overflowY="scroll"
         style={{
@@ -352,12 +355,8 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
               {currentIndex + 1} / {messageList.length}
             </Box>
             <Box display="flex" alignItems="center" fontSize="xs" key="icon-up">
-              <IconUp size={16} active={memoReaction.LIKE > 0} />
+              <IconHeart size={16} active={memoReaction.LIKE > 0} />
               {memoReaction.LIKE}
-            </Box>
-            <Box display="flex" alignItems="center" fontSize="xs" key="icon-down">
-              <IconDown size={16} active={memoReaction.DOWN > 0} />
-              {memoReaction.DOWN}
             </Box>
             <Box display="flex" alignItems="center" fontSize="xs" key="reply">
               댓글 {currentMessage !== undefined ? currentMessage.reply.length : 0} 개
