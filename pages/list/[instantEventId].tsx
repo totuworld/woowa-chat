@@ -364,7 +364,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           >
             <option value="latest">최신 등록 순</option>
             <option value="most_liked">공감 많은 순</option>
-            {isOwner && <option value="sortWeight">정렬 가중치 순</option>}
+            <option value="sortWeight">현장 진행 순</option>
             {isOwner && <option value="onlyShowAdmin">범석님만 보세요</option>}
           </Select>
           {eventState === 'question' && (
