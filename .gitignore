@@ -44,3 +44,5 @@ fly.toml
 fly.chat.toml
 fly.leaders.toml
 fly.youths.toml
+
+*.csv

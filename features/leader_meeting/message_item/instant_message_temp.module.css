@@ -1,0 +1,8 @@
+.counter {
+  display: flex;
+  cursor: pointer;
+  color: #365899;
+  font-family: San Francisco, -apple-system, BlinkMacSystemFont, '.SFNSText-Regular', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}

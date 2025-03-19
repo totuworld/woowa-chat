@@ -15,6 +15,7 @@ export interface InInstantEvent {
   /** 배경 이미지 */
   bgImg?: string;
   isQnA?: boolean;
+  isLeadersOnly?: boolean;
   /** 댓글 수집 기간 여부 */
   collectReply?: boolean;
 }

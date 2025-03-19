@@ -116,7 +116,7 @@ const TownHallMeetingPage: NextPage = function () {
                 onOpen();
               }}
             >
-              타운홀Q&A 생성
+              전사타운홀Q&A 생성
             </Button>
           )}
         </Box>
