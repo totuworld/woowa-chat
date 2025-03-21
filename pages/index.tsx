@@ -38,15 +38,45 @@ const IndexPage: NextPage = function () {
       <ServiceLayout height="100vh" backgroundColor="gray.200" title="공감톡톡" pt={16}>
         {authUser === null && <MainInfo />}
         {authUser !== null && (
-          <Box display="flex" justifyContent="center" mt={6} gap={4}>
-            <Button colorScheme="blue" size="lg" onClick={() => router.push('/town-hall-meeting')}>
+          <Box
+            display="flex"
+            flexDirection={{ base: 'column', md: 'row' }}
+            justifyContent="center"
+            mt={6}
+            gap={4}
+            mx={{ base: 4, md: 0 }}
+          >
+            <Button
+              colorScheme="blue"
+              size="lg"
+              width={{ base: '100%', md: 'auto' }}
+              onClick={() => router.push('/town-hall-meeting')}
+            >
               전사타운홀
             </Button>
-            <Button colorScheme="blue" size="lg" onClick={() => router.push('/list')}>
+            <Button
+              colorScheme="blue"
+              size="lg"
+              width={{ base: '100%', md: 'auto' }}
+              onClick={() => router.push('/list')}
+            >
               공감톡톡
             </Button>
-            <Button colorScheme="blue" size="lg" onClick={() => router.push('/leader_meeting')}>
+            <Button
+              colorScheme="blue"
+              size="lg"
+              width={{ base: '100%', md: 'auto' }}
+              onClick={() => router.push('/leader_meeting')}
+            >
               리더십타운홀
+            </Button>
+            <Button
+              colorScheme="blue"
+              size="lg"
+              width={{ base: '100%', md: 'auto' }}
+              onClick={() => router.push('/division-town-hall')}
+            >
+              부문/센터타운홀
             </Button>
           </Box>
         )}

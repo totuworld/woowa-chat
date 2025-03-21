@@ -9,6 +9,13 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
         title: {
           type: 'string',
         },
+        createId: {
+          type: 'string',
+        },
+        townhallType: {
+          type: 'string',
+          enum: ['division', 'center'],
+        },
         desc: {
           type: 'string',
         },
@@ -29,6 +36,9 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
           type: 'string',
         },
         isQnA: {
+          type: 'boolean',
+        },
+        isSecret: {
           type: 'boolean',
         },
       },

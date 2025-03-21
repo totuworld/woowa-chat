@@ -1,5 +1,9 @@
 export interface InInstantEvent {
   instantEventId: string;
+  /** 부문/센터 타운홀 만든 사람 */
+  createId?: string;
+  division?: string;
+  center?: string;
   title: string;
   desc?: string;
   startDate: string;
@@ -15,6 +19,7 @@ export interface InInstantEvent {
   /** 배경 이미지 */
   bgImg?: string;
   isQnA?: boolean;
+  isSecret?: boolean;
   isLeadersOnly?: boolean;
   /** 댓글 수집 기간 여부 */
   collectReply?: boolean;

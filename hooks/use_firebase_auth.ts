@@ -11,6 +11,8 @@ function formatAuthUser(user: User): InAuthUser {
     email: user.email,
     photoURL: user.photoURL,
     displayName: user.displayName,
+    division: null,
+    center: null,
   };
 }
 
