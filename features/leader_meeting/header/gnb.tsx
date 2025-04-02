@@ -49,7 +49,7 @@ const LeaderMettingGNB: React.FC = function () {
         {isOwner && (
           <MenuItem
             onClick={() => {
-              window.location.href = '/owner-members';
+              window.location.href = '/leader_meeting/owner-members';
             }}
           >
             관리자 추가/삭제
@@ -58,7 +58,7 @@ const LeaderMettingGNB: React.FC = function () {
         {isOwner && (
           <MenuItem
             onClick={() => {
-              window.location.href = '/leader-members';
+              window.location.href = '/leader_meeting/leader-members';
             }}
           >
             리더 목록 관리

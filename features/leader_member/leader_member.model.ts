@@ -4,7 +4,7 @@ import FieldValue = firestore.FieldValue;
 import CustomServerError from '@/controllers/custom_error/custom_server_error';
 
 const LEADER_MEMBER_INFO = 'leader_members/members';
-const OWNER_MEMBER_COLLECTION = 'owner_members';
+const OWNER_MEMBER_COLLECTION = 'leader_owner_members';
 
 async function list(senderUid: string) {
   const eventColRef = FirebaseAdmin.getInstance().Firestore.doc(LEADER_MEMBER_INFO);

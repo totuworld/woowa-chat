@@ -20,7 +20,7 @@ const INSTANT_EVENT = 'leader_meeting';
 const INSTANT_EVENT_INFO = 'collection_info/leader_meeting';
 const INSTANT_MESSAGE = 'messages';
 
-const OWNER_MEMBER_COLLECTION = 'owner_members';
+const OWNER_MEMBER_COLLECTION = 'leader_owner_members';
 const LEADER_MEMBER_INFO = 'leader_members/members';
 
 async function findAllEvent(): Promise<InInstantEvent[]> {
