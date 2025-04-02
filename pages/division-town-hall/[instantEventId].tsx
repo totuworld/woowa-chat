@@ -34,6 +34,7 @@ async function updateEvent({
   titleImg,
   bgImg,
   isQnA,
+  isSecret,
 }: {
   instantEventId: string;
   title: string;
@@ -43,6 +44,7 @@ async function updateEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isSecret?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -60,6 +62,7 @@ async function updateEvent({
       titleImg,
       bgImg,
       isQnA,
+      isSecret,
     });
     return {
       result: true,
@@ -198,6 +201,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isSecret?: boolean;
   }) {
     const resp = await updateEvent(data);
     if (resp.result === false) {

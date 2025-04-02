@@ -62,6 +62,7 @@ async function updateInfo({
   titleImg,
   bgImg,
   isQnA,
+  isSecret,
 }: {
   instantEventId: string;
   title: string;
@@ -71,6 +72,7 @@ async function updateInfo({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isSecret?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/division-town-hall/update';
   try {
@@ -83,6 +85,7 @@ async function updateInfo({
       titleImg,
       bgImg,
       isQnA,
+      isSecret,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {

@@ -34,6 +34,9 @@ const JSCUpdateInstantEventReq: JSONSchema6 = {
         isQnA: {
           type: 'boolean',
         },
+        isSecret: {
+          type: 'boolean',
+        },
       },
       required: ['instantEventId', 'title', 'startDate', 'endDate'],
       type: 'object',

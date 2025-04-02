@@ -8,5 +8,6 @@ export interface UpdateInstantEventReq {
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isSecret?: boolean;
   };
 }
