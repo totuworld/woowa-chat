@@ -1,5 +1,17 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Box, Button, Center, Flex, Heading, Spacer, Text, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Heading,
+  Select,
+  Spacer,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import ResizeTextarea from 'react-textarea-autosize';
@@ -119,7 +131,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   const toast = useToast();
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
-  const [msgCategory] = useState<string | undefined>(undefined);
+  const [msgCategory, setMsgCategory] = useState<string | undefined>(undefined);
   const [message, updateMessage] = useState('');
   const [showOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
@@ -300,6 +312,26 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="2">
             <Flex>
+              <Select
+                size="sm"
+                width="150px"
+                placeholder="필수선택"
+                required
+                onChange={(e) => {
+                  if (e.target.value.length <= 0) {
+                    setMsgCategory(undefined);
+                    return;
+                  }
+                  setMsgCategory(e.target.value);
+                }}
+              >
+                <option value="비즈니스">비즈니스</option>
+                <option value="리더십">리더십</option>
+                <option value="일문화">일문화</option>
+                <option value="HR제도">HR제도</option>
+                <option value="근무환경">근무환경</option>
+                <option value="기타">기타</option>
+              </Select>
               <Textarea
                 bg="gray.100"
                 border="none"
