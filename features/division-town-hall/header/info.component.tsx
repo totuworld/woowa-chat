@@ -10,7 +10,7 @@ interface Props {
   uniqueVoterCount?: number;
 }
 
-const DEFAULT_IMG = '/townhall_qna_logo.png';
+const DEFAULT_IMG = '/division_LOGO.png';
 
 function convertMarkdownLinksToJsx(text: string): (string | JSX.Element)[] {
   const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
