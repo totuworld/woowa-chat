@@ -5,7 +5,7 @@ import MemberModel from '@/features/member/member.model';
  * 이름에 '/'가 포함된 멤버의 Firebase Auth 이름만 수정하는 스크립트
  */
 async function updateAuthDisplayNameForMembersWithSlash() {
-  console.log('이름에 /가 포함된 멤버의 Firebase Auth 정보 업데이트 시작...');
+  console.log('Firebase Auth 정보 업데이트 시작...');
   const updatedMembers: string[] = [];
 
   // 재귀 함수로 페이지네이션 구현
@@ -14,8 +14,7 @@ async function updateAuthDisplayNameForMembersWithSlash() {
     const result = await MemberModel.getMembersWithPagination(limit, lastVisible);
     const { members, lastVisible: newLastVisible, hasMore } = result;
 
-    // 이름에 '/'가 포함된 멤버 필터링
-    const membersWithSlash = members.filter((member) => member.displayName && member.displayName.includes('/'));
+    const membersWithSlash = members;
 
     // 필터링된 멤버의 Auth 정보 병렬로 업데이트
     const updatePromises = membersWithSlash.map(async (member) => {
@@ -25,7 +24,7 @@ async function updateAuthDisplayNameForMembersWithSlash() {
           displayName: newName,
         });
         const oldName = await FirebaseAdminModel.getInstance().Auth.getUserByEmail(member.email!);
-        updatedMembers.push(`${member.uid} (${member.displayName} -> ${newName})`);
+        updatedMembers.push(`${member.uid} (${oldName} -> ${newName})`);
         console.log(`Firebase Auth 이름 업데이트 완료: ${member.uid}, 이름: ${oldName.displayName} -> ${newName}`);
       } catch (error) {
         console.error(`Firebase Auth 이름 업데이트 실패: ${member.uid}`, error);

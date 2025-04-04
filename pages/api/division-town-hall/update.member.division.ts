@@ -87,13 +87,11 @@ async function processMembers(lastVisible: any = null): Promise<UpdateResult> {
   // 업데이트 처리
   await Promise.all(
     updates.map(async (mv) => {
-      const updateValue: { division?: string; center?: string } = {};
-      if (mv.division !== undefined && mv.division !== null) {
-        updateValue.division = mv.division;
-      }
-      if (mv.center !== undefined && mv.center !== null) {
-        updateValue.center = mv.center;
-      }
+      const updateValue: { displayName: string; division: string | null; center: string | null } = {
+        displayName: mv.name,
+        division: mv.division !== undefined && mv.division !== null ? mv.division : null,
+        center: mv.center !== undefined && mv.center !== null ? mv.center : null,
+      };
       await MemberModel.update({ uid: mv.uid, data: updateValue });
     }),
   );
