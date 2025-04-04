@@ -167,9 +167,15 @@ export default function useFirebaseAuth() {
     if (authUser === null) return;
     if (token === undefined || token === null) return;
     async function checkExist() {
-      const targetUrl = urlPath.startsWith('/leader_meeting')
-        ? '/api/leader_meeting/owner-member/exist'
-        : '/api/owner-member.exist';
+      const targetUrl = (() => {
+        if (urlPath.startsWith('/leader_meeting')) {
+          return '/api/leader_meeting/owner-member/exist';
+        }
+        if (urlPath.startsWith('/division-town-hall')) {
+          return '/api/division-town-hall/owner-member/exist';
+        }
+        return '/api/owner-member.exist';
+      })();
       const resp = await fetch(targetUrl, { headers: { authorization: token! } });
       if (resp.status !== 200) {
         return setPrivileges([]);

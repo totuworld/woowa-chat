@@ -21,7 +21,7 @@ const EVENT = 'division_meeting';
 const EVENT_INFO = 'collection_info/division_meeting';
 const MESSAGE = 'messages';
 
-const OWNER_MEMBER_COLLECTION = 'owner_members';
+const OWNER_MEMBER_COLLECTION = 'division_owner_members';
 const MEMBER_COLLECTION = 'members';
 
 async function findAllEventWithQuery({

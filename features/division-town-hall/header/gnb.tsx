@@ -49,7 +49,7 @@ const DivMeetingGNB: React.FC = function () {
         {isOwner && (
           <MenuItem
             onClick={() => {
-              window.location.href = '/owner-members';
+              window.location.href = '/division-town-hall/owner-members';
             }}
           >
             관리자 추가/삭제
