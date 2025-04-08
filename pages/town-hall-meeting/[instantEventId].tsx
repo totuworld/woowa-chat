@@ -325,12 +325,8 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
                   setMsgCategory(e.target.value);
                 }}
               >
-                <option value="비즈니스">비즈니스</option>
-                <option value="리더십">리더십</option>
-                <option value="일문화">일문화</option>
-                <option value="HR제도">HR제도</option>
-                <option value="근무환경">근무환경</option>
-                <option value="기타">기타</option>
+                <option value="가게통합">가게통합</option>
+                <option value="포장서비스의 새로운 시작">포장서비스의 새로운 시작</option>
               </Select>
               <Textarea
                 bg="gray.100"
@@ -354,7 +350,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
               />
               <Button
                 isLoading={isSending}
-                disabled={isSending || message.trim().length <= 0}
+                disabled={isSending || message.trim().length <= 0 || msgCategory === undefined}
                 bgColor={`${ColorPalette.mint}`}
                 textColor="white"
                 _hover={{ bg: ColorPalette.mint_disabled }}
