@@ -131,7 +131,14 @@ const IndexPage: NextPage = function () {
           </Link>
           <Box>{authInitialized ? loginBtn : logoutBtn}</Box>
         </Box>
-        <Box fontFamily="BMHANNA_11yrs" fontSize="80pt" mx="auto" mt="10">
+        <Box
+          fontFamily="BMHANNA_11yrs"
+          fontSize={{ base: '40pt', md: '60pt', lg: '80pt' }}
+          mx="auto"
+          mt="10"
+          textAlign="center"
+          px="4"
+        >
           더 자주! 더 깊이! 소통해요~
         </Box>
         {/* 2px line */}
@@ -143,7 +150,7 @@ const IndexPage: NextPage = function () {
           px="10"
           flexDirection={{ base: 'column', md: 'row' }}
           gap={{ base: '4', md: '20' }}
-          mb={{ base: '20', md: '20' }}
+          mb={{ base: '40', md: '20' }}
         >
           {BUTTONS.map((button) => (
             <ButtonComponent
@@ -158,7 +165,8 @@ const IndexPage: NextPage = function () {
       {/* footer */}
       <Box
         display="flex"
-        justifyContent="space-between"
+        flexDirection={{ base: 'column', md: 'row' }}
+        justifyContent={{ base: 'center', md: 'space-between' }}
         p="2"
         bgColor="#eeeeee"
         alignItems="center"
@@ -168,10 +176,12 @@ const IndexPage: NextPage = function () {
         right="0"
         zIndex="10"
         width="full"
-        px="40"
+        px={{ base: '4', md: '40' }}
+        py={{ base: '3', md: '2' }}
         mx="auto"
+        textAlign={{ base: 'center', md: 'left' }}
       >
-        <Text color="#999999" fontSize="10pt">
+        <Text color="#999999" fontSize="10pt" mb={{ base: '2', md: '0' }}>
           전사 우아한소통 관련한 문의는 언제든지 편히 피플실 컬쳐커뮤니케이션팀으로 주세요~
         </Text>
         <img src="/woowa_logo.png" alt="우아한형제들" style={{ height: '22px' }} />
