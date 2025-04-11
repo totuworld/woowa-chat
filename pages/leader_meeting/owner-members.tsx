@@ -20,12 +20,12 @@ import {
 import axios from 'axios';
 import { useQuery } from 'react-query';
 import { useRef, useState } from 'react';
-import { ServiceLayout } from '@/components/containers/service_layout';
 import { useAuth } from '@/contexts/auth_user.context';
 import { InOwnerMember } from '@/features/owner_member/model/in_owner_member';
 import { OwnerMemberSearch } from '@/features//leader_meeting/owner_member/components/owner_member_search';
 import { PRIVILEGE_MAP, PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import OwnerMemberRoleControl from '@/features/leader_meeting/owner_member/components/owner_member_role_control';
+import { LeaderServiceLayout } from '@/features/leader_meeting/service_layout';
 
 const IndexPage: NextPage = function () {
   const { isOwner, token, hasPrivilege } = useAuth();
@@ -96,7 +96,7 @@ const IndexPage: NextPage = function () {
   }
 
   return (
-    <ServiceLayout height="100vh" backgroundColor="gray.50" pt={16}>
+    <LeaderServiceLayout height="100vh" backgroundColor="gray.50" pt={16}>
       <Box maxW="xl" mx="auto">
         <Box spacing="12px" mt="6">
           <Text color="gray.700" px="2" fontSize="2xl" fontWeight="bold">
@@ -194,7 +194,7 @@ const IndexPage: NextPage = function () {
           onCloseRole();
         }}
       />
-    </ServiceLayout>
+    </LeaderServiceLayout>
   );
 };
 

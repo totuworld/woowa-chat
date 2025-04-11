@@ -417,7 +417,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
               <Box>
                 <img src="/intro.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
-                  <Heading>Q&A 도우미</Heading>
+                  <Heading>리더십타운홀</Heading>
                   <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
                 </Flex>
               </Box>
@@ -425,7 +425,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
             <GoogleLoginButton
               isStart={false}
               onClickLogin={() => {
-                signInWithGoogle(`/list/${instantEventInfo.instantEventId}`);
+                signInWithGoogle(`/leader_meeting/${instantEventInfo.instantEventId}`);
               }}
             />
           </Box>

@@ -225,7 +225,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
       bgImage={instantEventInfo.bgImg ?? undefined}
       bgSize="100% auto"
       bgRepeat="no-repeat"
-      title="전사타운홀Q&A"
+      title="부문/센터타운홀Q&A"
       pt={16}
     >
       <Box maxW="xl" mx="auto" pt="6" bgColor="gray.200">
@@ -384,7 +384,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
               <Box>
                 <img src="/none_message.png" alt="hero" />
                 <Flex justify="center" alignItems="center" flexDir="column">
-                  <Heading>전사타운홀</Heading>
+                  <Heading>부문/센터 타운홀</Heading>
                   <Text>이 서비스는 우아한형제들 임직원용 서비스입니다.</Text>
                 </Flex>
               </Box>
@@ -392,7 +392,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             <GoogleLoginButton
               isStart={false}
               onClickLogin={() => {
-                signInWithGoogle(`/town-hall-meeting/${instantEventInfo.instantEventId}`);
+                signInWithGoogle(`/division-town-hall/${instantEventInfo.instantEventId}`);
               }}
             />
           </Box>

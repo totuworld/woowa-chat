@@ -178,7 +178,7 @@ const CreateTownhallEvent = function ({
         </FormControl>
       )}
       <FormControl mt={4}>
-        <FormLabel>비밀글 여부</FormLabel>
+        <FormLabel>익명 여부</FormLabel>
         <Checkbox
           size="md"
           isChecked={isSecret}
@@ -186,7 +186,7 @@ const CreateTownhallEvent = function ({
             setIsSecret((prev) => !prev);
           }}
         >
-          비밀글(체크하면 익명으로 노출됩니다)
+          익명(체크하면 작성자의 이름이 노출되지 않습니다)
         </Checkbox>
       </FormControl>
       <FormControl mt={4} isRequired>
