@@ -1,25 +1,13 @@
 import { GetServerSideProps, NextPage } from 'next';
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Heading,
-  Select,
-  Spacer,
-  Text,
-  Textarea,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Button, Center, Flex, Heading, Select, Spacer, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
-import ResizeTextarea from 'react-textarea-autosize';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
 import { useRouter } from 'next/router';
+import TiptapEditor from '@/components/TiptapEditor';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
@@ -139,6 +127,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   const [messageList, setMessageList] = useState<InInstantEventMessage[]>([]);
   const [sortRule] = useState<'latest' | 'most_liked' | 'onlyShowAdmin'>('latest');
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
+  const [editorActive, setEditorActive] = useState(false);
   const eventState = TownhallUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
 
@@ -311,95 +300,103 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
         </Box>
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="2">
-            <Flex>
-              <Select
-                size="sm"
-                width="150px"
-                placeholder="필수선택"
-                required
-                onChange={(e) => {
-                  if (e.target.value.length <= 0) {
-                    setMsgCategory(undefined);
-                    return;
-                  }
-                  setMsgCategory(e.target.value);
-                }}
-              >
-                <option value="가게통합">가게통합</option>
-                <option value="포장서비스의 새로운 시작">포장서비스의 새로운 시작</option>
-              </Select>
-              <Textarea
-                bg="gray.100"
-                border="none"
-                boxShadow="none !important"
-                placeholder="질문이 몽글몽글 떠오른다면? 여기로!"
+            {!editorActive ? (
+              <Box
+                p="3"
                 borderRadius="md"
-                resize="none"
-                minH="unset"
-                minRows={1}
-                maxRows={14}
-                overflow="hidden"
-                fontSize="xs"
-                mr="2"
-                ml="2"
-                as={ResizeTextarea}
-                value={message}
-                onChange={(e) => {
-                  updateMessage(e.target.value);
-                }}
-              />
-              <Button
-                isLoading={isSending}
-                disabled={isSending || message.trim().length <= 0 || msgCategory === undefined}
-                bgColor={`${ColorPalette.mint}`}
-                textColor="white"
-                _hover={{ bg: ColorPalette.mint_disabled }}
-                variant="solid"
-                size="sm"
-                onClick={async () => {
-                  if (message.trim().length <= 0) {
-                    toast({
-                      title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
-                      position: 'top-right',
-                      status: 'warning',
-                    });
-                    return;
-                  }
-                  if (message.trim().length > 5000) {
-                    toast({
-                      title: '5000자 내로 입력해주세요',
-                      position: 'top-right',
-                      status: 'warning',
-                    });
-                    return;
-                  }
-                  setSending(true);
-                  const resp = await postMessage({
-                    message: message.trim(),
-                    category: msgCategory,
-                    instantEventId: instantEventInfo.instantEventId,
-                    showOnlyAdmin,
-                  });
-                  if (resp.result === false) {
-                    toast({
-                      title: '메시지 등록 실패',
-                      position: 'top-right',
-                    });
-                  }
-                  if (resp.result === true) {
-                    toast({
-                      title: '질문 등록이 완료 되었습니다',
-                      position: 'top-right',
-                    });
-                  }
-                  setListLoadTrigger((prev) => !prev);
-                  updateMessage('');
-                  setSending(false);
-                }}
+                bg="gray.100"
+                color="gray.500"
+                cursor="pointer"
+                fontSize="sm"
+                _hover={{ bg: 'gray.200' }}
+                onClick={() => setEditorActive(true)}
               >
-                등록
-              </Button>
-            </Flex>
+                질문이 몽글몽글 떠오른다면? 여기로!
+              </Box>
+            ) : (
+              <>
+                <Flex mb="4">
+                  <Select
+                    size="sm"
+                    width="full"
+                    placeholder="필수선택"
+                    required
+                    onChange={(e) => {
+                      if (e.target.value.length <= 0) {
+                        setMsgCategory(undefined);
+                        return;
+                      }
+                      setMsgCategory(e.target.value);
+                    }}
+                  >
+                    <option value="가게통합">가게통합</option>
+                    <option value="포장서비스의 새로운 시작">포장서비스의 새로운 시작</option>
+                  </Select>
+                </Flex>
+
+                <TiptapEditor
+                  value={message}
+                  onChange={(value) => {
+                    updateMessage(value);
+                  }}
+                />
+
+                <Button
+                  mt="4"
+                  width="full"
+                  isLoading={isSending}
+                  disabled={isSending || message.trim().length <= 0 || msgCategory === undefined}
+                  bgColor={`${ColorPalette.mint}`}
+                  textColor="white"
+                  _hover={{ bg: ColorPalette.mint_disabled }}
+                  variant="solid"
+                  size="sm"
+                  onClick={async () => {
+                    if (message.trim().length <= 0) {
+                      toast({
+                        title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
+                        position: 'top-right',
+                        status: 'warning',
+                      });
+                      return;
+                    }
+                    if (message.trim().length > 5000) {
+                      toast({
+                        title: '5000자 내로 입력해주세요',
+                        position: 'top-right',
+                        status: 'warning',
+                      });
+                      return;
+                    }
+                    setSending(true);
+                    const resp = await postMessage({
+                      message: message.trim(),
+                      category: msgCategory,
+                      instantEventId: instantEventInfo.instantEventId,
+                      showOnlyAdmin,
+                    });
+                    if (resp.result === false) {
+                      toast({
+                        title: '메시지 등록 실패',
+                        position: 'top-right',
+                      });
+                    }
+                    if (resp.result === true) {
+                      toast({
+                        title: '질문 등록이 완료 되었습니다',
+                        position: 'top-right',
+                      });
+                    }
+                    setListLoadTrigger((prev) => !prev);
+                    updateMessage('');
+                    setSending(false);
+                    setEditorActive(false); // 에디터 비활성화
+                  }}
+                >
+                  등록
+                </Button>
+              </>
+            )}
           </Box>
         )}
         {authUser === null && (

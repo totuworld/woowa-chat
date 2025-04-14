@@ -1,13 +1,13 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { Box, Button, Center, Flex, Heading, Spacer, Text, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, Heading, Spacer, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
-import ResizeTextarea from 'react-textarea-autosize';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import 'antd/dist/antd.css';
 import { useRouter } from 'next/router';
+import TiptapEditor from '@/components/TiptapEditor';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
@@ -133,6 +133,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   const { query } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [message, updateMessage] = useState('');
+  const [editorActive, setEditorActive] = useState(false);
   const [showOnlyAdmin] = useState(false);
   const [instantEventInfo, setInstantEventInfo] = useState(propsEventInfo);
   const [listLoadTrigger, setListLoadTrigger] = useState(false);
@@ -329,86 +330,94 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
         )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="6">
-            <Flex>
-              <Textarea
-                bg="gray.100"
-                border="none"
-                boxShadow="none !important"
-                placeholder="질문할 내용을 입력해주세요"
+            {!editorActive ? (
+              <Box
+                p="3"
                 borderRadius="md"
-                resize="none"
-                minH="unset"
-                minRows={1}
-                maxRows={14}
-                overflow="hidden"
-                fontSize="xs"
+                bg="gray.100"
+                color="gray.500"
+                cursor="pointer"
+                fontSize="sm"
+                _hover={{ bg: 'gray.200' }}
+                onClick={() => setEditorActive(true)}
+                width="100%"
                 mr="2"
-                as={ResizeTextarea}
-                value={message}
-                onChange={(e) => {
-                  updateMessage(e.target.value);
-                }}
-              />
-              <Button
-                isLoading={isSending}
-                disabled={isSending}
-                bgColor={`${ColorPalette.mint}`}
-                textColor="white"
-                _hover={{ bg: ColorPalette.mint_disabled }}
-                variant="solid"
-                size="sm"
-                onClick={async () => {
-                  if (message.trim().length <= 0) {
-                    toast({
-                      title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
-                      position: 'top-right',
-                      status: 'warning',
-                    });
-                    return;
-                  }
-                  if (message.trim().length > 5000) {
-                    toast({
-                      title: '5000자 내로 입력해주세요',
-                      position: 'top-right',
-                      status: 'warning',
-                    });
-                    return;
-                  }
-                  setSending(true);
-                  const resp = await postMessage({
-                    message: message.trim(),
-                    instantEventId: instantEventInfo.instantEventId,
-                    showOnlyAdmin,
-                  });
-                  if (resp.result === false && resp.message !== undefined) {
-                    toast({
-                      title: '메시지 등록 실패',
-                      description: resp.message,
-                      position: 'top-right',
-                      status: 'error',
-                    });
-                  }
-                  if (resp.result === false && resp.message === undefined) {
-                    toast({
-                      title: '메시지 등록 실패',
-                      position: 'top-right',
-                      status: 'error',
-                    });
-                  }
-                  if (resp.result === true) {
-                    toast({
-                      title: '질문 등록이 완료 되었습니다',
-                      position: 'top-right',
-                    });
-                  }
-                  setListLoadTrigger((prev) => !prev);
-                  updateMessage('');
-                  setSending(false);
-                }}
               >
-                등록
-              </Button>
-            </Flex>
+                질문할 내용을 입력해주세요
+              </Box>
+            ) : (
+              <>
+                <TiptapEditor
+                  value={message}
+                  onChange={(value: string) => {
+                    updateMessage(value);
+                  }}
+                  placeholder="질문할 내용을 입력해주세요"
+                />
+                <Button
+                  mt="4"
+                  isLoading={isSending}
+                  disabled={isSending}
+                  bgColor={`${ColorPalette.mint}`}
+                  textColor="white"
+                  _hover={{ bg: ColorPalette.mint_disabled }}
+                  variant="solid"
+                  width="full"
+                  size="sm"
+                  onClick={async () => {
+                    if (message.trim().length <= 0) {
+                      toast({
+                        title: '공백을 제외하고 최소 1자 이상의 글자를 입력해주세요',
+                        position: 'top-right',
+                        status: 'warning',
+                      });
+                      return;
+                    }
+                    if (message.trim().length > 5000) {
+                      toast({
+                        title: '5000자 내로 입력해주세요',
+                        position: 'top-right',
+                        status: 'warning',
+                      });
+                      return;
+                    }
+                    setSending(true);
+                    const resp = await postMessage({
+                      message: message.trim(),
+                      instantEventId: instantEventInfo.instantEventId,
+                      showOnlyAdmin,
+                    });
+                    if (resp.result === false && resp.message !== undefined) {
+                      toast({
+                        title: '메시지 등록 실패',
+                        description: resp.message,
+                        position: 'top-right',
+                        status: 'error',
+                      });
+                    }
+                    if (resp.result === false && resp.message === undefined) {
+                      toast({
+                        title: '메시지 등록 실패',
+                        position: 'top-right',
+                        status: 'error',
+                      });
+                    }
+                    if (resp.result === true) {
+                      toast({
+                        title: '질문 등록이 완료 되었습니다',
+                        position: 'top-right',
+                      });
+                    }
+                    setListLoadTrigger((prev) => !prev);
+                    updateMessage('');
+                    setSending(false);
+                    setEditorActive(false);
+                  }}
+                >
+                  등록
+                </Button>
+              </>
+            )}
           </Box>
         )}
         {authUser === null && (

@@ -13,18 +13,19 @@ import {
   MenuList,
   Spacer,
   Text,
-  Textarea,
   Tooltip,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import { useState, useMemo } from 'react';
+import { DateTime } from 'luxon';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import InstantMessageItemReplyInput from './reply_input.component';
 import InstantEventMessageReply from './reply.component';
+import TiptapEditor from '@/components/TiptapEditor';
 import ChatClientService from '../chat.client.service';
 import ReplyIcon from '@/components/reply_icon';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
@@ -442,18 +443,42 @@ const InstantMessageItem = function ({
     return returnMenuList;
   }, [authUser, item]);
 
-  const linkText = convertMarkdownLinksToJsx(item.message);
-  const printMessage = convertMarkdownBoldToJsx(linkText);
-  const { userName, email } = item;
-  if (userName !== undefined && email !== undefined && isQnA === false) {
-    // email의 @ 뒤에 글자를 모두 삭제한다
-    const emailId = email.replace(/@.*/, '');
-    printMessage.push(
-      <Text key="text-email" color="gray.500" fontSize="xs" marginTop={2}>
-        {userName}(@{emailId})
-      </Text>,
-    );
-  }
+  // HTML 태그가 있는지 정규식으로 정확히 체크
+  const hasHtmlTags = (text: string): boolean => {
+    // <태그> 또는 </태그> 형식을 찾는 정규식 패턴
+    const htmlTagPattern = /<\/?[a-z][^>]*>/i;
+    return htmlTagPattern.test(text);
+  };
+
+  // item.message 안에 html 요소가 있는지 체크해서 있으면 HTML로 렌더링, 아니라면 마크다운 변환
+  const { messageContent, hasHtml } = useMemo(() => {
+    if (hasHtmlTags(item.message)) {
+      return {
+        messageContent: item.message,
+        hasHtml: true,
+      };
+    }
+    const linkText = convertMarkdownLinksToJsx(item.message);
+    return {
+      messageContent: convertMarkdownBoldToJsx(linkText),
+      hasHtml: false,
+    };
+  }, [item.message]);
+  // 사용자 정보가 있는 경우 표시를 위한 요소 생성
+  const userInfoElement = useMemo(() => {
+    const { userName, email } = item;
+    if (userName !== undefined && email !== undefined && isQnA === false) {
+      // email의 @ 뒤에 글자를 모두 삭제한다
+      const emailId = email.replace(/@.*/, '');
+      return (
+        <Text key="text-email" color="gray.500" fontSize="xs" marginTop={2}>
+          {userName}(@{emailId})
+          {isOwner && ` - ${DateTime.fromISO(item.createAt).setZone('Asia/Seoul').toFormat('yyyy-MM-dd HH:mm:ss')}`}
+        </Text>
+      );
+    }
+    return null;
+  }, [isQnA, isOwner, item]);
 
   const showReplyFlag = (() => {
     if (eventState === 'pre') return false;
@@ -569,26 +594,75 @@ const InstantMessageItem = function ({
       <Box p="2">
         <Box p="2">
           {isEditMode && (
-            <Textarea
-              bg="gray.100"
-              border="none"
-              boxShadow="none !important"
-              placeholder="무엇이 궁금한가요?"
-              borderRadius="md"
-              fontSize="sm"
-              mr="2"
-              minHeight="400px"
-              value={message}
-              onChange={(e) => {
-                updateMessage(e.target.value);
-              }}
-            />
+            <Box mb="4">
+              <TiptapEditor
+                value={message}
+                minHeight="400px"
+                onChange={(value: string) => {
+                  updateMessage(value);
+                }}
+                placeholder="무엇이 궁금한가요?"
+              />
+            </Box>
           )}
           {isEditMode === false && (
-            <Text whiteSpace="pre-line" fontSize="sm">
-              {printMessage}
-              {}
-            </Text>
+            <>
+              {hasHtml ? (
+                <Box
+                  className="html-content"
+                  fontSize="sm"
+                  sx={{
+                    '& p': {
+                      minHeight: '1.5em', // 빈 p 태그에 최소 높이 적용
+                      marginBottom: '0.5em', // 단락 간 간격 추가
+                    },
+                    '& p:empty': {
+                      height: '1.5em', // 완전히 빈 p 태그에 명시적 높이 설정
+                      display: 'block', // 블록 요소로 처리
+                    },
+                    '& p:empty::after': {
+                      content: '"\u00a0"', // 빈 p 태그에 비파괴 공백 추가
+                      visibility: 'hidden', // 텍스트는 숨김 처리
+                    },
+                    '& ul, & ol': {
+                      paddingLeft: '1.5em', // 목록 왼쪽 여백 설정 (기본값보다 작게)
+                      marginTop: '0.5em',
+                      marginBottom: '0.5em',
+                    },
+                    '& li': {
+                      marginBottom: '0.25em', // 목록 항목 간 간격
+                      display: 'flex', // 플렉스 박스로 변경
+                      alignItems: 'baseline', // 베이스라인 정렬
+                    },
+                    '& li::before': {
+                      content: '"\u2022"', // 기본 불렛
+                      marginRight: '0.5em', // 왼쪽 여백
+                      display: 'inline-block', // 인라인 블록으로 설정
+                    },
+                    '& ul': {
+                      listStyleType: 'none', // 기본 마커 제거
+                      paddingLeft: '0.5em', // 왼쪽 여백 줄임
+                    },
+                    '& ol': {
+                      counterReset: 'item', // 카운터 초기화
+                      listStyleType: 'none', // 기본 마커 제거
+                      paddingLeft: '0.5em', // 왼쪽 여백 줄임
+                    },
+                    '& ol > li::before': {
+                      counterIncrement: 'item', // 항목마다 카운터 증가
+                      content: 'counter(item) "."', // 숫자.
+                      marginRight: '0.5em', // 왼쪽 여백
+                    },
+                  }}
+                  dangerouslySetInnerHTML={{ __html: messageContent as string }}
+                />
+              ) : (
+                <Text whiteSpace="pre-line" fontSize="sm">
+                  {messageContent}
+                </Text>
+              )}
+              {userInfoElement}
+            </>
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
           {item.showOnlyAdmin !== undefined && item.showOnlyAdmin === true && (
