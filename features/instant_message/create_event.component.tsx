@@ -1,18 +1,8 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Checkbox,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Spacer,
-  Textarea,
-} from '@chakra-ui/react';
+import { Box, Button, ButtonGroup, Checkbox, Flex, FormControl, FormLabel, Input, Spacer } from '@chakra-ui/react';
 import { DatePicker } from 'antd';
 import { useRef, useState } from 'react';
 import moment, { Moment } from 'moment';
+import TiptapEditor from '@/components/TiptapEditor';
 
 const { RangePicker } = DatePicker;
 
@@ -142,13 +132,7 @@ const CreateEvent = function ({
 
       <FormControl mt={4}>
         <FormLabel>설명</FormLabel>
-        <Textarea
-          defaultValue={desc}
-          onChange={(e) => {
-            setDesc(e.target.value);
-          }}
-          placeholder="설명"
-        />
+        <TiptapEditor value={desc} onChange={setDesc} placeholder="설명" />
       </FormControl>
       <FormControl mt={4} isRequired>
         <FormLabel>질문 가능 날짜</FormLabel>

@@ -1,5 +1,6 @@
 import { Box, Center, Image, Text } from '@chakra-ui/react';
 import moment from 'moment';
+import { useMemo } from 'react';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 
 interface Props {
@@ -113,12 +114,31 @@ function convertMarkdownBoldToJsx(text: (string | JSX.Element)[]): (string | JSX
   return boldArray;
 }
 
+// HTML 태그가 있는지 정규식으로 정확히 체크
+const hasHtmlTags = (text: string): boolean => {
+  // <태그> 또는 </태그> 형식을 찾는 정규식 패턴
+  const htmlTagPattern = /<\/?[a-z][^>]*>/i;
+  return htmlTagPattern.test(text);
+};
+
 const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueVoterCount }: Props) {
   const endDate = moment(instantEventInfo.endDate, moment.ISO_8601);
-  const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
-  const linkText = convertMarkdownLinksToJsx(printDesc);
-  const bodyText = convertMarkdownBoldToJsx(linkText);
   const boldTitle = convertMarkdownBoldToJsx([instantEventInfo.title] ?? ['']);
+  // item.message 안에 html 요소가 있는지 체크해서 있으면 HTML로 렌더링, 아니라면 마크다운 변환
+  const { messageContent, hasHtml } = useMemo(() => {
+    if (instantEventInfo?.desc && hasHtmlTags(instantEventInfo?.desc)) {
+      return {
+        messageContent: instantEventInfo?.desc,
+        hasHtml: true,
+      };
+    }
+    const printDesc = instantEventInfo?.desc ? instantEventInfo!.desc.replace(/\\n/gi, '\n') : '';
+    const linkText = convertMarkdownLinksToJsx(printDesc);
+    return {
+      messageContent: convertMarkdownBoldToJsx(linkText),
+      hasHtml: false,
+    };
+  }, [instantEventInfo?.desc]);
   const titleImg = (() => {
     if (instantEventInfo.titleImg) {
       return instantEventInfo.titleImg;
@@ -133,9 +153,59 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueV
       <Image src={titleImg} objectFit="cover" />
       <Box px="2" pb="2">
         <Text fontSize="md">{boldTitle}</Text>
-        <Text fontSize="xs" style={{ whiteSpace: 'pre-line' }}>
-          {bodyText}
-        </Text>
+        {hasHtml ? (
+          <Box
+            className="html-content"
+            fontSize="md"
+            sx={{
+              '& p': {
+                minHeight: '1.5em', // 빈 p 태그에 최소 높이 적용
+              },
+              '& p:empty': {
+                height: '1.5em', // 완전히 빈 p 태그에 명시적 높이 설정
+                display: 'block', // 블록 요소로 처리
+              },
+              '& p:empty::after': {
+                content: '"\u00a0"', // 빈 p 태그에 비파괴 공백 추가
+                visibility: 'hidden', // 텍스트는 숨김 처리
+              },
+              '& ul, & ol': {
+                paddingLeft: '1.5em', // 목록 왼쪽 여백 설정 (기본값보다 작게)
+                marginTop: '0.5em',
+                marginBottom: '0.5em',
+              },
+              '& li': {
+                marginBottom: '0.25em', // 목록 항목 간 간격
+                display: 'flex', // 플렉스 박스로 변경
+                alignItems: 'baseline', // 베이스라인 정렬
+              },
+              '& li::before': {
+                content: '"\u2022"', // 기본 불렛
+                marginRight: '0.5em', // 왼쪽 여백
+                display: 'inline-block', // 인라인 블록으로 설정
+              },
+              '& ul': {
+                listStyleType: 'none', // 기본 마커 제거
+                paddingLeft: '0.5em', // 왼쪽 여백 줄임
+              },
+              '& ol': {
+                counterReset: 'item', // 카운터 초기화
+                listStyleType: 'none', // 기본 마커 제거
+                paddingLeft: '0.5em', // 왼쪽 여백 줄임
+              },
+              '& ol > li::before': {
+                counterIncrement: 'item', // 항목마다 카운터 증가
+                content: 'counter(item) "."', // 숫자.
+                marginRight: '0.5em', // 왼쪽 여백
+              },
+            }}
+            dangerouslySetInnerHTML={{ __html: messageContent as string }}
+          />
+        ) : (
+          <Text whiteSpace="pre-line" fontSize="sm">
+            {messageContent}
+          </Text>
+        )}
         {eventState === 'question' && <Text fontSize="xs">{endDate.format('YYYY-MM-DD hh:mm')}까지 질문 가능</Text>}
         {/* {eventState === 'locked' && (
           <Center width="full" fontSize="xs">
