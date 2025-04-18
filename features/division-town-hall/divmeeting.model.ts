@@ -24,6 +24,8 @@ const MESSAGE = 'messages';
 const OWNER_MEMBER_COLLECTION = 'division_owner_members';
 const MEMBER_COLLECTION = 'members';
 
+const DIVISION_INFO = 'division_info';
+
 async function findAllEventWithQuery({
   division,
   center,
@@ -68,18 +70,30 @@ async function findAllEventWithQuery({
   return result;
 }
 
-async function findAllEvent(currentUserUid: string) {
+async function findAllEvent(currentUserUid: string, email: string) {
   // ownerMember 정보 조회
   // Member 정보 조회
   const ownerMemberRef = FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(currentUserUid);
   const userInfoRef = FirebaseAdmin.getInstance().Firestore.collection(MEMBER_COLLECTION).doc(currentUserUid);
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
+    const divisionInfoRef = FirebaseAdmin.getInstance().Firestore.collection(DIVISION_INFO).doc(email);
     const userInfoDoc = await transaction.get(userInfoRef);
     const isOwner = ownerMemberDoc.exists;
     const userInfo = userInfoDoc.data() as InAuthUser;
-    const { division } = userInfo;
-    const { center } = userInfo;
+    const divisionInfoDoc = await divisionInfoRef.get();
+    let { division, center } = userInfo;
+
+    if (divisionInfoDoc.exists && division === null && center === null) {
+      const divisionInfo = divisionInfoDoc.data() as { division?: string; center?: string };
+      if (divisionInfo.division !== undefined) {
+        division = divisionInfo.division;
+      }
+      if (divisionInfo.center !== undefined) {
+        center = divisionInfo.center;
+      }
+    }
+
     return {
       isOwner,
       division,
@@ -87,6 +101,7 @@ async function findAllEvent(currentUserUid: string) {
     };
   });
   const { isOwner, division, center } = result;
+
   if (isOwner) {
     const allEvent = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
       const eventRef = FirebaseAdmin.getInstance().Firestore.collection(EVENT);

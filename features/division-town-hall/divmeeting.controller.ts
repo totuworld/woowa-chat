@@ -74,8 +74,11 @@ async function update(req: NextApiRequest, res: NextApiResponse) {
 async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
   const token = req.headers.authorization;
   let senderUid: string | undefined;
+  let email: string | undefined;
   if (token !== undefined) {
-    senderUid = await verifyFirebaseIdToken(token);
+    const verifyResp = await FirebaseAdmin.getInstance().Auth.verifyIdToken(token);
+    senderUid = verifyResp.uid;
+    email = verifyResp.email;
   }
   if (senderUid === undefined) {
     throw new BadReqError('authorization 누락');
@@ -89,8 +92,14 @@ async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
+
+  // email이 undefined이나 null이라면 존재하지 않는 정보로 반환처리하자.
+  if (email === undefined || email === null) {
+    return res.status(200).json([]);
+  }
+
   // TODO: page와 size를 넘겨서 paging 해야한다.
-  const instantEventInfo = await TownhallModel.findAllEvent(senderUid);
+  const instantEventInfo = await TownhallModel.findAllEvent(senderUid, email);
   return res.status(200).json(instantEventInfo);
 }
 
