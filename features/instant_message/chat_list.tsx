@@ -114,7 +114,7 @@ const ChatList = function () {
               onOpen();
             }}
           >
-            우수타 이벤트 생성
+            공감톡톡 이벤트 생성
           </Button>
         )}
       </Box>
