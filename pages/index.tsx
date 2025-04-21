@@ -110,6 +110,7 @@ const IndexPage: NextPage = function () {
   return (
     <>
       <Head>
+        <title>우아한소통</title>
         <meta property="og:url" content={mainUrl} />
         <meta property="og:image" content={`https://${publicRuntimeConfig.mainDomain}/main.jpg`} />
         <meta property="og:site_name" content="공감톡톡" />

@@ -11,7 +11,7 @@ import { LeaderServiceLayout } from '@/features/leader_meeting/service_layout';
  */
 const ListPage: NextPage = function () {
   return (
-    <LeaderServiceLayout height="100vh" backgroundColor="gray.50" title="Q&A 도우미" pt={16}>
+    <LeaderServiceLayout height="100vh" backgroundColor="gray.50" title="리더십타운홀 Q&A" pt={16}>
       <Box maxW="xl" mx="auto" minH="95vh" overflow="scroll; height:200px;">
         <ChatList />
       </Box>

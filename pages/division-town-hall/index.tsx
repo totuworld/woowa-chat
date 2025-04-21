@@ -131,7 +131,7 @@ const DivMeetingPage: NextPage = function () {
   );
 
   return (
-    <DivMeetingServiceLayout height="100vh" backgroundColor="gray.50" title="타운홀Q&A" pt={16}>
+    <DivMeetingServiceLayout height="100vh" backgroundColor="gray.50" title="부문/센터타운홀 Q&A" pt={16}>
       <Box maxW="xl" mx="auto" minH="95vh" overflow="scroll; height:200px;">
         <Box>
           {!isOpen && (

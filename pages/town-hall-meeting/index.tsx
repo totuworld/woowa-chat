@@ -105,7 +105,7 @@ const TownHallMeetingPage: NextPage = function () {
   );
 
   return (
-    <TownhallServiceLayout height="100vh" backgroundColor="gray.50" title="타운홀Q&A" pt={16}>
+    <TownhallServiceLayout height="100vh" backgroundColor="gray.50" title="전사타운홀 Q&A" pt={16}>
       <Box maxW="xl" mx="auto" minH="95vh" overflow="scroll; height:200px;">
         <Box>
           {isOwner && !isOpen && (
