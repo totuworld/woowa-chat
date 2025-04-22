@@ -120,7 +120,8 @@ const PresentationView = function ({
   messageList,
   memoReaction,
   currentMessage,
-  printMessage,
+  hasHtml,
+  messageContent,
   setFontSize,
 }: {
   fontSize: string;
@@ -128,7 +129,8 @@ const PresentationView = function ({
   messageList: InInstantEventMessage[];
   memoReaction: { LIKE: number; HAHA: number; WOW: number; SAD: number; ANGRY: number; DOWN: number; CARE: number };
   currentMessage: InInstantEventMessage | undefined;
-  printMessage: (string | JSX.Element)[] | string;
+  hasHtml: boolean;
+  messageContent: string | (string | JSX.Element)[];
   setFontSize: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
@@ -193,14 +195,64 @@ const PresentationView = function ({
           큰
         </Button>
       </Stack>
-      <Box
-        overflowY="scroll"
-        style={{
-          scrollbarWidth: 'none',
-        }}
-      >
-        {printMessage}
-      </Box>
+      {hasHtml ? (
+        <Box
+          className="html-content"
+          sx={{
+            '& p': {
+              minHeight: '1.5em', // 빈 p 태그에 최소 높이 적용
+              marginBottom: '0.5em', // 단락 간 간격 추가
+            },
+            '& p:empty': {
+              height: '1.5em', // 완전히 빈 p 태그에 명시적 높이 설정
+              display: 'block', // 블록 요소로 처리
+            },
+            '& p:empty::after': {
+              content: '"\u00a0"', // 빈 p 태그에 비파괴 공백 추가
+              visibility: 'hidden', // 텍스트는 숨김 처리
+            },
+            '& ul, & ol': {
+              paddingLeft: '1.5em', // 목록 왼쪽 여백 설정 (기본값보다 작게)
+              marginTop: '0.5em',
+              marginBottom: '0.5em',
+            },
+            '& li': {
+              marginBottom: '0.25em', // 목록 항목 간 간격
+              display: 'flex', // 플렉스 박스로 변경
+              alignItems: 'baseline', // 베이스라인 정렬
+            },
+            '& li::before': {
+              content: '"\u2022"', // 기본 불렛
+              marginRight: '0.5em', // 왼쪽 여백
+              display: 'inline-block', // 인라인 블록으로 설정
+            },
+            '& ul': {
+              listStyleType: 'none', // 기본 마커 제거
+              paddingLeft: '0.5em', // 왼쪽 여백 줄임
+            },
+            '& ol': {
+              counterReset: 'item', // 카운터 초기화
+              listStyleType: 'none', // 기본 마커 제거
+              paddingLeft: '0.5em', // 왼쪽 여백 줄임
+            },
+            '& ol > li::before': {
+              counterIncrement: 'item', // 항목마다 카운터 증가
+              content: 'counter(item) "."', // 숫자.
+              marginRight: '0.5em', // 왼쪽 여백
+            },
+          }}
+          dangerouslySetInnerHTML={{ __html: messageContent as string }}
+        />
+      ) : (
+        <Box
+          overflowY="scroll"
+          style={{
+            scrollbarWidth: 'none',
+          }}
+        >
+          {messageContent}
+        </Box>
+      )}
     </Box>
   );
 };
@@ -210,13 +262,34 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
   const currentMessage = messageList[currentIndex];
   const [fontSize, setFontSize] = useState('xl');
   const [mode, setMode] = useState<'PT' | 'REPLY'>('PT');
-  const printMessage = (() => {
+
+  // HTML 태그가 있는지 정규식으로 정확히 체크
+  const hasHtmlTags = (text: string): boolean => {
+    // <태그> 또는 </태그> 형식을 찾는 정규식 패턴
+    const htmlTagPattern = /<\/?[a-z][^>]*>/i;
+    return htmlTagPattern.test(text);
+  };
+
+  // item.message 안에 html 요소가 있는지 체크해서 있으면 HTML로 렌더링, 아니라면 마크다운 변환
+  const { messageContent, hasHtml } = useMemo(() => {
     if (currentMessage === undefined) {
-      return '';
+      return {
+        messageContent: '',
+        hasHtml: false,
+      };
+    }
+    if (hasHtmlTags(currentMessage.message)) {
+      return {
+        messageContent: currentMessage.message,
+        hasHtml: true,
+      };
     }
     const linkText = convertMarkdownLinksToJsx(currentMessage.message);
-    return convertMarkdownBoldToJsx(linkText);
-  })();
+    return {
+      messageContent: convertMarkdownBoldToJsx(linkText),
+      hasHtml: false,
+    };
+  }, [currentMessage]);
 
   const handleKeyPress = useCallback(
     (event) => {
@@ -328,7 +401,8 @@ const Presentation = function ({ messageList, show, turnOff, turnOn, instantEven
           messageList={messageList}
           memoReaction={memoReaction}
           currentMessage={currentMessage}
-          printMessage={printMessage}
+          hasHtml={hasHtml}
+          messageContent={messageContent}
           setFontSize={setFontSize}
         />
       )}
