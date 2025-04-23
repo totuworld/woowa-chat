@@ -584,14 +584,22 @@ async function messageListWithUniqueVoter({
         id: mv.id,
         voter: [],
         voted,
-        reaction: extractReaction({
-          reaction: docData.reaction,
-          isOwnerMember,
-          isShowAll,
-          voted,
-          UID: currentUserUid,
-          showOnlyAdmin: isOwnerMember && isPreview === false,
-        }),
+        reaction:
+          eventState === 'adminCheck' || eventState === 'showAll'
+            ? docData.reaction?.map((rmv) => ({
+                ...rmv,
+                userName: rmv.userName !== undefined && isOwnerMember && isPreview === false ? rmv.userName : undefined,
+                email:
+                  rmv.email !== undefined && (isOwnerMember || rmv.email === currentUserEmail) ? rmv.email : undefined,
+              }))
+            : extractReaction({
+                reaction: docData.reaction,
+                isOwnerMember,
+                isShowAll,
+                voted,
+                UID: currentUserUid,
+                showOnlyAdmin: isOwnerMember && isPreview === false,
+              }),
         message: docData.message,
         reply:
           docData.reply !== undefined

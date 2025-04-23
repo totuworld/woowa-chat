@@ -477,7 +477,12 @@ const InstantMessageItem = function ({
   }, [isQnA, isOwner, item]);
 
   const reactionPossible = ['question', 'reply'].includes(eventState);
-  const showReactionCount = isOwner || eventState === 'showAll' || eventState === 'question' || eventState === 'reply';
+  const showReactionCount =
+    isOwner ||
+    eventState === 'adminCheck' ||
+    eventState === 'showAll' ||
+    eventState === 'question' ||
+    eventState === 'reply';
 
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
