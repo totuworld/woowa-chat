@@ -689,12 +689,16 @@ const InstantMessageItem = function ({
                 <Tooltip
                   isDisabled={memoReaction.has('LIKE') === false}
                   fontSize="xs"
-                  label={item
-                    .reaction!.filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
-                    .map(
-                      (reaction, idx) =>
-                        `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
-                    )}
+                  label={
+                    item.reaction === undefined
+                      ? ''
+                      : item.reaction
+                          .filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
+                          .map(
+                            (reaction, idx) =>
+                              `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
+                          )
+                  }
                 >
                   <Button
                     isLoading={isSendingVote.LIKE}
@@ -731,12 +735,16 @@ const InstantMessageItem = function ({
                 <Tooltip
                   isDisabled={memoReaction.has('DOWN') === false}
                   fontSize="xs"
-                  label={item
-                    .reaction!.filter((reaction) => reaction.type === 'DOWN' && reaction.userName && reaction.email)
-                    .map(
-                      (reaction, idx) =>
-                        `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
-                    )}
+                  label={
+                    item.reaction === undefined
+                      ? ''
+                      : item.reaction
+                          .filter((reaction) => reaction.type === 'DOWN' && reaction.userName && reaction.email)
+                          .map(
+                            (reaction, idx) =>
+                              `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
+                          )
+                  }
                 >
                   <Button
                     isLoading={isSendingVote.DOWN}
