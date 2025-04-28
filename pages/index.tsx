@@ -13,9 +13,9 @@ const BUTTONS = [
     path: '/town-hall-meeting',
   },
   {
-    title: '공감톡톡',
-    description: '우아한형제들의 이모저모를 서로 진솔하게 대화하며 공감과 이해를 톡톡 쌓아가요',
-    path: '/list',
+    title: '부문/센터 타운홀',
+    description: '전사 방향성을 바탕으로 부문별 과제와 목표를 공유해요',
+    path: '/division-town-hall',
   },
   {
     title: '리더십 타운홀',
@@ -23,9 +23,9 @@ const BUTTONS = [
     path: '/leader_meeting',
   },
   {
-    title: '부문/센터 타운홀',
-    description: '전사 방향성을 바탕으로 부문별 과제와 목표를 공유해요',
-    path: '/division-town-hall',
+    title: '공감톡톡',
+    description: '우아한형제들의 이모저모를 서로 진솔하게 대화하며 공감과 이해를 톡톡 쌓아가요',
+    path: '/list',
   },
 ];
 
@@ -133,19 +133,35 @@ const IndexPage: NextPage = function () {
           <Box>{authInitialized ? loginBtn : logoutBtn}</Box>
         </Box>
         <Box
-          fontFamily="BMHANNA_11yrs"
-          fontSize={{ base: '40pt', md: '60pt', lg: '80pt' }}
+          display="flex"
+          flexDirection={{ base: 'column', md: 'row' }}
+          alignItems="center"
+          justifyContent="flex-start"
           mx="auto"
           mt="10"
-          textAlign="center"
           px="4"
+          gap={{ base: '4', md: '10' }}
         >
-          더 자주! 더 깊이! 소통해요~
+          {/* 왼쪽에 hero_img.png 이미지 */}
+          <Box flexShrink={0} display="flex" justifyContent="center" alignItems="center" mb={{ base: '4', md: '0' }}>
+            <img src="/hero_img.png" alt="Hero" style={{ width: '400px', height: 'auto' }} />
+          </Box>
+          {/* 오른쪽에 텍스트 */}
+          <Box
+            fontFamily="BMHANNA_11yrs"
+            fontSize={{ base: '20pt', md: '30pt', lg: '40pt' }}
+            textAlign={{ base: 'center', md: 'left' }}
+            flex={1}
+          >
+            더 자주! 더 깊이!
+            <br />
+            서로를 존중하며
+            <br />
+            열린 마음으로 소통해요~
+          </Box>
         </Box>
-        {/* 2px line */}
-        <Box height="2px" bgColor="black" mt={{ base: '20', '2xl': '40' }} />
         <Box
-          mt={{ base: '10', md: '10', xl: '20', '2xl': '60' }}
+          mt={{ base: '10' }}
           display="flex"
           justifyContent="space-between"
           px="10"
