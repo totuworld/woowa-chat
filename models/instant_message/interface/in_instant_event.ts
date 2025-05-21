@@ -23,4 +23,5 @@ export interface InInstantEvent {
   isLeadersOnly?: boolean;
   /** 댓글 수집 기간 여부 */
   collectReply?: boolean;
+  categories?: string[]; // Added to support dynamic categories
 }

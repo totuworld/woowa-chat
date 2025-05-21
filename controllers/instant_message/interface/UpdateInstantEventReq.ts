@@ -9,5 +9,6 @@ export interface UpdateInstantEventReq {
     bgImg?: string;
     isQnA?: boolean;
     isSecret?: boolean;
+    categories?: string[]; // Added to support dynamic categories
   };
 }

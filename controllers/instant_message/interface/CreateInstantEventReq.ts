@@ -10,5 +10,6 @@ export interface CreateInstantEventReq {
     isQnA?: boolean;
     isSecret?: boolean;
     townhallType?: 'division' | 'center';
+    categories?: string[]; // Added to support dynamic categories
   };
 }

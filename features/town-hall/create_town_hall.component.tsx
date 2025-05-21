@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Flex, FormControl, FormLabel, Input, Spacer } from '@chakra-ui/react';
+import { Box, Button, ButtonGroup, Flex, FormControl, FormLabel, Input, Spacer, Text } from '@chakra-ui/react';
 import { DatePicker } from 'antd';
 import { useRef, useState } from 'react';
 import moment, { Moment } from 'moment';
@@ -8,7 +8,7 @@ const { RangePicker } = DatePicker;
 
 const afterThreeWeekMoment = moment().add(3, 'week');
 
-const CreateTownhallEvent = function ({
+const CreateCompanyTownhallEvent = function ({
   isShow = true,
   mode,
   origin,
@@ -23,6 +23,7 @@ const CreateTownhallEvent = function ({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   }) => void;
   onClose: () => void;
   mode: 'CREATE' | 'MODIFY';
@@ -43,6 +44,7 @@ const CreateTownhallEvent = function ({
     /** 배경 이미지 */
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   };
 }) {
   const initialRef = useRef<any>();
@@ -54,6 +56,19 @@ const CreateTownhallEvent = function ({
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [isQnA] = useState(origin?.isQnA ?? false);
+  const [categories, setCategories] = useState<string[]>(origin?.categories ?? []);
+  const [newCategory, setNewCategory] = useState('');
+
+  const addCategory = () => {
+    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+      setCategories([...categories, newCategory.trim()]);
+      setNewCategory('');
+    }
+  };
+
+  const removeCategory = (category: string) => {
+    setCategories(categories.filter((cat) => cat !== category));
+  };
 
   async function extractData() {
     let titleImgUrl: string | null = null;
@@ -112,6 +127,7 @@ const CreateTownhallEvent = function ({
       titleImg,
       bgImg,
       isQnA,
+      categories,
     };
     return saveData;
   }
@@ -191,6 +207,25 @@ const CreateTownhallEvent = function ({
           }}
         />
       </FormControl>
+      <FormControl mt={4}>
+        <FormLabel>카테고리</FormLabel>
+        <Flex>
+          <Input placeholder="새 카테고리 입력" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+          <Button ml={2} onClick={addCategory} colorScheme="blue">
+            추가
+          </Button>
+        </Flex>
+        <Box mt={2}>
+          {categories.map((category) => (
+            <Flex key={category} alignItems="center" mb={1}>
+              <Text>{category}</Text>
+              <Button ml={2} size="xs" onClick={() => removeCategory(category)} colorScheme="red">
+                삭제
+              </Button>
+            </Flex>
+          ))}
+        </Box>
+      </FormControl>
       <Flex>
         <Spacer />
         <ButtonGroup variant="outline" spacing="6" mt="2">
@@ -198,7 +233,7 @@ const CreateTownhallEvent = function ({
             colorScheme="blue"
             onClick={() => {
               extractData().then((data) => {
-                onClickSave(data);
+                onClickSave({ ...data, categories });
               });
             }}
           >
@@ -217,4 +252,4 @@ const CreateTownhallEvent = function ({
   );
 };
 
-export default CreateTownhallEvent;
+export default CreateCompanyTownhallEvent;

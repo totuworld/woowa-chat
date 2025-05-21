@@ -8,7 +8,7 @@ import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { useAuth } from '@/contexts/auth_user.context';
 
 import 'antd/dist/antd.css';
-import CreateTownhallEvent from '@/features/town-hall/create_town_hall.component';
+import CreateCompanyTownhallEvent from '@/features/town-hall/create_town_hall.component';
 import TownhallClientService from '@/features/town-hall/townhall.client.service';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
 import TownhallUtil from '@/features/town-hall/townhall.util';
@@ -24,6 +24,7 @@ async function createEvent({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   title: string;
   desc?: string;
@@ -32,6 +33,7 @@ async function createEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }) {
   if (title.length <= 0) {
     return {
@@ -40,7 +42,16 @@ async function createEvent({
     };
   }
   try {
-    const resp = await TownhallClientService.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
+    const resp = await TownhallClientService.create({
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+      isQnA,
+      categories,
+    });
     return {
       result: true,
       instantEventId: resp.payload?.instantEventId,
@@ -70,6 +81,7 @@ const TownHallMeetingPage: NextPage = function () {
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   }) {
     const resp = await createEvent(data);
     if (resp.result === false) {
@@ -120,7 +132,7 @@ const TownHallMeetingPage: NextPage = function () {
             </Button>
           )}
         </Box>
-        <CreateTownhallEvent
+        <CreateCompanyTownhallEvent
           isShow={isOpen}
           mode="CREATE"
           onClose={onClose}

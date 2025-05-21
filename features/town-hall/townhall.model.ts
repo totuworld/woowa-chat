@@ -105,6 +105,7 @@ async function create({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   title: string;
   desc?: string;
@@ -113,6 +114,7 @@ async function create({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }) {
   const newInstantEventBody: {
     title: string;
@@ -123,12 +125,14 @@ async function create({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   } = {
     title,
     startDate,
     endDate,
     closed: false,
     isQnA: isQnA ?? false,
+    categories,
   };
   if (desc !== undefined) {
     newInstantEventBody.desc = desc.replace(/\n/g, '\\n');
@@ -169,6 +173,7 @@ async function update({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   instantEventId: string;
   title: string;
@@ -178,6 +183,7 @@ async function update({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }) {
   const updateInstantEventBody: {
     title: string;
@@ -188,12 +194,14 @@ async function update({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   } = {
     title,
     startDate,
     endDate,
     closed: false,
     isQnA: isQnA ?? false,
+    categories,
   };
   if (desc !== undefined) {
     updateInstantEventBody.desc = desc.replace(/\n/g, '\\n');

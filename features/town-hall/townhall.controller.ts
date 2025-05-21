@@ -42,8 +42,8 @@ async function create(req: NextApiRequest, res: NextApiResponse) {
   // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
   // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
 
-  const { title, desc, startDate, endDate, titleImg, bgImg, isQnA } = validateResp.data.body;
-  await TownhallModel.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
+  const { title, desc, startDate, endDate, titleImg, bgImg, isQnA, categories } = validateResp.data.body;
+  await TownhallModel.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA, categories });
   return res.status(201).end();
 }
 
@@ -61,8 +61,9 @@ async function update(req: NextApiRequest, res: NextApiResponse) {
   // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
   // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
 
-  const { title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA } = validateResp.data.body;
-  await TownhallModel.update({ title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA });
+  const { title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA, categories } =
+    validateResp.data.body;
+  await TownhallModel.update({ title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA, categories });
   return res.status(200).end();
 }
 

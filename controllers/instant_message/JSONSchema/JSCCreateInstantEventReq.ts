@@ -41,6 +41,12 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
         isSecret: {
           type: 'boolean',
         },
+        categories: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
       },
       required: ['title', 'startDate', 'endDate'],
       type: 'object',

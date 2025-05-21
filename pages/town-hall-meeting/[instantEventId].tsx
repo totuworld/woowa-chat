@@ -21,7 +21,7 @@ import TownhallUtil from '@/features/town-hall/townhall.util';
 import TownhallClientService from '@/features/town-hall/townhall.client.service';
 import TownhallHeaderSideMenu from '@/features/town-hall/header/side_menu.component';
 import TownhallInfo from '@/features/town-hall/header/info.component';
-import CreateTownhallEvent from '@/features/town-hall/create_town_hall.component';
+import CreateCompanyTownhallEvent from '@/features/town-hall/create_town_hall.component';
 import TownhallMessageList from '@/features/town-hall/message_list';
 import { TownhallServiceLayout } from '@/features/town-hall/service_layout';
 
@@ -34,6 +34,7 @@ async function updateEvent({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   instantEventId: string;
   title: string;
@@ -43,6 +44,7 @@ async function updateEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }) {
   if (title.length <= 0) {
     return {
@@ -60,6 +62,7 @@ async function updateEvent({
       titleImg,
       bgImg,
       isQnA,
+      categories,
     });
     return {
       result: true,
@@ -199,6 +202,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    categories?: string[];
   }) {
     const resp = await updateEvent(data);
     if (resp.result === false) {
@@ -245,7 +249,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             </Button>
           </Box>
         )}
-        <CreateTownhallEvent
+        <CreateCompanyTownhallEvent
           isShow={isOpen}
           mode="MODIFY"
           origin={{ ...instantEventInfo }}
@@ -329,8 +333,11 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
                       setMsgCategory(e.target.value);
                     }}
                   >
-                    <option value="가게통합">가게통합</option>
-                    <option value="포장서비스의 새로운 시작">포장서비스의 새로운 시작</option>
+                    {instantEventInfo?.categories?.map((category: string) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
                   </Select>
                 </Flex>
 

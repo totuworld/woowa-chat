@@ -12,6 +12,7 @@ async function create({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   title: string;
   desc?: string;
@@ -20,6 +21,7 @@ async function create({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/town-hall/create';
   try {
@@ -31,6 +33,7 @@ async function create({
       titleImg,
       bgImg,
       isQnA,
+      categories,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {
@@ -56,6 +59,7 @@ async function updateInfo({
   titleImg,
   bgImg,
   isQnA,
+  categories,
 }: {
   instantEventId: string;
   title: string;
@@ -65,6 +69,7 @@ async function updateInfo({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  categories?: string[];
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/town-hall/update';
   try {
@@ -77,6 +82,7 @@ async function updateInfo({
       titleImg,
       bgImg,
       isQnA,
+      categories,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {
