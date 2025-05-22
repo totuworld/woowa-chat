@@ -7,6 +7,30 @@ import {
 import { getBaseUrl } from '@/utils/get_base_url';
 import { requester, Resp } from '@/utils/requester';
 import { REACTION_TYPE } from './message_item/reaction_type';
+import CustomServerError from '@/controllers/custom_error/custom_server_error';
+
+async function getEventList() {
+  const url = '/api/instant-event.list';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  try {
+    const resp = await requester<InInstantEvent[]>({
+      option: {
+        url,
+        method: 'GET',
+        headers: {
+          authorization: token ?? '',
+        },
+      },
+    });
+    return resp;
+  } catch (err) {
+    console.error(err);
+    throw new CustomServerError({
+      statusCode: 500,
+      message: '이벤트 목록 조회 중 오류 발생',
+    });
+  }
+}
 
 async function create({
   title,
@@ -16,6 +40,7 @@ async function create({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   title: string;
   desc?: string;
@@ -24,6 +49,7 @@ async function create({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.create';
   try {
@@ -35,6 +61,7 @@ async function create({
       titleImg,
       bgImg,
       isQnA,
+      isAdminOnly,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {
@@ -45,9 +72,11 @@ async function create({
     });
     return resp;
   } catch (err) {
-    return {
-      status: 500,
-    };
+    console.error(err);
+    throw new CustomServerError({
+      statusCode: 500,
+      message: '이벤트 생성 중 오류 발생',
+    });
   }
 }
 
@@ -60,6 +89,7 @@ async function updateInfo({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   instantEventId: string;
   title: string;
@@ -69,6 +99,7 @@ async function updateInfo({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }): Promise<Resp<{ instantEventId: string }>> {
   const url = '/api/instant-event.update';
   try {
@@ -81,6 +112,7 @@ async function updateInfo({
       titleImg,
       bgImg,
       isQnA,
+      isAdminOnly,
     };
     const resp = await requester<{ instantEventId: string }>({
       option: {
@@ -732,6 +764,7 @@ const ChatClientService = {
   getMessageInfo,
   updateMessage,
   pinMessage,
+  getEventList,
 };
 
 export default ChatClientService;

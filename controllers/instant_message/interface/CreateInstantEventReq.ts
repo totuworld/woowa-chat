@@ -11,5 +11,6 @@ export interface CreateInstantEventReq {
     isSecret?: boolean;
     townhallType?: 'division' | 'center';
     categories?: string[]; // Added to support dynamic categories
+    isAdminOnly?: boolean;
   };
 }

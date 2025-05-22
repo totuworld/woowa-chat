@@ -47,6 +47,9 @@ const JSCCreateInstantEventReq: JSONSchema6 = {
             type: 'string',
           },
         },
+        isAdminOnly: {
+          type: 'boolean',
+        },
       },
       required: ['title', 'startDate', 'endDate'],
       type: 'object',

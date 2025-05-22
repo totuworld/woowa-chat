@@ -24,4 +24,6 @@ export interface InInstantEvent {
   /** 댓글 수집 기간 여부 */
   collectReply?: boolean;
   categories?: string[]; // Added to support dynamic categories
+  /** 관리자 전용 여부 */
+  isAdminOnly?: boolean;
 }

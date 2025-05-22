@@ -14,6 +14,12 @@ import {
   Tooltip,
   useDisclosure,
   useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, InfoOutlineIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
@@ -51,6 +57,7 @@ async function updateEvent({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   instantEventId: string;
   title: string;
@@ -60,6 +67,7 @@ async function updateEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -77,6 +85,7 @@ async function updateEvent({
       titleImg,
       bgImg,
       isQnA,
+      isAdminOnly,
     });
     return {
       result: true,
@@ -134,7 +143,7 @@ async function postMessage({
 
 const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventInfo }) {
   const toast = useToast();
-  const { query } = useRouter();
+  const { query, push } = useRouter();
   const { authUser, isOwner, token, signInWithGoogle } = useAuth();
   const [msgCategory, setMsgCategory] = useState<string | undefined>(undefined);
   const [message, updateMessage] = useState('');
@@ -149,6 +158,14 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
   console.log('eventState', eventState);
   // 주기적으로 데이터를 fetch할지 여부
   const [isAutoFetch, setIsAutoFetch] = useState(true);
+
+  const [isAdminOnlyModalOpen, setAdminOnlyModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (instantEventInfo?.isAdminOnly && !isOwner) {
+      setAdminOnlyModalOpen(true);
+    }
+  }, [instantEventInfo, isOwner]);
 
   useEffect(() => {
     if (eventState !== 'question') {
@@ -219,7 +236,7 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
       return resp;
     },
     {
-      enabled: token !== null,
+      enabled: token !== null && (!instantEventInfo?.isAdminOnly || isOwner),
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
@@ -563,6 +580,22 @@ const EventHomePage: NextPage<Props> = function ({ instantEventInfo: propsEventI
           instantEventId={instantEventInfo.instantEventId}
         />
       </Box>
+      <Modal isOpen={isAdminOnlyModalOpen} onClose={() => push('/list')} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>접근 불가</ModalHeader>
+          <ModalBody>이 이벤트는 관리자 전용입니다. 접근 권한이 없습니다.</ModalBody>
+          <ModalFooter>
+            <Button
+              onClick={() => {
+                push('/list');
+              }}
+            >
+              돌아가기
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </ServiceLayout>
   );
 };

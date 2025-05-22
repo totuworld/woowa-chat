@@ -44,8 +44,8 @@ async function create(req: NextApiRequest, res: NextApiResponse) {
   // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
   // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
 
-  const { title, desc, startDate, endDate, titleImg, bgImg, isQnA } = validateResp.data.body;
-  await ChatModel.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
+  const { title, desc, startDate, endDate, titleImg, bgImg, isQnA, isAdminOnly } = validateResp.data.body;
+  await ChatModel.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA, isAdminOnly });
   return res.status(201).end();
 }
 
@@ -63,8 +63,9 @@ async function update(req: NextApiRequest, res: NextApiResponse) {
   // TODO: header에서 authorization 확인해서 없으면 잘못된 요청
   // TODO: authorization에서 uid 알아내서 관리자 항목에 있는지 비교해야함.
 
-  const { title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA } = validateResp.data.body;
-  await ChatModel.update({ title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA });
+  const { title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA, isAdminOnly } =
+    validateResp.data.body;
+  await ChatModel.update({ title, desc, startDate, endDate, titleImg, bgImg, instantEventId, isQnA, isAdminOnly });
   return res.status(200).end();
 }
 
@@ -78,8 +79,13 @@ async function findAllEvent(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
+  const token = req.headers.authorization;
+  const uid = token ? await verifyFirebaseIdToken(token) : undefined;
+  if (uid === undefined) {
+    throw new BadReqError('authorization 누락');
+  }
   // TODO: page와 size를 넘겨서 paging 해야한다.
-  const instantEventInfo = await ChatModel.findAllEvent();
+  const instantEventInfo = await ChatModel.findAllEvent(uid);
   return res.status(200).json(instantEventInfo);
 }
 
@@ -93,9 +99,14 @@ async function findAllEventWithPage(req: NextApiRequest, res: NextApiResponse) {
   if (validateResp.result === false) {
     throw new BadReqError(validateResp.errorMessage);
   }
+
+  const token = req.headers.authorization;
+  const uid = token ? await verifyFirebaseIdToken(token) : undefined;
+
   const instantEventInfo = await ChatModel.findAllEventWithPage({
     page: validateResp.data.query.page,
     size: validateResp.data.query.size,
+    uid,
   });
   return res.status(200).json(instantEventInfo);
 }

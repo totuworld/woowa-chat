@@ -23,6 +23,7 @@ const CreateEvent = function ({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isAdminOnly?: boolean;
   }) => void;
   onClose: () => void;
   mode: 'CREATE' | 'MODIFY';
@@ -43,6 +44,7 @@ const CreateEvent = function ({
     /** 배경 이미지 */
     bgImg?: string;
     isQnA?: boolean;
+    isAdminOnly?: boolean;
   };
 }) {
   const initialRef = useRef<any>();
@@ -54,6 +56,7 @@ const CreateEvent = function ({
   const [titleImageSrc, setTitleImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [bgImageSrc, setBGImageSrc] = useState<string | ArrayBuffer | null>(null);
   const [isQnA, setIsQnA] = useState(origin?.isQnA ?? false);
+  const [isAdminOnly, setIsAdminOnly] = useState(origin?.isAdminOnly ?? false);
 
   async function extractData() {
     let titleImgUrl: string | null = null;
@@ -112,6 +115,7 @@ const CreateEvent = function ({
       titleImg,
       bgImg,
       isQnA,
+      isAdminOnly,
     };
     return saveData;
   }
@@ -164,6 +168,19 @@ const CreateEvent = function ({
           }}
         >
           Q&A로 전환(OO님만 보세요 미노출)
+        </Checkbox>
+      </FormControl>
+      <FormControl mt={4}>
+        {/* 관리자 전용 여부를 묻는 체크 박스. 기본값을 false */}
+        <FormLabel>관리자만 볼 수 있는 이벤트</FormLabel>
+        <Checkbox
+          size="md"
+          isChecked={isAdminOnly}
+          onChange={() => {
+            setIsAdminOnly((prev) => !prev);
+          }}
+        >
+          관리자만 볼 수 있는 이벤트로 전환
         </Checkbox>
       </FormControl>
       <FormControl mt={4}>

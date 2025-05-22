@@ -22,15 +22,24 @@ const INSTANT_MESSAGE = 'messages';
 
 const OWNER_MEMBER_COLLECTION = 'owner_members';
 
-async function findAllEvent(): Promise<InInstantEvent[]> {
+async function findAllEvent(uid: string): Promise<InInstantEvent[]> {
   const eventColRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).orderBy('createCount', 'desc');
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
-    const eventListSnap = await transaction.get(eventColRef);
+    const ownerDoc = await transaction.get(
+      FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(uid),
+    );
+    const isAdmin = ownerDoc.exists;
 
+    const eventListSnap = await transaction.get(eventColRef);
     const data = eventListSnap.docs;
 
     const allEvent: InInstantEvent[] = data.reduce((acc: InInstantEvent[], doc) => {
       const innerData = doc.data() as InInstantEvent;
+
+      // 관리자 전용 이벤트 필터링
+      if (!isAdmin && innerData.isAdminOnly) {
+        return acc;
+      }
 
       // 상태가 showAll이면 제거한다
       if (
@@ -52,44 +61,38 @@ async function findAllEvent(): Promise<InInstantEvent[]> {
   return result;
 }
 
-async function findAllEventWithPage({ page = 1, size = 10 }: { page?: number; size?: number }) {
+async function findAllEventWithPage({ page = 1, size = 10, uid }: { page?: number; size?: number; uid?: string }) {
   const collectionInfoRef = FirebaseAdmin.getInstance().Firestore.doc(INSTANT_EVENT_INFO);
   const result = await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
     const collectionInfoDoc = await transaction.get(collectionInfoRef);
-    // 전체 갯수를 조회
     const { count = 0 } = collectionInfoDoc.data() as { count?: number };
     const totalElements = count !== 0 ? count - 1 : 0;
-    const remains = totalElements % size;
-    const totalPages = (totalElements - remains) / size + (remains > 0 ? 1 : 0);
-    // 전체 갯수에서 page 숫자만큼 숫자를 미뤄서 검색한다.
-    const startAt = totalElements - (page - 1) * size;
-    if (startAt < 0) {
-      return {
-        totalElements,
-        totalPages: 0,
-        page,
-        size,
-        content: [],
-      };
-    }
-    const colRef = FirebaseAdmin.getInstance()
+
+    const ownerDoc = uid
+      ? await transaction.get(FirebaseAdmin.getInstance().Firestore.collection(OWNER_MEMBER_COLLECTION).doc(uid))
+      : null;
+    const isAdmin = ownerDoc?.exists ?? false;
+
+    const eventColRef = FirebaseAdmin.getInstance()
       .Firestore.collection(INSTANT_EVENT)
       .orderBy('createCount', 'desc')
-      .startAt(startAt)
+      .offset((page - 1) * size)
       .limit(size);
-    const eventListSnap = await transaction.get(colRef);
 
+    const eventListSnap = await transaction.get(eventColRef);
     const data = eventListSnap.docs;
 
-    const allEvent: InInstantEvent[] = data.map((doc) => {
+    const allEvent: InInstantEvent[] = data.reduce((acc: InInstantEvent[], doc) => {
       const innerData = doc.data() as InInstantEvent;
-      return { ...innerData, instantEventId: doc.id };
-    });
+
+      if (isAdmin || !innerData.isAdminOnly) {
+        acc.push({ ...innerData, instantEventId: doc.id });
+      }
+      return acc;
+    }, []);
+
     return {
       totalElements,
-      totalPages,
-      page,
-      size,
       content: allEvent,
     };
   });
@@ -105,6 +108,7 @@ async function create({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   title: string;
   desc?: string;
@@ -113,6 +117,7 @@ async function create({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }) {
   const newInstantEventBody: {
     title: string;
@@ -123,12 +128,14 @@ async function create({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isAdminOnly?: boolean;
   } = {
     title,
     startDate,
     endDate,
     closed: false,
     isQnA: isQnA ?? false,
+    isAdminOnly: isAdminOnly ?? false,
   };
   if (desc !== undefined) {
     newInstantEventBody.desc = desc.replace(/\n/g, '\\n');
@@ -169,6 +176,7 @@ async function update({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   instantEventId: string;
   title: string;
@@ -178,6 +186,7 @@ async function update({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }) {
   const updateInstantEventBody: {
     title: string;
@@ -188,6 +197,7 @@ async function update({
     titleImg?: string;
     bgImg?: string;
     isQnA?: boolean;
+    isAdminOnly?: boolean;
   } = {
     title,
     startDate,
@@ -203,6 +213,9 @@ async function update({
   }
   if (bgImg !== undefined) {
     updateInstantEventBody.bgImg = bgImg;
+  }
+  if (isAdminOnly !== undefined) {
+    updateInstantEventBody.isAdminOnly = isAdminOnly;
   }
   const eventRef = FirebaseAdmin.getInstance().Firestore.collection(INSTANT_EVENT).doc(instantEventId);
   await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
@@ -528,6 +541,12 @@ async function messageListWithUniqueVoter({
     const colDocs = await transaction.get(colRef);
     const ownerMemberDoc = await transaction.get(ownerMemberRef);
     const eventInfo = eventDoc.data() as InInstantEvent;
+
+    // 관리자 전용 이벤트 필터링
+    if (eventInfo.isAdminOnly && !ownerMemberDoc.exists) {
+      throw new CustomServerError({ statusCode: 403, message: '관리자 전용 이벤트입니다.' });
+    }
+
     const eventState = InstantEventUtil.calEventState(eventInfo);
     const isShowAll = eventState === 'showAll';
     const isOwnerMember = ownerMemberDoc.exists;
@@ -567,7 +586,6 @@ async function messageListWithUniqueVoter({
       ) {
         return null;
       }
-      // 운영자라도, preview 모드일때는 비공개 메시지 노출하지 않음
       if (
         isOwnerMember === true &&
         docData.showOnlyAdmin !== undefined &&
@@ -648,29 +666,6 @@ async function messageListWithUniqueVoter({
       return returnData;
     });
     const filteredData = originData.filter((fv): fv is InInstantEventMessage => fv !== null);
-    // T상태가 전체 공개 혹은 preview flag가 있을 때 sort 룰 적용.
-    // 공감해요 리액션이 많은걸 먼저 노출. 리액션 숫자 동률이면 댓글 많은 순. 댓글 숫자도 동률이면 나중에 등록한 질문 순
-    // if (isShowAll || (isPreview && isOwnerMember)) {
-    //   const sortedData = filteredData.sort((a, b) => {
-    //     const aReaction =
-    //       a.reaction === undefined || a.reaction.length === 0
-    //         ? 0
-    //         : a.reaction.filter((fv) => fv.type === 'LIKE').length;
-    //     const bReaction =
-    //       b.reaction === undefined || b.reaction.length === 0
-    //         ? 0
-    //         : b.reaction.filter((fv) => fv.type === 'LIKE').length;
-    //     return bReaction - aReaction;
-    //   });
-    //   const mapData = sortedData.map((mv) => ({
-    //     ...mv,
-    //     sortWeight: 0,
-    //   }));
-    //   return {
-    //     list: mapData,
-    //     uniqueVoterCount: voterSet.size,
-    //   };
-    // }
     return {
       list: filteredData,
       uniqueVoterCount: voterSet.size,

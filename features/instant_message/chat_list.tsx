@@ -2,7 +2,6 @@ import { Box, Button, Flex, Spacer, useDisclosure, useToast, Text, Badge, Spinne
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
-import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/auth_user.context';
 import 'antd/dist/antd.css';
@@ -20,6 +19,7 @@ async function createEvent({
   titleImg,
   bgImg,
   isQnA,
+  isAdminOnly,
 }: {
   title: string;
   desc?: string;
@@ -28,6 +28,7 @@ async function createEvent({
   titleImg?: string;
   bgImg?: string;
   isQnA?: boolean;
+  isAdminOnly?: boolean;
 }) {
   if (title.length <= 0) {
     return {
@@ -36,7 +37,16 @@ async function createEvent({
     };
   }
   try {
-    const resp = await ChatClientService.create({ title, desc, startDate, endDate, titleImg, bgImg, isQnA });
+    const resp = await ChatClientService.create({
+      title,
+      desc,
+      startDate,
+      endDate,
+      titleImg,
+      bgImg,
+      isQnA,
+      isAdminOnly,
+    });
     return {
       result: true,
       instantEventId: resp.payload?.instantEventId,
@@ -51,7 +61,7 @@ async function createEvent({
 }
 
 const ChatList = function () {
-  const { isOwner } = useAuth();
+  const { isOwner, authUser } = useAuth();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
@@ -64,15 +74,17 @@ const ChatList = function () {
 
   const { status } = useQuery(
     queryKey,
-    // eslint-disable-next-line no-return-await
-    async () => await axios.get<InInstantEvent[]>('/api/instant-event.list'),
+    async () => {
+      const resp = await ChatClientService.getEventList();
+      return resp.payload;
+    },
     {
-      enabled: true,
+      enabled: authUser !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
-        if (data.status === 200 && data.data) {
-          setEventList(data.data);
+        if (data) {
+          setEventList(data);
         }
       },
     },
@@ -123,7 +135,7 @@ const ChatList = function () {
         mode="CREATE"
         onClose={onClose}
         onClickSave={(saveData) => {
-          create(saveData).then(() => {
+          create({ ...saveData }).then(() => {
             onClose();
           });
         }}
@@ -146,6 +158,11 @@ const ChatList = function () {
               mb="2"
             >
               <Badge colorScheme={badgeColor}>{InstantEventUtil.EventStateTOKorText[eventState]}</Badge>
+              {eventInfo.isAdminOnly === true && (
+                <Badge colorScheme="purple" ml="2">
+                  관리자 전용
+                </Badge>
+              )}
               <Text style={{ marginLeft: '10px' }}>{eventInfo.title}</Text>
               <Spacer />
               <Button

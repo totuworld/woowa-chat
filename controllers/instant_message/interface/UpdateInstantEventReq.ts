@@ -10,5 +10,6 @@ export interface UpdateInstantEventReq {
     isQnA?: boolean;
     isSecret?: boolean;
     categories?: string[]; // Added to support dynamic categories
+    isAdminOnly?: boolean;
   };
 }

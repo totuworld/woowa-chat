@@ -1,4 +1,4 @@
-import { Box, Center, Image, Text } from '@chakra-ui/react';
+import { Badge, Box, Center, Image, Text } from '@chakra-ui/react';
 import moment from 'moment';
 import { useMemo } from 'react';
 import { InInstantEvent } from '@/models/instant_message/interface/in_instant_event';
@@ -143,6 +143,7 @@ const InstantInfo = function ({ instantEventInfo, eventState, isPreview, uniqueV
     <>
       <Image src={instantEventInfo.titleImg ?? DEFAULT_IMG} objectFit="cover" />
       <Box px="2" pb="2">
+        {instantEventInfo.isAdminOnly === true && <Badge colorScheme="purple">관리자 전용</Badge>}
         <Text fontSize="lg">{boldTitle}</Text>
         {hasHtml ? (
           <Box
