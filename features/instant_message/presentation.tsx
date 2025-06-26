@@ -202,53 +202,56 @@ const PresentationView = function ({
         <Box
           className="html-content"
           sx={{
+            maxHeight: '80vh', // 스크롤 영역 최대 높이
+            overflowY: 'auto', // 세로 스크롤 활성화
             '& p': {
-              minHeight: '1.5em', // 빈 p 태그에 최소 높이 적용
-              marginBottom: '0.5em', // 단락 간 간격 추가
+              minHeight: '1.5em',
+              marginBottom: '0.5em',
             },
             '& p:empty': {
-              height: '1.5em', // 완전히 빈 p 태그에 명시적 높이 설정
-              display: 'block', // 블록 요소로 처리
+              height: '1.5em',
+              display: 'block',
             },
             '& p:empty::after': {
-              content: '"\u00a0"', // 빈 p 태그에 비파괴 공백 추가
-              visibility: 'hidden', // 텍스트는 숨김 처리
+              content: '"\u00a0"',
+              visibility: 'hidden',
             },
             '& ul, & ol': {
-              paddingLeft: '1.5em', // 목록 왼쪽 여백 설정 (기본값보다 작게)
+              paddingLeft: '1.5em',
               marginTop: '0.5em',
               marginBottom: '0.5em',
             },
             '& li': {
-              marginBottom: '0.25em', // 목록 항목 간 간격
-              display: 'flex', // 플렉스 박스로 변경
-              alignItems: 'baseline', // 베이스라인 정렬
+              marginBottom: '0.25em',
+              display: 'flex',
+              alignItems: 'baseline',
             },
             '& li::before': {
-              content: '"\u2022"', // 기본 불렛
-              marginRight: '0.5em', // 왼쪽 여백
-              display: 'inline-block', // 인라인 블록으로 설정
+              content: '"\u2022"',
+              marginRight: '0.5em',
+              display: 'inline-block',
             },
             '& ul': {
-              listStyleType: 'none', // 기본 마커 제거
-              paddingLeft: '0.5em', // 왼쪽 여백 줄임
+              listStyleType: 'none',
+              paddingLeft: '0.5em',
             },
             '& ol': {
-              counterReset: 'item', // 카운터 초기화
-              listStyleType: 'none', // 기본 마커 제거
-              paddingLeft: '0.5em', // 왼쪽 여백 줄임
+              counterReset: 'item',
+              listStyleType: 'none',
+              paddingLeft: '0.5em',
             },
             '& ol > li::before': {
-              counterIncrement: 'item', // 항목마다 카운터 증가
-              content: 'counter(item) "."', // 숫자.
-              marginRight: '0.5em', // 왼쪽 여백
+              counterIncrement: 'item',
+              content: 'counter(item) "."',
+              marginRight: '0.5em',
             },
           }}
           dangerouslySetInnerHTML={{ __html: messageContent as string }}
         />
       ) : (
         <Box
-          overflowY="scroll"
+          maxHeight="500px"
+          overflowY="auto"
           style={{
             scrollbarWidth: 'none',
           }}
