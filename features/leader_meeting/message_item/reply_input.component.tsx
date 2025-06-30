@@ -1,9 +1,9 @@
-import { Avatar, Box, Button, Input, Textarea, useToast } from '@chakra-ui/react';
+import { Avatar, Box, Button, Input, useToast } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
-import ResizeTextarea from 'react-textarea-autosize';
 import ChatClientService from '../chat.client.service';
 import ColorPalette from '@/styles/color_palette';
+import TiptapEditor from '@/components/TiptapEditor';
 
 import './reply_input.module.css';
 import { useAuth } from '@/contexts/auth_user.context';
@@ -43,21 +43,11 @@ const InstantMessageItemReplyInput = function ({ locked, instantEventId, message
           <Avatar size="xs" src="/profile_anonymous.png" mr="2" />
         </Box>
         <Box borderRadius="md" width="full" bg="gray.100" mr="2">
-          <Textarea
-            disabled={locked}
-            border="none"
-            boxShadow="none !important"
-            resize="none"
-            minH="unset"
-            minRows={1}
-            overflow="hidden"
-            fontSize="xs"
-            as={ResizeTextarea}
-            placeholder="댓글을 입력하세요..."
+          <TiptapEditor
             value={message}
-            onChange={(e) => {
-              updateMessage(e.target.value);
-            }}
+            onChange={updateMessage}
+            placeholder="댓글을 입력하세요..."
+            minHeight="3.5rem"
           />
         </Box>
         <Button

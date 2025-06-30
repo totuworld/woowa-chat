@@ -22,6 +22,13 @@ import ChatClientService from '../chat.client.service';
 import ColorPalette from '@/styles/color_palette';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 
+// HTML 태그가 있는지 정규식으로 체크
+const hasHtmlTags = (text: string): boolean => {
+  // <태그> 또는 </태그> 형식을 찾는 정규식 패턴
+  const htmlTagPattern = /<\/?[a-z][^>]*>/i;
+  return htmlTagPattern.test(text);
+};
+
 function convertAsterisksToJSX(text: (string | JSX.Element)[]): (string | JSX.Element)[] {
   // 배열의 각 요소를 Array.map 메서드를 사용하여 반복하고, 콜백 함수를 전달합니다.
   const newText = text
@@ -436,11 +443,61 @@ const InstantEventMessageReply = function ({
               </Flex>
             </>
           )}
-          {isEditMode === false && (
-            <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
-              {printReply}
-            </Text>
-          )}
+          {isEditMode === false &&
+            (hasHtmlTags(replyItem.reply) ? (
+              <Box
+                className="html-content"
+                fontSize="sm"
+                sx={{
+                  '& p': {
+                    minHeight: '1.5em',
+                    marginBottom: '0.5em',
+                  },
+                  '& p:empty': {
+                    height: '1.5em',
+                    display: 'block',
+                  },
+                  '& p:empty::after': {
+                    content: '"\u00a0"',
+                    visibility: 'hidden',
+                  },
+                  '& ul, & ol': {
+                    paddingLeft: '1.5em',
+                    marginTop: '0.5em',
+                    marginBottom: '0.5em',
+                  },
+                  '& li': {
+                    marginBottom: '0.25em',
+                    display: 'flex',
+                    alignItems: 'baseline',
+                  },
+                  '& li::before': {
+                    content: '"\u2022"',
+                    marginRight: '0.5em',
+                    display: 'inline-block',
+                  },
+                  '& ul': {
+                    listStyleType: 'none',
+                    paddingLeft: '0.5em',
+                  },
+                  '& ol': {
+                    counterReset: 'item',
+                    listStyleType: 'none',
+                    paddingLeft: '0.5em',
+                  },
+                  '& ol > li::before': {
+                    counterIncrement: 'item',
+                    content: 'counter(item) "."',
+                    marginRight: '0.5em',
+                  },
+                }}
+                dangerouslySetInnerHTML={{ __html: replyItem.reply as string }}
+              />
+            ) : (
+              <Text whiteSpace="pre-line" fontSize={fontSize} color="black">
+                {printReply}
+              </Text>
+            ))}
         </Box>
       </Box>
     </Box>
