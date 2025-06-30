@@ -24,6 +24,7 @@ import TownhallInfo from '@/features/division-town-hall/header/info.component';
 import CreateTownhallEvent from '@/features/division-town-hall/create_town_hall.component';
 import DivMeetingMessageList from '@/features/division-town-hall/message_list';
 import { DivMeetingServiceLayout } from '@/features/division-town-hall/service_layout';
+import Presentation from '@/features/instant_message/presentation';
 
 async function updateEvent({
   instantEventId,
@@ -134,6 +135,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   // 접속한 사용자가 만든 이벤트인지 확인한다
   const isCreator = authUser?.uid === instantEventInfo?.createId;
   const eventState = TownhallUtil.calEventState(instantEventInfo);
+  const [showPresentation, setShowPresentation] = useState(false);
   console.log('eventState', eventState);
 
   const sortedMessageList = useMemo(() => {
@@ -302,6 +304,17 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             uniqueVoterCount={eventState === 'showAll' || eventState === 'locked' ? uniqueVoterCount : undefined}
           />
         </Box>
+        {authUser !== null && sortedMessageList.length > 0 && eventState === 'locked' && (
+          <Box>
+            <Button
+              onClick={() => {
+                setShowPresentation((prev) => !prev);
+              }}
+            >
+              프리젠테이션 모드
+            </Button>
+          </Box>
+        )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="2">
             {!editorActive ? (
@@ -425,6 +438,17 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             }}
           />
         )}
+        <Presentation
+          messageList={sortedMessageList.filter((fv) => fv.deny === undefined || fv.deny === false)}
+          show={showPresentation}
+          turnOff={() => {
+            setShowPresentation(false);
+          }}
+          turnOn={() => {
+            setShowPresentation(true);
+          }}
+          instantEventId={instantEventInfo.instantEventId}
+        />
       </Box>
     </DivMeetingServiceLayout>
   );

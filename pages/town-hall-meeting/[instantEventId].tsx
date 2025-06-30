@@ -24,6 +24,7 @@ import TownhallInfo from '@/features/town-hall/header/info.component';
 import CreateCompanyTownhallEvent from '@/features/town-hall/create_town_hall.component';
 import TownhallMessageList from '@/features/town-hall/message_list';
 import { TownhallServiceLayout } from '@/features/town-hall/service_layout';
+import Presentation from '@/features/instant_message/presentation';
 
 async function updateEvent({
   instantEventId,
@@ -131,6 +132,7 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
   const [sortRule] = useState<'latest' | 'most_liked' | 'onlyShowAdmin'>('latest');
   const [uniqueVoterCount, setUniqueVoterCount] = useState(0);
   const [editorActive, setEditorActive] = useState(false);
+  const [showPresentation, setShowPresentation] = useState(false);
   const eventState = TownhallUtil.calEventState(instantEventInfo);
   console.log('eventState', eventState);
 
@@ -302,6 +304,17 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             uniqueVoterCount={eventState === 'showAll' || eventState === 'locked' ? uniqueVoterCount : undefined}
           />
         </Box>
+        {authUser !== null && sortedMessageList.length > 0 && eventState === 'locked' && (
+          <Box>
+            <Button
+              onClick={() => {
+                setShowPresentation((prev) => !prev);
+              }}
+            >
+              프리젠테이션 모드
+            </Button>
+          </Box>
+        )}
         {eventState === 'question' && authUser !== null && (
           <Box borderWidth="1px" borderRadius="lg" p="2" overflow="hidden" bg="white" mt="2">
             {!editorActive ? (
@@ -446,6 +459,17 @@ const TownhallHomePage: NextPage<Props> = function ({ instantEventInfo: propsEve
             }}
           />
         )}
+        <Presentation
+          messageList={sortedMessageList.filter((fv) => fv.deny === undefined || fv.deny === false)}
+          show={showPresentation}
+          turnOff={() => {
+            setShowPresentation(false);
+          }}
+          turnOn={() => {
+            setShowPresentation(true);
+          }}
+          instantEventId={instantEventInfo.instantEventId}
+        />
       </Box>
     </TownhallServiceLayout>
   );
