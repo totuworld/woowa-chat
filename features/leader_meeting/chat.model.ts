@@ -575,6 +575,8 @@ async function messageListWithUniqueVoter({
       }
       const returnData = {
         ...docData,
+        userName: docData.userName && isOwnerMember ? docData.userName : undefined,
+        email: docData.email && (isOwnerMember || isMyMessage) ? docData.email : undefined,
         id: mv.id,
         voter: [],
         voted,
@@ -585,9 +587,24 @@ async function messageListWithUniqueVoter({
             ? docData.reply
                 .map((replyMv) => {
                   if (replyMv.deny !== undefined && replyMv.deny) {
-                    return { ...replyMv, reply: '비공개 처리된 메시지입니다.' };
+                    return {
+                      ...replyMv,
+                      reply: '비공개 처리된 메시지입니다.',
+                      userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                      email:
+                        replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
+                          ? replyMv.email
+                          : undefined,
+                    };
                   }
-                  return { ...replyMv };
+                  return {
+                    ...replyMv,
+                    userName: replyMv.userName && isOwnerMember ? replyMv.userName : undefined,
+                    email:
+                      replyMv.email && (isOwnerMember || replyMv.email === currentUserEmail)
+                        ? replyMv.email
+                        : undefined,
+                  };
                 })
                 .sort((a, b) => {
                   const isAOwnerCreate = a.createByOwner !== undefined && a.createByOwner === true;
