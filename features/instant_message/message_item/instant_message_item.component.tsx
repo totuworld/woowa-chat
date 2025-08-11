@@ -694,7 +694,7 @@ const InstantMessageItem = function ({
                       }
                     }}
                   >
-                    공감 {showReactionCount ? memoReaction.get('LIKE') : ''}
+                    Up {showReactionCount ? memoReaction.get('LIKE') : ''}
                   </Button>
                 </Tooltip>
               </GridItem>
