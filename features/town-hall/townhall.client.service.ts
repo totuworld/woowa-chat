@@ -3,6 +3,7 @@ import { InInstantEvent } from '@/models/instant_message/interface/in_instant_ev
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { getBaseUrl } from '@/utils/get_base_url';
 import { requester, Resp } from '@/utils/requester';
+import { REACTION_TYPE } from './message_item/reaction_type';
 
 async function create({
   title,
@@ -624,6 +625,47 @@ async function pinMessage({
   }
 }
 
+async function reactionMessageInfo({
+  instantEventId,
+  messageId,
+  reaction,
+}: {
+  instantEventId: string;
+  messageId: string;
+  reaction: { isAdd: true; type: REACTION_TYPE } | { isAdd: false };
+}): Promise<Resp<InInstantEventMessage>> {
+  const url = '/api/town-hall/messages.reaction';
+  const token = await FirebaseAuthClient.getInstance().Auth.currentUser?.getIdToken();
+  if (token === undefined) {
+    return {
+      status: 401,
+      error: {
+        statusCode: 401,
+        data: {
+          message: '토큰이 존재하지 않습니다.',
+        },
+      },
+    };
+  }
+  try {
+    const resp = await requester<InInstantEventMessage>({
+      option: {
+        url,
+        method: 'PUT',
+        headers: {
+          authorization: token,
+        },
+        data: { instantEventId, messageId, reaction },
+      },
+    });
+    return resp;
+  } catch (err) {
+    return {
+      status: 500,
+    };
+  }
+}
+
 const TownhallClientService = {
   create,
   updateInfo,
@@ -646,6 +688,7 @@ const TownhallClientService = {
   getMessageInfo,
   updateMessage,
   pinMessage,
+  reactionMessageInfo,
 };
 
 export default TownhallClientService;

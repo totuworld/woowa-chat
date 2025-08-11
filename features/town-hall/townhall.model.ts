@@ -15,6 +15,7 @@ import {
 import { InOwnerMember } from '../owner_member/model/in_owner_member';
 import { PRIVILEGE_NO } from '../owner_member/model/in_owner_privilege';
 import TownhallUtil from './townhall.util';
+import { REACTION_TYPE } from './message_item/reaction_type';
 
 const EVENT = 'townhall';
 const EVENT_INFO = 'collection_info/townhall';
@@ -1249,6 +1250,69 @@ async function updateReply({
   });
 }
 
+async function reactionMessage({
+  instantEventId,
+  messageId,
+  voter,
+  reaction,
+  userName,
+  email,
+}: {
+  instantEventId: string;
+  messageId: string;
+  voter: string;
+  reaction: { type: REACTION_TYPE };
+  userName: string;
+  email: string;
+}) {
+  const eventRef = FirebaseAdmin.getInstance().Firestore.collection(EVENT).doc(instantEventId);
+  const messageRef = eventRef.collection(MESSAGE).doc(messageId);
+  await FirebaseAdmin.getInstance().Firestore.runTransaction(async (transaction) => {
+    const eventDoc = await transaction.get(eventRef);
+    const messageDoc = await transaction.get(messageRef);
+    if (eventDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 이벤트' });
+    }
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지 않는 메시지' });
+    }
+    const eventInfo = eventDoc.data() as InInstantEvent;
+    // 이미 폐쇄된 이벤트인가?
+    if (eventInfo.closed !== undefined && eventInfo.closed) {
+      throw new CustomServerError({ statusCode: 400, message: '종료된 이벤트' });
+    }
+    // 잠긴 이벤트인가?
+    if (eventInfo.locked !== undefined && eventInfo.locked) {
+      throw new CustomServerError({ statusCode: 400, message: '잠긴 이벤트' });
+    }
+    const messageData = messageDoc.data() as InInstantEventMessageServer;
+    const reactionList = (() => {
+      // 리액션 정보 없으면 무조건 추가
+      if (messageData.reaction === undefined) {
+        return [{ voter, type: reaction.type, userName, email }];
+      }
+      // 기존 리액션에서 현재 사용자가 추가한 리액션 찾기
+      const findAlreadyVotedIndex = messageData.reaction.findIndex((fv) => fv.voter === voter);
+      if (findAlreadyVotedIndex < 0) {
+        // 없으면 추가
+        return [...messageData.reaction, { voter, type: reaction.type, userName, email }];
+      }
+      // 이미 동일한 타입의 리액션이면 제거
+      if (messageData.reaction[findAlreadyVotedIndex].type === reaction.type) {
+        return messageData.reaction.filter((fv) => fv.voter !== voter);
+      }
+      // 다른 타입의 리액션이면 교체
+      return messageData.reaction.map((fv) => {
+        if (fv.voter === voter) {
+          return { voter, type: reaction.type, userName, email };
+        }
+        return fv;
+      });
+    })();
+    await transaction.update(messageRef, { reaction: reactionList });
+  });
+}
+
 const TownhallModel = {
   findAllEvent,
   findAllEventWithPage,
@@ -1277,6 +1341,7 @@ const TownhallModel = {
   updateMessage,
   pinMessage,
   updateReply,
+  reactionMessage,
 };
 
 export default TownhallModel;

@@ -27,6 +27,8 @@ import JSCPinInstantEventMessageReq from '@/controllers/instant_message/JSONSche
 import JSCDeleteInstantEventMessageReplyReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReplyReq';
 import JSCDeleteInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCDeleteInstantEventMessageReq';
 import JSCUpdateReplyReq from '@/controllers/instant_message/JSONSchema/JSCUpdateReplyReq';
+import JSCReactionInstantEventMessageReq from '@/controllers/instant_message/JSONSchema/JSCReactionInstantEventMessageReq';
+import { REACTION_TYPE } from './message_item/reaction_type';
 
 async function create(req: NextApiRequest, res: NextApiResponse) {
   const validateResp = validateParamWithData<CreateInstantEventReq>(
@@ -508,6 +510,34 @@ async function pinMessage(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json(result);
 }
 
+async function reactionMessage(req: NextApiRequest, res: NextApiResponse) {
+  const token = checkEmptyToken(req.headers.authorization);
+  const senderUid = await verifyFirebaseIdToken(token);
+  const validateResp = validateParamWithData<{
+    body: {
+      instantEventId: string;
+      messageId: string;
+      reaction: { type: REACTION_TYPE };
+    };
+  }>(
+    {
+      body: req.body,
+    },
+    JSCReactionInstantEventMessageReq,
+  );
+  if (validateResp.result === false) {
+    throw new BadReqError(validateResp.errorMessage);
+  }
+  const userInfoByAuth = await FirebaseAdmin.getInstance().Auth.getUser(senderUid);
+  await TownhallModel.reactionMessage({
+    ...validateResp.data.body,
+    voter: senderUid,
+    userName: userInfoByAuth.displayName!,
+    email: userInfoByAuth.email!,
+  });
+  return res.status(200).end();
+}
+
 async function voteMessage(req: NextApiRequest, res: NextApiResponse) {
   const token = checkEmptyToken(req.headers.authorization);
   const senderUid = await verifyFirebaseIdToken(token);
@@ -652,6 +682,7 @@ const TownhallCtrl = {
   updateBody,
   updateReply,
   pinMessage,
+  reactionMessage,
 };
 
 export default TownhallCtrl;

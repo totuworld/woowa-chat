@@ -2,6 +2,7 @@ import {
   Badge,
   Box,
   Button,
+  Divider,
   Flex,
   GridItem,
   IconButton,
@@ -12,11 +13,12 @@ import {
   MenuList,
   Spacer,
   Text,
+  Tooltip,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { DateTime } from 'luxon';
 import { InInstantEventMessage } from '@/models/instant_message/interface/in_instant_event_message';
 import { useAuth } from '@/contexts/auth_user.context';
@@ -24,6 +26,11 @@ import ExtraMenuIcon from '@/components/extra_menu_icon';
 import TownhallClientService from '../townhall.client.service';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 import TiptapEditor from '@/components/TiptapEditor';
+import TownhallMessageItemReplyInput from './reply_input.component';
+import TownhallEventMessageReply from './reply.component';
+import ReplyIcon from '@/components/reply_icon';
+import { REACTION_TYPE } from './reaction_type';
+import IconHeart from './icon_heart';
 
 interface Props {
   instantEventId: string;
@@ -150,28 +157,84 @@ const TownhallMessageItem = function ({
 }: Props) {
   const { authUser, isOwner, hasPrivilege } = useAuth();
   const toast = useToast();
-
+  const [toggleReplyInput, setToggleReplyInput] = useState(false);
   const [sortWeight, setSortWeight] = useState<number | undefined>(item.sortWeight);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [message, updateMessage] = useState(item.message);
+  const [isSendingVote, setSendingVote] = useState({
+    LIKE: false,
+    DOWN: false,
+    CARE: false,
+    HAHA: false,
+    WOW: false,
+    SAD: false,
+    ANGRY: false,
+  });
 
-  function turnOnEditer() {
+  const memoReaction = useMemo(() => {
+    if (item.reaction === undefined) return new Map<REACTION_TYPE, number>();
+    return item.reaction.reduce((acc: Map<REACTION_TYPE, number>, cur) => {
+      if (acc.has(cur.type) === false) {
+        acc.set(cur.type, 1);
+        return acc;
+      }
+      acc.set(cur.type, acc.get(cur.type)! + 1);
+      return acc;
+    }, new Map<REACTION_TYPE, number>());
+  }, [item.reaction]);
+
+  const sendReaction = useCallback(
+    (reaction: { isAdd: boolean; type: REACTION_TYPE }) => {
+      if (authUser === null) {
+        toast({
+          title: '로그인이 필요합니다',
+          position: 'top-right',
+        });
+        return;
+      }
+      setSendingVote((prev) => ({ ...prev, [reaction.type]: true }));
+      TownhallClientService.reactionMessageInfo({
+        instantEventId,
+        messageId: item.id,
+        reaction,
+      })
+        .then((resp) => {
+          if (resp.status !== 200 && resp.error !== undefined) {
+            toast({
+              title: (resp.error.data as { message: string }).message,
+              status: 'warning',
+              position: 'top-right',
+            });
+            return;
+          }
+          onSendComplete();
+        })
+        .finally(() => {
+          setSendingVote((prev) => ({ ...prev, [reaction.type]: false }));
+        });
+    },
+    [authUser, instantEventId, item.id, onSendComplete, toast],
+  );
+
+  const turnOnEditer = useCallback(() => {
     setIsEditMode(true);
     updateMessage(item.message);
-  }
-  function turnOffEditer() {
+  }, [item.message]);
+
+  const turnOffEditer = useCallback(() => {
     setIsEditMode(false);
-  }
+  }, []);
 
   const isDeny = item.deny !== undefined && item.deny;
+  const havePostReplyPrivilege = hasPrivilege(PRIVILEGE_NO.postReply);
 
-  function denyMessage() {
+  const denyMessage = useCallback(() => {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
         position: 'top-right',
-      });
+      } as const);
       return;
     }
     TownhallClientService.denyMessage({
@@ -182,21 +245,21 @@ const TownhallMessageItem = function ({
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
           title: (resp.error.data as { message: string }).message,
-          status: 'warning',
-          position: 'top-right',
+          status: 'warning' as const,
+          position: 'top-right' as const,
         });
         return;
       }
       onSendComplete();
     });
-  }
+  }, [authUser, instantEventId, isDeny, item.id, onSendComplete, toast]);
 
-  function deleteMessage() {
+  const deleteMessage = useCallback(() => {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
         position: 'top-right',
-      });
+      } as const);
       return;
     }
     TownhallClientService.deleteMessage({
@@ -206,21 +269,23 @@ const TownhallMessageItem = function ({
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
           title: (resp.error.data as { message: string }).message,
-          status: 'warning',
-          position: 'top-right',
+          status: 'warning' as const,
+          position: 'top-right' as const,
         });
         return;
       }
-      onDeleteComplete && onDeleteComplete();
+      if (onDeleteComplete) {
+        onDeleteComplete();
+      }
     });
-  }
+  }, [authUser, instantEventId, item.id, onDeleteComplete, toast]);
 
-  function updateSortWeight() {
+  const updateSortWeight = useCallback(() => {
     if (authUser === null) {
       toast({
         title: '로그인이 필요합니다',
         position: 'top-right',
-      });
+      } as const);
       return;
     }
     if (sortWeight === undefined) {
@@ -238,41 +303,44 @@ const TownhallMessageItem = function ({
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
           title: (resp.error.data as { message: string }).message,
-          status: 'warning',
-          position: 'top-right',
+          status: 'warning' as const,
+          position: 'top-right' as const,
         });
         return;
       }
       onSendComplete();
       onClose();
     });
-  }
+  }, [authUser, instantEventId, item.id, onClose, onSendComplete, sortWeight, toast]);
 
-  function updateMessageToServer(msg: string) {
-    if (authUser === null) {
-      toast({
-        title: '로그인이 필요합니다',
-        position: 'top-right',
-      });
-      return;
-    }
-    TownhallClientService.updateMessage({
-      instantEventId,
-      messageId: item.id,
-      message: msg,
-    }).then((resp) => {
-      if (resp.status !== 200 && resp.error !== undefined) {
+  const updateMessageToServer = useCallback(
+    (msg: string) => {
+      if (authUser === null) {
         toast({
-          title: (resp.error.data as { message: string }).message,
-          status: 'warning',
+          title: '로그인이 필요합니다',
           position: 'top-right',
         });
         return;
       }
-      onSendComplete();
-      turnOffEditer();
-    });
-  }
+      TownhallClientService.updateMessage({
+        instantEventId,
+        messageId: item.id,
+        message: msg,
+      }).then((resp) => {
+        if (resp.status !== 200 && resp.error !== undefined) {
+          toast({
+            title: (resp.error.data as { message: string }).message,
+            status: 'warning',
+            position: 'top-right',
+          });
+          return;
+        }
+        onSendComplete();
+        setIsEditMode(false);
+      });
+    },
+    [authUser, instantEventId, item.id, onSendComplete, toast],
+  );
 
   const ownerMenuList = useMemo(() => {
     const returnMenuList = [];
@@ -358,7 +426,18 @@ const TownhallMessageItem = function ({
       );
     }
     return returnMenuList;
-  }, [authUser, isOwner]);
+  }, [
+    deleteMessage,
+    denyMessage,
+    hasPrivilege,
+    instantEventId,
+    isDeny,
+    item.id,
+    onOpen,
+    onSendComplete,
+    toast,
+    turnOnEditer,
+  ]);
 
   const memberMenuList = useMemo(() => {
     const returnMenuList = [];
@@ -377,7 +456,7 @@ const TownhallMessageItem = function ({
       );
     }
     return returnMenuList;
-  }, [authUser, item]);
+  }, [authUser, item, eventState, turnOnEditer]);
 
   // HTML 태그가 있는지 정규식으로 정확히 체크
   const hasHtmlTags = (text: string): boolean => {
@@ -416,6 +495,14 @@ const TownhallMessageItem = function ({
     }
     return null;
   }, [isShowName, isOwner, item]);
+
+  const reactionPossible = ['question', 'reply'].includes(eventState);
+  const showReactionCount =
+    isOwner ||
+    eventState === 'adminCheck' ||
+    eventState === 'showAll' ||
+    eventState === 'question' ||
+    eventState === 'reply';
 
   return (
     <Box borderRadius="md" width="full" bg="white" boxShadow="md">
@@ -568,6 +655,7 @@ const TownhallMessageItem = function ({
           )}
           {item.deny !== undefined && item.deny === true && <Badge colorScheme="red">비공개 처리된 메시지</Badge>}
         </Box>
+        {!(eventState === 'pre' || eventState === 'question') && <Divider />}
         {(item.deny === undefined || item.deny === false) && !(eventState === 'pre') && (
           <Flex
             minWidth="max-content"
@@ -582,6 +670,70 @@ const TownhallMessageItem = function ({
             paddingTop={2}
             borderColor="gray.300"
           >
+            <GridItem key="grid-item-vote-up" flex={1}>
+              <Tooltip
+                isDisabled
+                fontSize="xs"
+                label={
+                  item.reaction === undefined
+                    ? ''
+                    : item.reaction
+                        .filter((reaction) => reaction.type === 'LIKE' && reaction.userName && reaction.email)
+                        .map(
+                          (reaction, idx) =>
+                            `${idx !== 0 ? ', ' : ''}${reaction.userName}(${reaction.email?.replace(/@.*/, '')})`,
+                        )
+                }
+              >
+                <Button
+                  isLoading={isSendingVote.LIKE}
+                  disabled={isSendingVote.LIKE}
+                  fontSize="xs"
+                  width="full"
+                  leftIcon={<IconHeart size={16} active={memoReaction.has('LIKE') === true} />}
+                  variant="ghost"
+                  height="4"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    if (reactionPossible && memoReaction.has('LIKE') === true) {
+                      sendReaction({
+                        isAdd: false,
+                        type: 'LIKE',
+                      });
+                    }
+                    if (reactionPossible && memoReaction.has('LIKE') === false) {
+                      sendReaction({
+                        isAdd: true,
+                        type: 'LIKE',
+                      });
+                    }
+                  }}
+                >
+                  공감 {showReactionCount ? memoReaction.get('LIKE') : ''}
+                </Button>
+              </Tooltip>
+            </GridItem>
+            {((isEditMode === false && (eventState === 'question' || eventState === 'reply')) ||
+              havePostReplyPrivilege === true) && (
+              <GridItem key="grid-item-reply" flex={1}>
+                <Button
+                  fontSize="xs"
+                  leftIcon={<ReplyIcon />}
+                  variant="ghost"
+                  height="4"
+                  color="black"
+                  width="full"
+                  _hover={{ bg: 'white' }}
+                  _focus={{ bg: 'white' }}
+                  onClick={() => {
+                    setToggleReplyInput((prev) => !prev);
+                  }}
+                >
+                  댓글달기
+                </Button>
+              </GridItem>
+            )}
             {isEditMode === true && (
               <GridItem w="100%" key="grid-item-close">
                 <Button
@@ -623,6 +775,45 @@ const TownhallMessageItem = function ({
               </GridItem>
             )}
           </Flex>
+        )}
+        {toggleReplyInput && (
+          <Box pt="2">
+            <Divider />
+            {(item.deny === undefined || item.deny === false) && (
+              <TownhallMessageItemReplyInput
+                instantEventId={instantEventId}
+                messageId={item.id}
+                locked={false}
+                onSendComplete={() => {
+                  onSendComplete();
+                  setToggleReplyInput(false);
+                }}
+              />
+            )}
+          </Box>
+        )}
+        {!(eventState === 'pre') && (
+          <Box>
+            {item.reply &&
+              item.reply.length > 0 &&
+              item.reply
+                .filter((replyItem) =>
+                  isOwner === true ? true : replyItem.deny === undefined || replyItem.deny === false,
+                )
+                .map((replyItem, idx) => (
+                  <Box pt="2" key={`town-hall-msg-reply-${instantEventId}-${item.id}-${replyItem.id}`}>
+                    {idx === 0 && <Divider mb="2" />}
+                    <TownhallEventMessageReply
+                      replyItem={replyItem}
+                      instantEventId={instantEventId}
+                      messageId={item.id}
+                      isOwner={isOwner}
+                      onSendComplete={onSendComplete}
+                      eventState={eventState}
+                    />
+                  </Box>
+                ))}
+          </Box>
         )}
       </Box>
     </Box>
