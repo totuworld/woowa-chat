@@ -19,7 +19,6 @@ import { InInstantEventMessageReply } from '@/models/instant_message/interface/i
 import ExtraMenuIcon from '@/components/extra_menu_icon';
 import { useAuth } from '@/contexts/auth_user.context';
 import TownhallClientService from '../townhall.client.service';
-import ColorPalette from '@/styles/color_palette';
 import { PRIVILEGE_NO } from '@/features/owner_member/model/in_owner_privilege';
 
 // HTML 태그가 있는지 정규식으로 정확히 체크
@@ -155,7 +154,7 @@ const TownhallEventMessageReply = function ({
   const [message, updateMessage] = useState(replyItem.reply);
   const toast = useToast();
   const isDeny = replyItem.deny !== undefined && replyItem.deny;
-  
+
   function denyReply() {
     if (authUser === null) {
       toast({
@@ -181,7 +180,7 @@ const TownhallEventMessageReply = function ({
       onSendComplete();
     });
   }
-  
+
   function deleteReply() {
     if (authUser === null) {
       toast({
@@ -211,7 +210,7 @@ const TownhallEventMessageReply = function ({
     setIsEditMode(true);
     updateMessage(replyItem.reply);
   }
-  
+
   function turnOffEditer() {
     setIsEditMode(false);
   }
@@ -228,7 +227,7 @@ const TownhallEventMessageReply = function ({
       instantEventId,
       messageId,
       replyId: replyItem.id,
-      reply: msg,
+      message: msg,
     }).then((resp) => {
       if (resp.status !== 200 && resp.error !== undefined) {
         toast({
@@ -343,14 +342,14 @@ const TownhallEventMessageReply = function ({
   return (
     <Box pl="6" pb="2">
       <Flex alignItems="flex-start">
-        <Avatar
-          size="xs"
-          src={avatarURL}
-          mr="2"
-        />
+        <Avatar size="xs" src={avatarURL} mr="2" />
         <Box bg="gray.100" borderRadius="md" pl="2" pr="2" pt="1" pb="1" width="full" fontSize={fontSize}>
           <Flex alignItems="center">
-            {displayName !== '' && <Text fontSize={fontSize} fontWeight="semibold">{displayName}</Text>}
+            {displayName !== '' && (
+              <Text fontSize={fontSize} fontWeight="semibold">
+                {displayName}
+              </Text>
+            )}
             <Box flex="1" />
             {isOwner && ownerMenuList.length > 0 && (
               <Menu>
@@ -399,10 +398,7 @@ const TownhallEventMessageReply = function ({
                 placeholder="댓글을 입력하세요..."
                 minH="unset"
                 overflow="hidden"
-                as="textarea"
                 borderRadius="md"
-                minRows={1}
-                maxRows={15}
               />
             </Box>
           )}
